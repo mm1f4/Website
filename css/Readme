@@ -5,3 +5,4 @@ git pull        # 從 GitHub 拿最新版
 git add .       # 暫存所有變更
 git commit -m "你的訊息"
 git push        # 推到 GitHub
+git sync        # 將您的資料夾更新至最新版本
