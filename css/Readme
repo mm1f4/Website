@@ -1,6 +1,29 @@
 Do command to terminal to get new version if needed.
 Do ctrl + shift + p to run command panel.
 
+# Global
+git config --global user.email "信箱"   #   設定提交者信箱
+git config --global user.name "名字"    #   設定提交者名稱
+git config --global --list             #    查看所有全域設定
+
+
+# init
+git init                    #   在當前資料夾初始化新的 Git 倉庫
+git clone <URL>             #   複製遠端專案到本機
+git clone <URL> <資料夾名>  #   複製並指定資料夾名稱
+
+# status
+git status                      #   查看當前狀態（哪些檔案改了、暫存了）
+git status -s                   #   簡短格式顯示狀態
+git log                         #   查看提交歷史
+git log --oneline               #   每個提交一行，簡潔顯示
+git log --oneline --graph --all #   圖形化顯示所有分支歷史
+git log -p <檔案>               #	查看某檔案的詳細修改歷史
+git diff                        #	查看尚未暫存的變更
+git diff --staged               #	查看已暫存的變更
+git show <commit>               #	查看某個提交的詳細內容
+git blame <檔案>                #   逐行顯示誰改了什麼
+
 git pull        # 從 GitHub 拿最新版
 git add .       # 暫存所有變更
 git commit -m "你的訊息"
