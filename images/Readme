@@ -1,4 +1,5 @@
-Do command to terminal to get new version if updated.
+Do command to terminal to get new version if needed.
+Do ctrl + shift + p to run command panel.
 
 git pull        # 從 GitHub 拿最新版
 git add .       # 暫存所有變更
