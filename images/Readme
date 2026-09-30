@@ -1,0 +1,6 @@
+Do command to terminal to get new version if updated.
+
+git pull        # 從 GitHub 拿最新版
+git add .       # 暫存所有變更
+git commit -m "你的訊息"
+git push        # 推到 GitHub
