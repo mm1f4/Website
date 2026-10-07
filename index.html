@@ -1760,11 +1760,28 @@
 
     /* ---------- Avatar upload ---------- */
     const AVATAR_MAX_BYTES = 8 * 1024 * 1024;
-    const AVATAR_SIZE = 128;
 
-    // The photo is stored on the user record as a small data URL. That avoids
-    // Firebase Storage, which needs a billing plan, and keeps the file tiny by
-    // cropping to a square and re-encoding it.
+    // Firebase rejects a photoUrl longer than 2048 characters with
+    // auth/invalid-profile-attribute. A base64 JPEG eats that budget fast: a
+    // detailed 128x128 photo encodes to roughly 8000 characters, so the image
+    // has to be shrunk until it fits. These are the sizes and qualities we try,
+    // in order; the first result that fits wins.
+    const AVATAR_BUDGET = 1900;
+    const AVATAR_ATTEMPTS = [
+      { size: 64, quality: 0.6 },
+      { size: 64, quality: 0.5 },
+      { size: 64, quality: 0.4 },
+      { size: 56, quality: 0.5 },
+      { size: 56, quality: 0.4 },
+      { size: 48, quality: 0.45 },
+      { size: 48, quality: 0.35 },
+      { size: 40, quality: 0.4 },
+      { size: 32, quality: 0.4 },
+    ];
+
+    // Crops to a centred square and returns a data URL that fits the budget.
+    // An image with a lot of detail may drop to a smaller size, which is the
+    // price of storing it on the user record instead of in Cloud Storage.
     function resizeAvatar(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -1779,12 +1796,22 @@
               const sy = (image.height - side) / 2;
 
               const canvas = document.createElement("canvas");
-              canvas.width = AVATAR_SIZE;
-              canvas.height = AVATAR_SIZE;
               const ctx = canvas.getContext("2d");
-              ctx.drawImage(image, sx, sy, side, side, 0, 0, AVATAR_SIZE, AVATAR_SIZE);
+              let best = null;
 
-              resolve(canvas.toDataURL("image/jpeg", 0.85));
+              for (const attempt of AVATAR_ATTEMPTS) {
+                canvas.width = attempt.size;
+                canvas.height = attempt.size;
+                ctx.clearRect(0, 0, attempt.size, attempt.size);
+                ctx.drawImage(image, sx, sy, side, side, 0, 0, attempt.size, attempt.size);
+
+                const dataUrl = canvas.toDataURL("image/jpeg", attempt.quality);
+                best = dataUrl;
+                if (dataUrl.length <= AVATAR_BUDGET) return resolve(dataUrl);
+              }
+
+              // Nothing fit: hand back the smallest attempt and let the server decide.
+              resolve(best);
             } catch (e) {
               reject(new Error("canvas"));
             }
