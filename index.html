@@ -1188,6 +1188,10 @@
           return;
         }
         setAuthStatus("auth.welcomeBack", { name: (cred && cred.user) ? getName(cred.user) : email }, "success");
+
+        // Close the dialog on success. Failures above return early, so the
+        // message stays on screen for the visitor to read.
+        closeModal();
       } catch (error) {
         logAuthError("login", error);
         setAuthStatus(authErrorKey(error));
