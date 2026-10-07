@@ -214,13 +214,18 @@
 
             <div class="error-message" id="profileStatus" role="alert" aria-live="polite"></div>
 
-            <button type="button" class="avatar-button" id="avatarButton" data-i18n-aria-label="profile.avatarLabel" aria-label="Profile photo">
+            <div class="avatar-row">
               <span class="avatar" id="profileAvatar" data-profile-avatar aria-hidden="true"></span>
-              <span class="avatar-button-text">
+              <div class="avatar-actions">
                 <strong data-i18n="profile.avatarLabel">Profile photo</strong>
-                <span data-i18n="profile.avatarHint">Signed in with Google? Your Google photo is used automatically.</span>
-              </span>
-            </button>
+                <span class="avatar-note" data-i18n="profile.avatarHint">Signed in with Google? Your Google photo is used automatically.</span>
+                <div class="form-actions">
+                  <button type="button" class="btn btn-ghost btn-sm" id="avatarButton" data-i18n="profile.avatarChange">Upload photo</button>
+                  <button type="button" class="btn btn-ghost btn-sm is-hidden" id="avatarRemove" data-i18n="profile.avatarRemove">Remove photo</button>
+                  <input type="file" id="avatarInput" class="visually-hidden" accept="image/png,image/jpeg,image/webp,image/gif" />
+                </div>
+              </div>
+            </div>
 
             <form id="profileForm" novalidate>
               <div class="field-row">
@@ -362,10 +367,6 @@
 
       <div class="error-message" id="authStatus" role="alert" aria-live="polite"></div>
 
-      <!-- Resend-verification link, shown only when sign-in fails on an unverified email -->
-      <p class="switch-prompt verify-prompt" id="verifyPrompt" hidden>
-        <a href="#" id="resendVerifyLink" data-i18n="auth.resendVerify">Resend verification email</a>
-      </p>
 
       <!-- ---------- Login Panel ---------- -->
       <div class="panel active" id="panelLogin">
@@ -396,6 +397,11 @@
 
           <button type="submit" class="btn" data-i18n="auth.signIn">Sign in</button>
         </form>
+
+        <!-- Shown when sign-in fails because the email is not verified yet -->
+        <p class="verify-prompt" id="verifyPrompt" hidden>
+          <a href="#" id="resendVerifyLink" data-i18n="auth.resendVerify">Resend verification email</a>
+        </p>
 
         <p class="switch-prompt">
           <span data-i18n="auth.noAccount">Don't have an account?</span>
@@ -687,6 +693,14 @@
         "profile.signoutHint": "You will need to sign in again to reach this page.",
         "profile.goHome": "Back to home",
         "profile.signInRequired": "Please sign in to view your profile.",
+        "profile.avatarChange": "Upload photo",
+        "profile.avatarRemove": "Remove photo",
+        "profile.avatarUploaded": "Your photo has been updated.",
+        "profile.avatarRemoved": "Your photo has been removed.",
+        "profile.avatarNotImage": "Please choose an image file.",
+        "profile.avatarTooLarge": "That image is larger than 8 MB.",
+        "profile.avatarUnreadable": "That image could not be read.",
+        "profile.avatarFailed": "The photo could not be saved. Please try again.",
       },
       zh: {
         "nav.features": "功能",
@@ -861,6 +875,14 @@
         "profile.signoutHint": "登出後需要重新登入才能進入此頁。",
         "profile.goHome": "回到首頁",
         "profile.signInRequired": "請先登入才能查看個人資料。",
+        "profile.avatarChange": "上傳照片",
+        "profile.avatarRemove": "移除照片",
+        "profile.avatarUploaded": "大頭貼已更新。",
+        "profile.avatarRemoved": "大頭貼已移除。",
+        "profile.avatarNotImage": "請選擇圖片檔案。",
+        "profile.avatarTooLarge": "圖片不能超過 8 MB。",
+        "profile.avatarUnreadable": "無法讀取這張圖片。",
+        "profile.avatarFailed": "照片儲存失敗，請重試一次。",
       }
     };
 
@@ -1460,8 +1482,14 @@
       return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
 
+    function hasPhoto(user) {
+      return !!(user && user.photoURL);
+    }
+
     function paintAvatars(user) {
       const photo = user && user.photoURL;
+      const removeBtn = document.getElementById("avatarRemove");
+      if (removeBtn) removeBtn.classList.toggle("is-hidden", !photo);
       const initials = initialsFor(user);
       document.querySelectorAll("[data-profile-avatar]").forEach((el) => {
         if (photo) {
@@ -1680,14 +1708,96 @@
       });
     })();
 
-    /* ---------- Avatar button: no uploader yet, so explain that ---------- */
-    (function initAvatarButton() {
-      const btn = document.getElementById("avatarButton");
-      if (!btn) return;
-      btn.addEventListener("click", () => {
-        const status = document.getElementById("profileStatus");
-        setStatus(status, "profile.avatarHint");
+    /* ---------- Avatar upload ---------- */
+    const AVATAR_MAX_BYTES = 8 * 1024 * 1024;
+    const AVATAR_SIZE = 128;
+
+    // The photo is stored on the user record as a small data URL. That avoids
+    // Firebase Storage, which needs a billing plan, and keeps the file tiny by
+    // cropping to a square and re-encoding it.
+    function resizeAvatar(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("read"));
+        reader.onload = () => {
+          const image = new Image();
+          image.onerror = () => reject(new Error("decode"));
+          image.onload = () => {
+            try {
+              const side = Math.min(image.width, image.height);
+              const sx = (image.width - side) / 2;
+              const sy = (image.height - side) / 2;
+
+              const canvas = document.createElement("canvas");
+              canvas.width = AVATAR_SIZE;
+              canvas.height = AVATAR_SIZE;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(image, sx, sy, side, side, 0, 0, AVATAR_SIZE, AVATAR_SIZE);
+
+              resolve(canvas.toDataURL("image/jpeg", 0.85));
+            } catch (e) {
+              reject(new Error("canvas"));
+            }
+          };
+          image.src = String(reader.result);
+        };
+        reader.readAsDataURL(file);
       });
+    }
+
+    (function initAvatarUpload() {
+      const button = document.getElementById("avatarButton");
+      const input = document.getElementById("avatarInput");
+      const removeBtn = document.getElementById("avatarRemove");
+      if (!button || !input) return;
+
+      const status = document.getElementById("profileStatus");
+
+      button.addEventListener("click", () => {
+        if (!currentUser) return;
+        input.click();
+      });
+
+      input.addEventListener("change", async () => {
+        const file = input.files && input.files[0];
+        input.value = ""; // allow re-picking the same file
+        if (!file || !currentUser) return;
+
+        clearStatus(status);
+
+        if (!/^image\//.test(file.type)) return setStatus(status, "profile.avatarNotImage");
+        if (file.size > AVATAR_MAX_BYTES) return setStatus(status, "profile.avatarTooLarge");
+
+        try {
+          const dataUrl = await resizeAvatar(file);
+          await updateProfile(currentUser, { photoURL: dataUrl });
+          paintAvatars(currentUser);
+          renderProfile();
+          setStatus(status, "profile.avatarUploaded", "success");
+        } catch (error) {
+          if (error && (error.message === "read" || error.message === "decode" || error.message === "canvas")) {
+            return setStatus(status, "profile.avatarUnreadable");
+          }
+          logAuthError("avatarUpload", error);
+          setStatus(status, "profile.avatarFailed");
+        }
+      });
+
+      if (removeBtn) {
+        removeBtn.addEventListener("click", async () => {
+          if (!currentUser) return;
+          clearStatus(status);
+          try {
+            await updateProfile(currentUser, { photoURL: null });
+            paintAvatars(currentUser);
+            renderProfile();
+            setStatus(status, "profile.avatarRemoved", "success");
+          } catch (error) {
+            logAuthError("avatarRemove", error);
+            setStatus(status, "profile.avatarFailed");
+          }
+        });
+      }
     })();
 
     /* ---------- Settings shortcut inside the auth modal ---------- */
