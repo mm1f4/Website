@@ -1288,9 +1288,38 @@
       const settingsPrompt = document.getElementById("settingsPrompt");
       if (settingsPrompt) settingsPrompt.classList.toggle("is-hidden", !currentUser);
 
-      if (!currentUser && currentRoute === PROFILE) {
-        if (window.history && window.history.replaceState) window.history.replaceState(null, "", location.pathname + location.search);
+      if (!authReady && !currentUser) {
+        // The very first callback is always null while Firebase checks for a
+        // persisted session. If nothing is stored, that null is already final.
+        authReady = true;
+        authSignedOut = !hasStoredSession();
+      } else if (currentUser) {
+        authHasUser = true;
+        authSignedOut = false;
+        authReady = true;
+      } else {
+        // A null after the first callback means the session really is gone, which
+        // includes signing out while the page is open.
+        authSignedOut = true;
+        authReady = true;
+      }
+
+      // Apply a deep link once the state is actually known.
+      if (bootRoute === PROFILE && (authHasUser || authSignedOut)) {
+        bootRoute = HOME;
+        currentRoute = HOME; // force goRoute down its profile branch
+        goRoute(PROFILE, false);
+        return;
+      }
+
+      if (!currentUser && authSignedOut && currentRoute === PROFILE) {
+        // Leave the page without the guard raising its own dialog, then explain
+        // once, here, so the message cannot be cleared by the redirect.
+        if (window.history && window.history.replaceState) window.history.replaceState(null, "", cleanPath());
         goRoute(HOME, false);
+        showPanel("login");
+        openModal("login");
+        setAuthStatus("profile.signInRequired");
       } else if (currentUser && currentRoute === PROFILE) {
         renderProfile();
       }
@@ -1557,12 +1586,67 @@
       });
     });
 
-    function goRoute(route, push) {
+    // Firebase persists the session under a key that starts with "firebase:authUser:".
+    // If nothing is stored, an initial null really does mean signed out and the
+    // visitor can be bounced to the sign-in dialog immediately.
+    function hasStoredSession() {
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.indexOf("firebase:authUser:") === 0) return true;
+        }
+      } catch (e) { /* storage blocked */ }
+      return false;
+    }
+
+    // Drives the "go home" links and the guard's URL cleanup.
+    function cleanPath() {
+      return location.pathname + location.search;
+    }
+
+    // Firebase reports null on the very first callback and only restores the
+    // persisted session afterwards, so the guard must not run until that has
+    // happened. Without this, refreshing on #profile bounces you to the landing
+    // page (or pops the sign-in dialog) while the session is still loading.
+    let authReady = false;
+    // authHasUser   : a real signed-in user has been reported
+    // authSignedOut : Firebase finished reporting and there is no user, so the
+    //                 visitor really is signed out (a stored session was checked
+    //                 and either absent or rejected).
+    let authHasUser = false;
+    let authSignedOut = false;
+    let bootRoute = HOME;
+
+    function goRoute(route, push, notify) {
+      if (route === PROFILE && !authReady) {
+        // Firebase has not reported the persisted session yet. Show the page
+        // straight away and let onAuthStateChanged finish, so a refresh neither
+        // flashes the landing page nor pops the sign-in dialog. The guard runs
+        // once authHasUser or authSignedOut is set.
+        bootRoute = PROFILE;
+        currentRoute = PROFILE;
+        currentUser = auth.currentUser;
+        pageHome.classList.add("is-hidden");
+        pageProfile.classList.remove("is-hidden");
+        if (currentUser) {
+          renderProfile();
+          syncProfileControls();
+        }
+        return;
+      }
+
       if (route === PROFILE && !currentUser) {
-        if (push && window.history && window.history.replaceState) window.history.replaceState(null, "", location.pathname + location.search);
-        showPanel("login");
-        openModal("login");
-        setAuthStatus("profile.signInRequired");
+        // Signed out for certain: return to the landing page and explain why.
+        if (window.history && window.history.replaceState) window.history.replaceState(null, "", cleanPath());
+        pageHome.classList.remove("is-hidden");
+        pageProfile.classList.add("is-hidden");
+        currentRoute = HOME;
+        if (notify !== false) {
+          // showPanel() inside openModal clears the status, so set it after.
+          showPanel("login");
+          openModal("login");
+          setAuthStatus("profile.signInRequired");
+        }
         return;
       }
 
@@ -1925,6 +2009,12 @@
     currentLang = detectInitialLang();
     applyTranslations();
     initScrollReveal();
+
+    // Honour a deep link such as #profile on a fresh load or a refresh. GitHub
+    // Pages normalises the URL, so no hashchange event fires here; the router has
+    // to be asked once.
+    bootRoute = routeFromHash();
+    if (bootRoute === PROFILE) goRoute(PROFILE, false);
     if (lastAlert) alert(t(lastAlert.key));
   </script>
 </body>
