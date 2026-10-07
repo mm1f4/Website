@@ -1,0 +1,4 @@
+# Tells GitHub Pages to serve the files as-is instead of running them through
+# Jekyll. Without this, Jekyll would skip any file or folder whose name starts
+# with an underscore. This project has none today, but the marker keeps that
+# from ever becoming a silent deployment failure.
