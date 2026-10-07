@@ -15,47 +15,54 @@
     <nav class="container">
       <div class="logo">XCOPE</div>
 
-      <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">☰</button>
+      <ul class="nav-links" id="navLinks" data-i18n-aria-label="nav.menu">
+          <li><a href="#features" data-i18n="nav.features">Features</a></li>
+          <li><a href="#about" data-i18n="nav.about">About</a></li>
+          <li><a href="#contact" data-i18n="nav.contact">Contact</a></li>
+  
+          <!-- Shown when logged OUT -->
+          <li id="loginItem"><a href="#" id="loginLink" data-i18n="nav.login">Login</a></li>
+  
+          <!-- Shown when logged IN -->
+          <li id="userItem" style="display:none;">
+            <span id="userName" style="font-weight:600; color:var(--text);"></span>
+            <a href="#" id="logoutLink" style="color: var(--error); margin-left: 0.75rem;" data-i18n="nav.logout">Logout</a>
+          </li>
+        </ul>
 
-      <ul class="nav-links" id="navLinks">
-        <li><a href="#features">Features</a></li>
-        <li><a href="#about">About</a></li>
-        <li><a href="#contact">Contact</a></li>
-
-        <!-- Shown when logged OUT -->
-        <li id="loginItem"><a href="#" id="loginLink">Login</a></li>
-
-        <!-- Shown when logged IN -->
-        <li id="userItem" style="display:none;">
-          <span id="userName" style="font-weight:600; color:var(--text);"></span>
-          <a href="#" id="logoutLink" style="color: var(--error); margin-left: 0.75rem;">Logout</a>
-        </li>
-      </ul>
+      <!-- Right-hand cluster: language switcher + mobile menu button -->
+      <div class="header-controls">
+        <div class="lang-toggle" role="group" data-i18n-aria-label="nav.switchLanguage" aria-label="Switch language">
+          <button type="button" data-lang="en" aria-pressed="true">EN</button>
+          <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+        </div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">☰</button>
+      </div>
     </nav>
   </header>
 
   <main>
     <section class="hero container">
-      <h1>Build something great</h1>
-      <p>A minimal starting point for your next web project. Clean, responsive, and ready to customise.</p>
-      <a href="#features" class="btn">Get started</a>
+      <h1 data-i18n="hero.title">Build something great</h1>
+      <p data-i18n="hero.subtitle">A minimal starting point for your next web project. Clean, responsive, and ready to customise.</p>
+      <a href="#features" class="btn" data-i18n="hero.cta">Get started</a>
     </section>
 
     <section class="features" id="features">
       <div class="container">
-        <h2>What you get</h2>
+        <h2 data-i18n="features.title">What you get</h2>
         <div class="grid">
           <article class="card">
-            <h3>Fast</h3>
-            <p>No frameworks, no build step — just open it in your browser and go.</p>
+            <h3 data-i18n="features.fast.title">Fast</h3>
+            <p data-i18n="features.fast.body">No frameworks, no build step - just open it in your browser and go.</p>
           </article>
           <article class="card">
-            <h3>Responsive</h3>
-            <p>Looks good on phones, tablets, and desktops out of the box.</p>
+            <h3 data-i18n="features.responsive.title">Responsive</h3>
+            <p data-i18n="features.responsive.body">Looks good on phones, tablets, and desktops out of the box.</p>
           </article>
           <article class="card">
-            <h3>Customisable</h3>
-            <p>All styling lives in CSS variables at the top, easy to tweak.</p>
+            <h3 data-i18n="features.custom.title">Customisable</h3>
+            <p data-i18n="features.custom.body">All styling lives in CSS variables at the top, easy to tweak.</p>
           </article>
         </div>
       </div>
@@ -64,37 +71,42 @@
 
   <footer>
     <div class="container">
-      <p>&copy; <span id="year"></span> X COPE. All rights reserved.</p>
+      <p>&copy; <span id="year"></span> <span data-i18n="footer.rights">X COPE. All rights reserved.</span></p>
     </div>
   </footer>
 
   <!-- ---------- Auth Modal ---------- -->
-  <div class="modal-overlay" id="authModal" role="dialog" aria-modal="true">
+  <div class="modal-overlay" id="authModal" role="dialog" aria-modal="true" data-i18n-aria-label="auth.dialogLabel">
     <div class="modal">
       <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
 
       <div class="tabs" role="tablist">
-        <button class="tab active" id="tabLogin" role="tab" aria-selected="true">Sign in</button>
-        <button class="tab" id="tabSignup" role="tab" aria-selected="false">Create account</button>
+        <button class="tab active" id="tabLogin" role="tab" aria-selected="true" data-i18n="auth.signIn">Sign in</button>
+        <button class="tab" id="tabSignup" role="tab" aria-selected="false" data-i18n="auth.createAccount">Create account</button>
       </div>
 
-      <div class="error-message" id="modalError"></div>
+      <div class="error-message" id="authStatus" role="alert" aria-live="polite"></div>
+
+      <!-- Resend-verification link, shown only when sign-in fails on an unverified email -->
+      <p class="switch-prompt verify-prompt" id="verifyPrompt" hidden>
+        <a href="#" id="resendVerifyLink" data-i18n="auth.resendVerify">Resend verification email</a>
+      </p>
 
       <!-- ---------- Login Panel ---------- -->
       <div class="panel active" id="panelLogin">
-        <h2>Welcome back</h2>
-        <p class="subtitle">Sign in to your XCOPE account</p>
+        <h2 data-i18n="auth.loginTitle">Welcome back</h2>
+        <p class="subtitle" data-i18n="auth.loginSubtitle">Sign in to your XCOPE account</p>
 
         <form id="loginForm" novalidate>
           <div class="form-group">
-            <label for="loginEmail">Email address</label>
-            <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" required />
+            <label for="loginEmail" data-i18n="auth.email">Email address</label>
+            <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" data-i18n-placeholder="auth.emailPlaceholder" required />
           </div>
 
           <div class="form-group">
-            <label for="loginPassword">Password</label>
+            <label for="loginPassword" data-i18n="auth.password">Password</label>
             <div class="password-wrapper">
-              <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password" required />
+              <input type="password" id="loginPassword" placeholder="Enter your password" data-i18n-placeholder="auth.passwordPlaceholder" autocomplete="current-password" required />
               <button type="button" class="toggle-password" data-target="loginPassword">Show</button>
             </div>
           </div>
@@ -102,63 +114,83 @@
           <div class="form-options">
             <label class="remember">
               <input type="checkbox" />
-              Remember me
+              <span data-i18n="auth.remember">Remember me</span>
             </label>
-            <a href="#" class="forgot">Forgot password?</a>
+            <a href="#" class="forgot" id="forgotLink" data-i18n="auth.forgot">Forgot password?</a>
           </div>
 
-          <button type="submit" class="btn">Sign in</button>
+          <button type="submit" class="btn" data-i18n="auth.signIn">Sign in</button>
         </form>
 
         <p class="switch-prompt">
-          Don't have an account?
-          <a id="switchToSignup">Create one</a>
+          <span data-i18n="auth.noAccount">Don't have an account?</span>
+          <a id="switchToSignup" data-i18n="auth.createOne">Create one</a>
         </p>
       </div>
 
       <!-- ---------- Signup Panel ---------- -->
       <div class="panel" id="panelSignup">
-        <h2>Create your account</h2>
-        <p class="subtitle">It's free and only takes a minute</p>
+        <h2 data-i18n="auth.signupTitle">Create your account</h2>
+        <p class="subtitle" data-i18n="auth.signupSubtitle">It's free and only takes a minute</p>
 
         <form id="signupForm" novalidate>
           <div class="form-group">
-            <label for="signupName">Full name</label>
-            <input type="text" id="signupName" placeholder="Jane Doe" autocomplete="name" required />
+            <label for="signupName" data-i18n="auth.fullName">Full name</label>
+            <input type="text" id="signupName" placeholder="Jane Doe" data-i18n-placeholder="auth.namePlaceholder" autocomplete="name" required />
           </div>
 
           <div class="form-group">
-            <label for="signupEmail">Email address</label>
-            <input type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email" required />
+            <label for="signupEmail" data-i18n="auth.email">Email address</label>
+            <input type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email" data-i18n-placeholder="auth.emailPlaceholder" required />
           </div>
 
           <div class="form-group">
-            <label for="signupPassword">Password</label>
+            <label for="signupPassword" data-i18n="auth.password">Password</label>
             <div class="password-wrapper">
-              <input type="password" id="signupPassword" placeholder="At least 6 characters" autocomplete="new-password" required />
+              <input type="password" id="signupPassword" placeholder="At least 6 characters" data-i18n-placeholder="auth.newPasswordPlaceholder" autocomplete="new-password" required />
               <button type="button" class="toggle-password" data-target="signupPassword">Show</button>
             </div>
           </div>
 
           <div class="form-group">
-            <label for="signupConfirm">Confirm password</label>
+            <label for="signupConfirm" data-i18n="auth.confirmPassword">Confirm password</label>
             <div class="password-wrapper">
-              <input type="password" id="signupConfirm" placeholder="Re-enter your password" autocomplete="new-password" required />
+              <input type="password" id="signupConfirm" placeholder="Re-enter your password" data-i18n-placeholder="auth.confirmPlaceholder" autocomplete="new-password" required />
               <button type="button" class="toggle-password" data-target="signupConfirm">Show</button>
             </div>
           </div>
 
-          <label class="terms">
+                      <label class="terms">
             <input type="checkbox" id="signupTerms" />
-            <span>I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</span>
+            <span><span data-i18n="auth.agreePrefix">I agree to the</span> <a href="#" data-i18n="auth.terms">Terms of Service</a> <span data-i18n="auth.and">and</span> <a href="#" data-i18n="auth.privacy">Privacy Policy</a>.</span>
           </label>
 
-          <button type="submit" class="btn">Create account</button>
+          <button type="submit" class="btn" data-i18n="auth.createAccount">Create account</button>
         </form>
 
         <p class="switch-prompt">
-          Already have an account?
-          <a id="switchToLogin">Sign in</a>
+          <span data-i18n="auth.haveAccount">Already have an account?</span>
+          <a id="switchToLogin" data-i18n="auth.signIn">Sign in</a>
+        </p>
+      </div>
+      <!-- ---------- Reset Password Panel ---------- -->
+      <div class="panel" id="panelReset">
+        <h2 data-i18n="auth.resetTitle">Reset password</h2>
+        <p class="subtitle" data-i18n="auth.resetSubtitle">We will email you a secure link to choose a new password.</p>
+
+        <form id="resetForm" novalidate>
+          <div class="form-group">
+            <label for="resetEmail" data-i18n="auth.email">Email address</label>
+            <input type="email" id="resetEmail" placeholder="you@example.com" autocomplete="email" data-i18n-placeholder="auth.emailPlaceholder" required />
+          </div>
+
+          <p class="reset-help" data-i18n="auth.resetHelp">Click the link in the email to set a new password. If it does not arrive in a few minutes, check your spam folder.</p>
+
+          <button type="submit" class="btn" data-i18n="auth.sendResetLink">Send reset link</button>
+        </form>
+
+        <p class="switch-prompt">
+          <a href="#" id="backToLogin" class="back-link">&larr; <span data-i18n="auth.backToLogin">Back to sign in</span></a>
         </p>
       </div>
     </div>
@@ -169,14 +201,15 @@
   <!-- ================================================== -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
-    import { 
-      getAuth, 
-      createUserWithEmailAndPassword, 
-      signInWithEmailAndPassword, 
-      signOut, 
-      onAuthStateChanged, 
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged,
       updateProfile,
-      sendEmailVerification
+      sendEmailVerification,
+      sendPasswordResetEmail
     } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
 
     const firebaseConfig = {
@@ -192,181 +225,571 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // ---------- UI LOGIC ----------
-    document.getElementById('year').textContent = new Date().getFullYear();
+    /* ==========================================================
+       I18N - dictionary-driven translation with browser detection
+       ========================================================== */
+    const SUPPORTED = ["en", "zh"];
+    const STORAGE_KEY = "xcope-lang";
 
-    const menuToggle = document.getElementById('menuToggle');
-    const navLinks = document.getElementById('navLinks');
-    menuToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
-    navLinks.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => navLinks.classList.remove('active'));
+    const I18N = {
+      en: {
+        "nav.features": "Features",
+        "nav.about": "About",
+        "nav.contact": "Contact",
+        "nav.menu": "Toggle navigation",
+        "nav.login": "Login",
+        "nav.logout": "Logout",
+        "nav.switchLanguage": "Switch language",
+        "hero.title": "Build something great",
+        "hero.subtitle": "A minimal starting point for your next web project. Clean, responsive, and ready to customise.",
+        "hero.cta": "Get started",
+        "features.title": "What you get",
+        "features.fast.title": "Fast",
+        "features.fast.body": "No frameworks, no build step - just open it in your browser and go.",
+        "features.responsive.title": "Responsive",
+        "features.responsive.body": "Looks good on phones, tablets, and desktops out of the box.",
+        "features.custom.title": "Customisable",
+        "features.custom.body": "All styling lives in CSS variables at the top, easy to tweak.",
+        "footer.rights": "X COPE. All rights reserved.",
+        "auth.dialogLabel": "Account",
+        "auth.signIn": "Sign in",
+        "auth.createAccount": "Create account",
+        "auth.loginTitle": "Welcome back",
+        "auth.loginSubtitle": "Sign in to your XCOPE account",
+        "auth.signupTitle": "Create your account",
+        "auth.signupSubtitle": "It's free and only takes a minute",
+        "auth.fullName": "Full name",
+        "auth.email": "Email address",
+        "auth.password": "Password",
+        "auth.confirmPassword": "Confirm password",
+        "auth.namePlaceholder": "Jane Doe",
+        "auth.emailPlaceholder": "you@example.com",
+        "auth.passwordPlaceholder": "Enter your password",
+        "auth.newPasswordPlaceholder": "At least 6 characters",
+        "auth.confirmPlaceholder": "Re-enter your password",
+        "auth.remember": "Remember me",
+        "auth.forgot": "Forgot password?",
+        "auth.noAccount": "Don't have an account?",
+        "auth.createOne": "Create one",
+        "auth.haveAccount": "Already have an account?",
+        "auth.agreePrefix": "I agree to the",
+        "auth.and": "and",
+        "auth.terms": "Terms of Service",
+        "auth.privacy": "Privacy Policy",
+        "auth.show": "Show",
+        "auth.hide": "Hide",
+        "auth.resetTitle": "Reset password",
+        "auth.resetSubtitle": "We will email you a secure link to choose a new password.",
+        "auth.resetHelp": "Click the link in the email to set a new password. If it does not arrive in a few minutes, check your spam folder.",
+        "auth.sendResetLink": "Send reset link",
+        "auth.backToLogin": "Back to sign in",
+        "auth.resendVerify": "Resend verification email",
+        "auth.resendSent": "Verification email sent to {email}. Check your inbox, and your spam folder.",
+        "auth.enterEmailFirst": "Enter your email address above first.",
+        "auth.resetSent": "If an account exists for {email}, a password reset link is on its way. Check your spam folder too.",
+        "auth.resetNotConfigured": "Password reset is not available for this address right now.",
+        "auth.verifySent": "We sent a new verification link to {email}.",
+        "auth.verifyNeedsPassword": "Enter your password above, then click resend.",
+        "auth.verifyFailed": "That email could not be verified yet. Open the link in the email, then sign in again.",
+        "auth.fillAll": "Please fill in all fields.",
+        "auth.nameTooShort": "Please enter your full name.",
+        "auth.emailInvalid": "Please enter a valid email address.",
+        "auth.passwordTooShort": "Password must be at least 6 characters.",
+        "auth.passwordMismatch": "Passwords do not match.",
+        "auth.acceptTerms": "Please accept the Terms and Privacy Policy.",
+        "auth.needEmailPassword": "Please fill in both email and password.",
+        "auth.welcomeBack": "Welcome back, {name}!",
+        "auth.signedOut": "You have been signed out.",
+        "auth.signedOutNeedsVerify": "You have been signed out because your email is not verified yet.",
+        "auth.verifyEmailNotice": "Account created. We emailed {email} a verification link. Verify it, then sign in.",
+        "auth.signedInNotVerified": "Signed in, but your email is not verified yet. Check your inbox, or resend the link below.",
+        "auth.tooManyRequests": "Too many attempts. Please try again later.",
+        "auth.genericError": "Something went wrong. Please try again.",
+        "err.emailInUse": "An account with this email already exists.",
+        "err.invalidEmail": "Please enter a valid email address.",
+        "err.weakPassword": "Password must be at least 6 characters.",
+        "err.badCredentials": "Invalid email or password.",
+        "err.tooManyRequests": "Too many failed attempts. Please try again later.",
+        "err.network": "Network problem. Check your connection and try again.",
+        "err.operationNotAllowed": "This sign-in method is disabled for this project.",
+        "err.userDisabled": "This account has been disabled.",
+        "err.missingEmail": "No account uses that email address.",
+        "err.resetNotConfigured": "Password reset is not configured for this project.",
+        "err.unauthorizedDomain": "This domain is not authorised in Firebase Authentication.",
+        "err.popupBlocked": "Your browser blocked the sign-in window.",
+        "err.resetNeedsEmail": "Enter the email address you signed up with, then try again."
+      },
+      zh: {
+        "nav.features": "功能",
+        "nav.about": "關於",
+        "nav.contact": "聯絡我們",
+        "nav.menu": "切換導覽列",
+        "nav.login": "登入",
+        "nav.logout": "登出",
+        "nav.switchLanguage": "切換語言",
+        "hero.title": "打造出色的作品",
+        "hero.subtitle": "為你下一個網站專案提供最簡潔的起點。乾淨、回應式，隨時可以開始客製。",
+        "hero.cta": "立即開始",
+        "features.title": "你會得到什麼",
+        "features.fast.title": "快速",
+        "features.fast.body": "不需框架、不需建置流程，用瀏覽器打開就能用。",
+        "features.responsive.title": "回應式",
+        "features.responsive.body": "手機、平板、桌機開箱即可使用。",
+        "features.custom.title": "易於客製",
+        "features.custom.body": "所有樣式都在最上方的 CSS 變數裡，輕鬆調整。",
+        "footer.rights": "X COPE。保留所有權利。",
+        "auth.dialogLabel": "帳戶",
+        "auth.signIn": "登入",
+        "auth.createAccount": "建立帳戶",
+        "auth.loginTitle": "歡迎回來",
+        "auth.loginSubtitle": "登入你的 XCOPE 帳戶",
+        "auth.signupTitle": "建立你的帳戶",
+        "auth.signupSubtitle": "完全免費，只需一分鐘",
+        "auth.fullName": "姓名",
+        "auth.email": "電子郵件",
+        "auth.password": "密碼",
+        "auth.confirmPassword": "確認密碼",
+        "auth.namePlaceholder": "王小明",
+        "auth.emailPlaceholder": "you@example.com",
+        "auth.passwordPlaceholder": "請輸入密碼",
+        "auth.newPasswordPlaceholder": "至少 6 個字元",
+        "auth.confirmPlaceholder": "再次輸入密碼",
+        "auth.remember": "記住我",
+        "auth.forgot": "忘記密碼？",
+        "auth.noAccount": "還沒有帳戶？",
+        "auth.createOne": "立即建立",
+        "auth.haveAccount": "已經有帳戶了？",
+        "auth.agreePrefix": "我同意",
+        "auth.and": "與",
+        "auth.terms": "服務條款",
+        "auth.privacy": "隱私政策",
+        "auth.show": "顯示",
+        "auth.hide": "隱藏",
+        "auth.resetTitle": "重設密碼",
+        "auth.resetSubtitle": "我們會寄一封安全連結到你的信箱，讓你重設新密碼。",
+        "auth.resetHelp": "點擊信件裡的連結即可設定新密碼。若幾分鐘後還沒收到，請檢查垃圾郵件。",
+        "auth.sendResetLink": "傳送重設連結",
+        "auth.backToLogin": "返回登入",
+        "auth.resendVerify": "重新傳送驗證信",
+        "auth.resendSent": "驗證信已寄至 {email}，請檢查收件匣（也看一下垃圾郵件）。",
+        "auth.enterEmailFirst": "請先在上方輸入電子郵件。",
+        "auth.resetSent": "若 {email} 已建立帳戶，重設密碼的連結已寄出，請也檢查垃圾郵件。",
+        "auth.resetNotConfigured": "目前無法為此信箱提供密碼重設。",
+        "auth.verifySent": "已重新寄出驗證信至 {email}。",
+        "auth.verifyNeedsPassword": "請先在上方輸入密碼，再點擊重新傳送。",
+        "auth.verifyFailed": "尚未完成驗證。請點擊信件裡的連結，再重新登入。",
+        "auth.fillAll": "請填寫所有欄位。",
+        "auth.nameTooShort": "請輸入完整姓名。",
+        "auth.emailInvalid": "請輸入有效的電子郵件。",
+        "auth.passwordTooShort": "密碼至少需要 6 個字元。",
+        "auth.passwordMismatch": "兩次輸入的密碼不一致。",
+        "auth.acceptTerms": "請先同意服務條款與隱私政策。",
+        "auth.needEmailPassword": "請同時填寫電子郵件與密碼。",
+        "auth.welcomeBack": "歡迎回來，{name}！",
+        "auth.signedOut": "你已登出。",
+        "auth.signedOutNeedsVerify": "因為電子郵件尚未驗證，你已被登出。",
+        "auth.verifyEmailNotice": "帳戶已建立。驗證信已寄至 {email}，請先完成驗證再登入。",
+        "auth.signedInNotVerified": "已登入，但電子郵件尚未驗證。請檢查信箱，或點擊下方重新傳送。",
+        "auth.tooManyRequests": "嘗試次數過多，請稍後再試。",
+        "auth.genericError": "出現錯誤，請稍後再試一次。",
+        "err.emailInUse": "這個電子郵件已經建立過帳戶。",
+        "err.invalidEmail": "請輸入有效的電子郵件。",
+        "err.weakPassword": "密碼至少需要 6 個字元。",
+        "err.badCredentials": "電子郵件或密碼錯誤。",
+        "err.tooManyRequests": "失敗次數過多，請稍後再試。",
+        "err.network": "網路連線有問題，請確認後再試。",
+        "err.operationNotAllowed": "此專案已停用這種登入方式。",
+        "err.userDisabled": "這個帳戶已被停用。",
+        "err.missingEmail": "查不到使用這個電子郵件的帳戶。",
+        "err.resetNotConfigured": "此專案尚未設定密碼重設功能。",
+        "err.unauthorizedDomain": "此網域尚未加入 Firebase Authentication 的授權清單。",
+        "err.popupBlocked": "瀏覽器阻擋了登入視窗。",
+        "err.resetNeedsEmail": "請輸入你註冊時使用的電子郵件再試一次。"
+      }
+    };
+
+    let currentLang = "en";
+
+    function detectInitialLang() {
+      try {
+        const fromUrl = new URLSearchParams(location.search).get("lang");
+        if (fromUrl && SUPPORTED.includes(fromUrl)) return fromUrl;
+
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved && SUPPORTED.includes(saved)) return saved;
+      } catch (e) { /* ignore: private mode or blocked storage */ }
+
+      const nav = (navigator.languages && navigator.languages[0]) || navigator.language || "en";
+      return /^zh\b/i.test(nav) ? "zh" : "en";
+    }
+
+    function t(key, vars) {
+      const table = I18N[currentLang] || I18N.en;
+      let text = table[key];
+      if (text === undefined) text = I18N.en[key];
+      if (text === undefined) return key;
+      if (vars) {
+        Object.keys(vars).forEach((k) => { text = text.split("{" + k + "}").join(vars[k]); });
+      }
+      return text;
+    }
+
+    function applyTranslations() {
+      const table = I18N[currentLang] || I18N.en;
+      document.documentElement.lang = currentLang === "zh" ? "zh-Hant" : "en";
+
+      document.querySelectorAll("[data-i18n]").forEach((el) => {
+        const key = el.getAttribute("data-i18n");
+        if (table[key] !== undefined) el.textContent = table[key];
+      });
+      document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+        const key = el.getAttribute("data-i18n-placeholder");
+        if (table[key] !== undefined) el.setAttribute("placeholder", table[key]);
+      });
+      document.querySelectorAll("[data-i18n-aria-label]").forEach((el) => {
+        const key = el.getAttribute("data-i18n-aria-label");
+        if (table[key] !== undefined) el.setAttribute("aria-label", table[key]);
+      });
+
+      document.querySelectorAll(".toggle-password").forEach((btn) => {
+        const input = document.getElementById(btn.dataset.target);
+        btn.textContent = input && input.type === "text" ? t("auth.hide") : t("auth.show");
+      });
+
+      document.querySelectorAll("[data-lang]").forEach((btn) => {
+        btn.setAttribute("aria-pressed", String(btn.dataset.lang === currentLang));
+      });
+
+      document.title = "X Cope - " + t("hero.title");
+      const yearEl = document.getElementById("year");
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+      refreshDynamicTexts();
+    }
+
+    function setLanguage(lang) {
+      currentLang = SUPPORTED.includes(lang) ? lang : "en";
+      try { localStorage.setItem(STORAGE_KEY, currentLang); } catch (e) { /* ignore */ }
+      applyTranslations();
+    }
+
+    document.querySelectorAll("[data-lang]").forEach((btn) => {
+      btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
     });
 
-    const loginLink = document.getElementById('loginLink');
-    const authModal = document.getElementById('authModal');
-    const modalClose = document.getElementById('modalClose');
-    const modalError = document.getElementById('modalError');
-    const tabLogin = document.getElementById('tabLogin');
-    const tabSignup = document.getElementById('tabSignup');
-    const panelLogin = document.getElementById('panelLogin');
-    const panelSignup = document.getElementById('panelSignup');
-    const switchToSignup = document.getElementById('switchToSignup');
-    const switchToLogin = document.getElementById('switchToLogin');
-    const loginForm = document.getElementById('loginForm');
-    const signupForm = document.getElementById('signupForm');
+    /* ---------- Dynamic text (alerts, status, greeting) ---------- */
+    let lastStatus = null;
+    let lastAlert = null;
+    let lastAuthUser = null;
 
-    function openModal(view = 'login') {
-      authModal.classList.add('active');
-      document.body.style.overflow = 'hidden';
-      showPanel(view);
+    function refreshDynamicTexts() {
+      if (lastStatus) setAuthStatus(lastStatus.key, lastStatus.vars);
+      const el = document.getElementById("userName");
+      if (lastAuthUser && el) el.textContent = t("auth.welcomeBack", { name: getName(lastAuthUser) });
     }
+
+    function getName(user) {
+      return user.displayName ? user.displayName.split(" ")[0] : user.email;
+    }
+
+    function setAuthStatus(key, vars, type) {
+      const el = document.getElementById("authStatus");
+      if (!el) return;
+      lastStatus = { key: key, vars: vars };
+      el.textContent = t(key, vars);
+      el.classList.toggle("success", type === "success");
+      el.classList.add("show");
+    }
+
+    function hideAuthStatus() {
+      const el = document.getElementById("authStatus");
+      if (!el) return;
+      el.classList.remove("show");
+      lastStatus = null;
+    }
+
+    /* ---------- UI logic ---------- */
+    const menuToggle = document.getElementById("menuToggle");
+    const navLinks = document.getElementById("navLinks");
+    menuToggle.addEventListener("click", () => navLinks.classList.toggle("active"));
+    navLinks.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => navLinks.classList.remove("active"));
+    });
+
+    const loginLink = document.getElementById("loginLink");
+    const authModal = document.getElementById("authModal");
+    const modalClose = document.getElementById("modalClose");
+    const logoutLink = document.getElementById("logoutLink");
+    const tabLogin = document.getElementById("tabLogin");
+    const tabSignup = document.getElementById("tabSignup");
+    const panelLogin = document.getElementById("panelLogin");
+    const panelSignup = document.getElementById("panelSignup");
+    const panelReset = document.getElementById("panelReset");
+    const switchToSignup = document.getElementById("switchToSignup");
+    const switchToLogin = document.getElementById("switchToLogin");
+    const forgotLink = document.getElementById("forgotLink");
+    const backToLogin = document.getElementById("backToLogin");
+    const loginForm = document.getElementById("loginForm");
+    const signupForm = document.getElementById("signupForm");
+    const resetForm = document.getElementById("resetForm");
+    const verifyPrompt = document.getElementById("verifyPrompt");
+    const resendVerifyLink = document.getElementById("resendVerifyLink");
+
+    function openModal(view) {
+      authModal.classList.add("active");
+      document.body.style.overflow = "hidden";
+      showPanel(view || "login");
+    }
+
     function closeModal() {
-      authModal.classList.remove('active');
-      document.body.style.overflow = '';
-      hideError();
+      authModal.classList.remove("active");
+      document.body.style.overflow = "";
+      hideAuthStatus();
+      hideVerifyPrompt();
       loginForm.reset();
       signupForm.reset();
-      document.querySelectorAll('.password-wrapper input').forEach(i => i.type = 'password');
-      document.querySelectorAll('.toggle-password').forEach(b => b.textContent = 'Show');
+      resetForm.reset();
+      document.querySelectorAll(".password-wrapper input").forEach((i) => { i.type = "password"; });
+      document.querySelectorAll(".toggle-password").forEach((b) => { b.textContent = t("auth.show"); });
     }
-
-    loginLink.addEventListener('click', (e) => { e.preventDefault(); openModal('login'); });
-    modalClose.addEventListener('click', closeModal);
-    authModal.addEventListener('click', (e) => { if (e.target === authModal) closeModal(); });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && authModal.classList.contains('active')) closeModal();
-    });
 
     function showPanel(view) {
-      hideError();
-      const isSignup = view === 'signup';
-      panelSignup.classList.toggle('active', isSignup);
-      panelLogin.classList.toggle('active', !isSignup);
-      tabSignup.classList.toggle('active', isSignup);
-      tabLogin.classList.toggle('active', !isSignup);
-      tabSignup.setAttribute('aria-selected', isSignup);
-      tabLogin.setAttribute('aria-selected', !isSignup);
+      hideAuthStatus();
+      panelLogin.classList.toggle("active", view === "login");
+      panelSignup.classList.toggle("active", view === "signup");
+      panelReset.classList.toggle("active", view === "reset");
+      tabLogin.classList.toggle("active", view === "login");
+      tabSignup.classList.toggle("active", view === "signup");
+      tabLogin.setAttribute("aria-selected", String(view === "login"));
+      tabSignup.setAttribute("aria-selected", String(view === "signup"));
+      const tabs = document.querySelector(".tabs");
+      if (tabs) tabs.style.visibility = view === "reset" ? "hidden" : "";
     }
-    tabLogin.addEventListener('click', () => showPanel('login'));
-    tabSignup.addEventListener('click', () => showPanel('signup'));
-    switchToSignup.addEventListener('click', (e) => { e.preventDefault(); showPanel('signup'); });
-    switchToLogin.addEventListener('click', (e) => { e.preventDefault(); showPanel('login'); });
 
-    document.querySelectorAll('.toggle-password').forEach(btn => {
-      btn.addEventListener('click', () => {
+    function showVerifyPrompt() {
+      if (verifyPrompt) verifyPrompt.hidden = false;
+    }
+
+    function hideVerifyPrompt() {
+      if (verifyPrompt) verifyPrompt.hidden = true;
+    }
+
+    loginLink.addEventListener("click", (e) => { e.preventDefault(); openModal("login"); });
+    modalClose.addEventListener("click", closeModal);
+    authModal.addEventListener("click", (e) => { if (e.target === authModal) closeModal(); });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && authModal.classList.contains("active")) closeModal();
+    });
+
+    tabLogin.addEventListener("click", () => showPanel("login"));
+    tabSignup.addEventListener("click", () => showPanel("signup"));
+    switchToSignup.addEventListener("click", (e) => { e.preventDefault(); showPanel("signup"); });
+    switchToLogin.addEventListener("click", (e) => { e.preventDefault(); showPanel("login"); });
+    backToLogin.addEventListener("click", (e) => { e.preventDefault(); showPanel("login"); });
+
+    forgotLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      const typed = document.getElementById("loginEmail").value.trim();
+      if (typed) document.getElementById("resetEmail").value = typed;
+      showPanel("reset");
+      document.getElementById("resetEmail").focus();
+    });
+
+    document.querySelectorAll(".toggle-password").forEach((btn) => {
+      btn.addEventListener("click", () => {
         const input = document.getElementById(btn.dataset.target);
-        const isPw = input.type === 'password';
-        input.type = isPw ? 'text' : 'password';
-        btn.textContent = isPw ? 'Hide' : 'Show';
+        const isPw = input.type === "password";
+        input.type = isPw ? "text" : "password";
+        btn.textContent = isPw ? t("auth.hide") : t("auth.show");
       });
     });
 
-    function showError(msg) { modalError.textContent = msg; modalError.classList.add('show'); }
-    function hideError() { modalError.classList.remove('show'); }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    /* ---------- Error-code translation ---------- */
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // ---------- SIGN UP ----------
-    signupForm.addEventListener('submit', async (e) => {
+    const AUTH_ERROR_KEYS = {
+      "auth/email-already-in-use": "err.emailInUse",
+      "auth/invalid-email": "err.invalidEmail",
+      "auth/weak-password": "err.weakPassword",
+      "auth/user-not-found": "err.badCredentials",
+      "auth/wrong-password": "err.badCredentials",
+      "auth/invalid-credential": "err.badCredentials",
+      "auth/invalid-login-credentials": "err.badCredentials",
+      "auth/too-many-requests": "err.tooManyRequests",
+      "auth/network-request-failed": "err.network",
+      "auth/operation-not-allowed": "err.operationNotAllowed",
+      "auth/user-disabled": "err.userDisabled",
+      "auth/missing-email": "err.missingEmail",
+      "auth/missing-password": "err.badCredentials",
+      "auth/unauthorized-domain": "err.unauthorizedDomain",
+      "auth/popup-blocked": "err.popupBlocked"
+    };
+
+    function authErrorKey(error) {
+      const code = error && error.code ? error.code : "";
+      if (AUTH_ERROR_KEYS[code]) return AUTH_ERROR_KEYS[code];
+      if (code === "auth/internal-error") return "err.resetNeedsEmail";
+      if (error && error.message && error.message.indexOf("identitytoolkit") !== -1) return "err.resetNotConfigured";
+      return "auth.genericError";
+    }
+
+    function logAuthError(where, error) {
+      console.error("[" + where + "]", (error && error.code) || "", error && error.message);
+    }
+
+    /* ---------- SIGN UP ---------- */
+    signupForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      hideError();
+      hideAuthStatus();
+      hideVerifyPrompt();
 
-      const name = document.getElementById('signupName').value.trim();
-      const email = document.getElementById('signupEmail').value.trim();
-      const password = document.getElementById('signupPassword').value;
-      const confirm = document.getElementById('signupConfirm').value;
-      const terms = document.getElementById('signupTerms').checked;
+      const name = document.getElementById("signupName").value.trim();
+      const email = document.getElementById("signupEmail").value.trim();
+      const password = document.getElementById("signupPassword").value;
+      const confirm = document.getElementById("signupConfirm").value;
+      const terms = document.getElementById("signupTerms").checked;
 
-      if (!name || !email || !password || !confirm) return showError('Please fill in all fields.');
-      if (name.length < 2) return showError('Please enter your full name.');
-      if (!emailRegex.test(email)) return showError('Please enter a valid email address.');
-      if (password.length < 6) return showError('Password must be at least 6 characters.');
-      if (password !== confirm) return showError('Passwords do not match.');
-      if (!terms) return showError('Please accept the Terms and Privacy Policy.');
+      if (!name || !email || !password || !confirm) return setAuthStatus("auth.fillAll");
+      if (name.length < 2) return setAuthStatus("auth.nameTooShort");
+      if (!EMAIL_RE.test(email)) return setAuthStatus("auth.emailInvalid");
+      if (password.length < 6) return setAuthStatus("auth.passwordTooShort");
+      if (password !== confirm) return setAuthStatus("auth.passwordMismatch");
+      if (!terms) return setAuthStatus("auth.acceptTerms");
 
       try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await updateProfile(userCredential.user, { displayName: name });
-        await sendEmailVerification(userCredential.user);
-        await signOut(auth);
-        alert('Account created! Please check your email to verify your account before signing in.');
-        closeModal();
-      } catch (error) {
-        switch (error.code) {
-          case 'auth/email-already-in-use':
-            showError('An account with this email already exists.');
-            break;
-          case 'auth/invalid-email':
-            showError('Please enter a valid email address.');
-            break;
-          case 'auth/weak-password':
-            showError('Password must be at least 6 characters.');
-            break;
-          default:
-            showError('Something went wrong. Please try again. (' + error.code + ')');
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        if (cred && cred.user) {
+          try {
+            await updateProfile(cred.user, { displayName: name });
+          } catch (profileError) {
+            logAuthError("updateProfile", profileError);
+          }
+          try {
+            await sendEmailVerification(cred.user);
+          } catch (verifyError) {
+            logAuthError("sendEmailVerification", verifyError);
+          }
         }
+        await signOut(auth);
+        setAuthStatus("auth.verifyEmailNotice", { email: email }, "success");
+      } catch (error) {
+        logAuthError("signup", error);
+        setAuthStatus(authErrorKey(error));
       }
     });
 
-    // ---------- LOGIN ----------
-    loginForm.addEventListener('submit', async (e) => {
+    /* ---------- LOGIN ---------- */
+    loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      hideError();
+      hideAuthStatus();
+      hideVerifyPrompt();
 
-      const email = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value;
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
 
-      if (!email || !password) return showError('Please fill in both email and password.');
+      if (!email || !password) return setAuthStatus("auth.needEmailPassword");
 
       try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        if (!userCredential.user.emailVerified) {
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        if (cred && cred.user && !cred.user.emailVerified) {
           await signOut(auth);
-          return showError('Please verify your email address first. Check your inbox for the verification link.');
+          setAuthStatus("auth.verifyFailed");
+          showVerifyPrompt();
+          return;
         }
-        alert('Welcome back!');
-        closeModal();
+        setAuthStatus("auth.welcomeBack", { name: (cred && cred.user) ? getName(cred.user) : email }, "success");
       } catch (error) {
-        switch (error.code) {
-          case 'auth/user-not-found':
-          case 'auth/wrong-password':
-          case 'auth/invalid-credential':
-            showError('Invalid email or password.');
-            break;
-          case 'auth/too-many-requests':
-            showError('Too many failed attempts. Please try again later.');
-            break;
-          default:
-            showError('Something went wrong. Please try again. (' + error.code + ')');
+        logAuthError("login", error);
+        setAuthStatus(authErrorKey(error));
+      }
+    });
+
+    /* ---------- FORGOT / RESET PASSWORD ---------- */
+    resetForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      hideAuthStatus();
+
+      const email = document.getElementById("resetEmail").value.trim();
+      if (!email) return setAuthStatus("auth.fillAll");
+      if (!EMAIL_RE.test(email)) return setAuthStatus("auth.emailInvalid");
+
+      try {
+        await sendPasswordResetEmail(auth, email);
+        setAuthStatus("auth.resetSent", { email: email }, "success");
+      } catch (error) {
+        logAuthError("resetPassword", error);
+        if (error && error.code === "auth/user-not-found") {
+          // Do not reveal whether the address exists.
+          setAuthStatus("auth.resetSent", { email: email }, "success");
+        } else {
+          setAuthStatus(authErrorKey(error));
         }
       }
     });
 
-    // ---------- LOGOUT ----------
-    document.getElementById('logoutLink').addEventListener('click', async (e) => {
+    /* ---------- RESEND VERIFICATION ---------- */
+    resendVerifyLink.addEventListener("click", async (e) => {
+      e.preventDefault();
+      hideAuthStatus();
+
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
+
+      if (!email) {
+        showVerifyPrompt();
+        return setAuthStatus("auth.enterEmailFirst");
+      }
+      if (!password) {
+        showVerifyPrompt();
+        return setAuthStatus("auth.verifyNeedsPassword");
+      }
+
+      try {
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        if (cred && cred.user) await sendEmailVerification(cred.user);
+        await signOut(auth);
+        setAuthStatus("auth.resendSent", { email: email }, "success");
+      } catch (error) {
+        logAuthError("resendVerification", error);
+        setAuthStatus(authErrorKey(error));
+      }
+    });
+
+    /* ---------- LOGOUT ---------- */
+    logoutLink.addEventListener("click", async (e) => {
       e.preventDefault();
       try {
         await signOut(auth);
-        alert('You have been logged out.');
+        lastAlert = { key: "auth.signedOut" };
+        alert(t("auth.signedOut"));
       } catch (error) {
-        alert('Error logging out: ' + error.message);
+        logAuthError("logout", error);
+        alert(t("auth.genericError"));
       }
     });
 
-    // ---------- AUTH STATE ----------
+    /* ---------- AUTH STATE ---------- */
     onAuthStateChanged(auth, (user) => {
-      const loginItem = document.getElementById('loginItem');
-      const userItem = document.getElementById('userItem');
-      const userName = document.getElementById('userName');
+      const loginItem = document.getElementById("loginItem");
+      const userItem = document.getElementById("userItem");
+      const userName = document.getElementById("userName");
+
+      lastAuthUser = user;
 
       if (user && user.emailVerified) {
-        loginItem.style.display = 'none';
-        userItem.style.display = 'flex';
-        userName.textContent = 'Hi, ' + (user.displayName ? user.displayName.split(' ')[0] : user.email);
+        loginItem.style.display = "none";
+        userItem.style.display = "flex";
+        userName.textContent = t("auth.welcomeBack", { name: getName(user) });
       } else {
-        loginItem.style.display = 'block';
-        userItem.style.display = 'none';
+        loginItem.style.display = "block";
+        userItem.style.display = "none";
       }
     });
+
+    /* ---------- Start ---------- */
+    currentLang = detectInitialLang();
+    applyTranslations();
+    if (lastAlert) alert(t(lastAlert.key));
   </script>
 </body>
 </html>

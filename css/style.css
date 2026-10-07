@@ -77,6 +77,42 @@ nav {
 .nav-links a { color: var(--text); font-size: 0.95rem; }
 .nav-links a:hover { color: var(--accent); text-decoration: none; }
 
+/* ---------- Language toggle ---------- */
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.lang-toggle {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: var(--surface);
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.lang-toggle button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.lang-toggle button[aria-pressed="true"] {
+  background: #fff;
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 /* ---------- Hero ---------- */
 .hero {
   padding: 5rem 0;
@@ -366,6 +402,27 @@ footer {
 }
 .error-message.show { display: block; }
 
+/* Success variant of the status box, used by the password-reset flow */
+.error-message.success {
+  background: #f0fdf4;
+  color: #15803d;
+  border-color: #bbf7d0;
+}
+
+/* ---------- Reset-password panel ---------- */
+.back-link {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.reset-help {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
 .switch-prompt {
   text-align: center;
   font-size: 0.875rem;
@@ -380,6 +437,16 @@ footer {
 /* ---------- Mobile ---------- */
 @media (max-width: 600px) {
   .menu-toggle { display: block; }
+
+  .lang-toggle button {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.72rem;
+  }
+
+  .form-options {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
 
   .nav-links {
     display: none;
