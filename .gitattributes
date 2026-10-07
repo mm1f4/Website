@@ -1,0 +1,19 @@
+# The repository stores text with LF endings. Declaring it here keeps diffs
+# stable and stops Git from rewriting whole files over line-ending differences.
+* text=auto eol=lf
+
+*.html text eol=lf
+*.css  text eol=lf
+*.js   text eol=lf
+*.cjs  text eol=lf
+*.json text eol=lf
+*.md   text eol=lf
+
+# Binary assets - never touch these
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.woff binary
+*.woff2 binary

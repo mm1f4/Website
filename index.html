@@ -7,6 +7,12 @@
   <title>X Cope</title>
 
   <!-- 🔗 Link to your external CSS file -->
+<!-- xcope-ui-pass:v2 -->
+  <!-- Fonts: the CJK family is only fetched by pages that use CJK glyphs,
+       and unicode-range keeps the latin subsets small. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -24,9 +30,9 @@
           <li id="loginItem"><a href="#" id="loginLink" data-i18n="nav.login">Login</a></li>
   
           <!-- Shown when logged IN -->
-          <li id="userItem" style="display:none;">
-            <span id="userName" style="font-weight:600; color:var(--text);"></span>
-            <a href="#" id="logoutLink" style="color: var(--error); margin-left: 0.75rem;" data-i18n="nav.logout">Logout</a>
+          <li id="userItem" class="user-item is-hidden">
+            <span id="userName" class="user-name"></span>
+            <a href="#" id="logoutLink" class="logout-link" data-i18n="nav.logout">Logout</a>
           </li>
         </ul>
 
@@ -42,7 +48,7 @@
   </header>
 
   <main>
-    <section class="hero container">
+    <section class="hero container is-reveal">
       <h1 data-i18n="hero.title">Build something great</h1>
       <p data-i18n="hero.subtitle">A minimal starting point for your next web project. Clean, responsive, and ready to customise.</p>
       <a href="#features" class="btn" data-i18n="hero.cta">Get started</a>
@@ -51,16 +57,19 @@
     <section class="features" id="features">
       <div class="container">
         <h2 data-i18n="features.title">What you get</h2>
-        <div class="grid">
+        <div class="grid" data-reveal-group>
           <article class="card">
+            <span class="card-icon card-icon--1" aria-hidden="true"></span>
             <h3 data-i18n="features.fast.title">Fast</h3>
             <p data-i18n="features.fast.body">No frameworks, no build step - just open it in your browser and go.</p>
           </article>
           <article class="card">
+            <span class="card-icon card-icon--2" aria-hidden="true"></span>
             <h3 data-i18n="features.responsive.title">Responsive</h3>
             <p data-i18n="features.responsive.body">Looks good on phones, tablets, and desktops out of the box.</p>
           </article>
           <article class="card">
+            <span class="card-icon card-icon--3" aria-hidden="true"></span>
             <h3 data-i18n="features.custom.title">Customisable</h3>
             <p data-i18n="features.custom.body">All styling lives in CSS variables at the top, easy to tweak.</p>
           </article>
@@ -69,7 +78,7 @@
     </section>
   </main>
 
-  <footer>
+  <footer class="is-reveal">
     <div class="container">
       <p>&copy; <span id="year"></span> <span data-i18n="footer.rights">X COPE. All rights reserved.</span></p>
     </div>
@@ -777,18 +786,46 @@
       lastAuthUser = user;
 
       if (user && user.emailVerified) {
-        loginItem.style.display = "none";
-        userItem.style.display = "flex";
+        loginItem.classList.add("is-hidden");
+        userItem.classList.remove("is-hidden");
         userName.textContent = t("auth.welcomeBack", { name: getName(user) });
       } else {
-        loginItem.style.display = "block";
-        userItem.style.display = "none";
+        loginItem.classList.remove("is-hidden");
+        userItem.classList.add("is-hidden");
       }
     });
+
+    /* ---------- Scroll reveal (progressive enhancement) ---------- */
+    function initScrollReveal() {
+      const targets = document.querySelectorAll(".is-reveal, [data-reveal-group]");
+      if (!targets.length) return;
+
+      const motionOk = !window.matchMedia || !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!("IntersectionObserver" in window) || !motionOk) {
+        targets.forEach((el) => el.classList.add("is-revealed"));
+        return;
+      }
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-revealed");
+          observer.unobserve(entry.target);
+        });
+      }, { threshold: 0.08, rootMargin: "0px 0px -8% 0px" });
+
+      targets.forEach((el) => {
+        // Anything already on screen at load reveals immediately.
+        const box = el.getBoundingClientRect();
+        if (box.top < window.innerHeight * 0.9) el.classList.add("is-revealed");
+        else observer.observe(el);
+      });
+    }
 
     /* ---------- Start ---------- */
     currentLang = detectInitialLang();
     applyTranslations();
+    initScrollReveal();
     if (lastAlert) alert(t(lastAlert.key));
   </script>
 </body>
