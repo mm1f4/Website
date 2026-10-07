@@ -1,54 +1,27 @@
 /* ==========================================================================
    XCOPE - stylesheet
    Structure
-     1. Design tokens
-     2. Reset & base
+     1. Design tokens (shared)
+     2. Themes (light / dark)
      3. Scroll reveal
-     4. Layout primitives
-     5. Header & navigation
-     6. Hero
-     7. Features
-     8. Footer
-     9. Buttons
-    10. Forms
-    11. Auth modal
-    12. Status messages
-    13. Responsive
+     4. Reset & base
+     5. Layout primitives
+     6. Header & navigation
+     7. Hero
+     8. Features
+     9. About & contact
+    10. Footer
+    11. Buttons
+    12. Forms
+    13. Auth modal
+    14. Status messages
+    15. Responsive
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   1. Design tokens
+   1. Design tokens (theme-independent)
    -------------------------------------------------------------------------- */
 :root {
-  /* Surfaces */
-  --bg: #ffffff;
-  --surface: #f6f8fb;
-  --surface-2: #eef2f7;
-  --card: #ffffff;
-
-  /* Text */
-  --text: #0f172a;
-  --text-strong: #020617;
-  --muted: #64748b;
-
-  /* Lines */
-  --border: #e4e9f0;
-  --border-strong: #d3dbe6;
-
-  /* Accent */
-  --accent: #2563eb;
-  --accent-hover: #1d4ed8;
-  --accent-soft: #eff5ff;
-  --accent-ring: rgba(37, 99, 235, 0.18);
-
-  /* Feedback */
-  --error: #dc2626;
-  --error-bg: #fef2f2;
-  --error-border: #fecaca;
-  --success: #15803d;
-  --success-bg: #f0fdf4;
-  --success-border: #bbf7d0;
-
   /* Radii */
   --radius-sm: 8px;
   --radius: 12px;
@@ -56,23 +29,16 @@
   --radius-xl: 24px;
   --radius-pill: 999px;
 
-  /* Elevation - layered, low-opacity shadows read as "soft" rather than "boxy" */
-  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
-  --shadow-lg: 0 12px 28px -6px rgba(15, 23, 42, 0.12), 0 4px 10px -4px rgba(15, 23, 42, 0.06);
-  --shadow-xl: 0 28px 60px -12px rgba(15, 23, 42, 0.22);
-
   /* Type scale */
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto,
     "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
-  --text-xs: 0.8125rem;   /* 13px */
-  --text-sm: 0.875rem;    /* 14px */
-  --text-base: 1rem;      /* 16px */
-  --text-lg: 1.125rem;    /* 18px */
-  --text-xl: 1.375rem;    /* 22px */
-  --text-2xl: 1.75rem;    /* 28px */
-  --text-3xl: 2.25rem;    /* 36px */
+  --text-xs: 0.8125rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
   --text-hero: clamp(2.25rem, 5.5vw, 3.75rem);
 
   /* Spacing rhythm */
@@ -95,73 +61,125 @@
 }
 
 /* --------------------------------------------------------------------------
-   2. Reset & base
+   2. Themes
+
+   Every colour lives here, so a theme is a token swap and nothing else.
+   The light values are also the defaults on plain :root, which keeps the page
+   correct even if the theme script never runs.
    -------------------------------------------------------------------------- */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Surfaces */
+  --bg: #ffffff;
+  --surface: #f6f8fb;
+  --surface-2: #eef2f7;
+  --card: #ffffff;
+
+  /* Text */
+  --text: #0f172a;
+  --text-strong: #020617;
+  --text-on-accent: #ffffff;
+  --muted: #64748b;
+  --placeholder: #94a3b8;
+
+  /* Lines */
+  --border: #e4e9f0;
+  --border-strong: #d3dbe6;
+  --border-hover: #b9c4d4;
+
+  /* Accent */
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-soft: #eff5ff;
+  --accent-ring: rgba(37, 99, 235, 0.18);
+  --accent-gradient: linear-gradient(135deg, var(--accent), #60a5fa);
+  --button-gradient: linear-gradient(180deg, #3b82f6, var(--accent));
+  --logo-bar: linear-gradient(90deg, var(--accent), #60a5fa);
+  --danger-hover: #b91c1c;
+
+  /* Feedback */
+  --error: #dc2626;
+  --error-bg: #fef2f2;
+  --error-border: #fecaca;
+  --error-ring: rgba(220, 38, 38, 0.14);
+  --success: #15803d;
+  --success-bg: #f0fdf4;
+  --success-border: #bbf7d0;
+
+  /* Structure */
+  --header-bg: rgba(255, 255, 255, 0.72);
+  --overlay-bg: rgba(15, 23, 42, 0.55);
+
+  /* Elevation */
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --shadow-lg: 0 12px 28px -6px rgba(15, 23, 42, 0.12), 0 4px 10px -4px rgba(15, 23, 42, 0.06);
+  --shadow-xl: 0 28px 60px -12px rgba(15, 23, 42, 0.22);
+  --shadow-button: 0 1px 2px rgba(15, 23, 42, 0.08), 0 6px 16px -6px var(--accent-ring);
+  --shadow-button-hover: 0 2px 4px rgba(15, 23, 42, 0.1), 0 12px 24px -8px var(--accent-ring);
 }
 
-html {
-  -webkit-text-size-adjust: 100%;
-  scroll-behavior: smooth;
-}
+:root[data-theme="dark"] {
+  color-scheme: dark;
 
-body {
-  font-family: var(--font-sans);
-  font-size: var(--text-base);
-  line-height: 1.65;
-  color: var(--text);
-  /* A barely-there tint keeps the page from reading as flat white */
-  background:
-    radial-gradient(1100px 520px at 50% -240px, var(--accent-soft), transparent 70%),
-    var(--bg);
-  background-attachment: fixed;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-synthesis-weight: none;
-}
+  /* Surfaces - raised surfaces are lighter than the page, not darker */
+  --bg: #0b1120;
+  --surface: #101827;
+  --surface-2: #1b2436;
+  --card: #141d2f;
 
-h1, h2, h3 {
-  color: var(--text-strong);
-  line-height: 1.18;
-  letter-spacing: -0.022em;
-  font-weight: 700;
-  text-wrap: balance;
-}
+  /* Text */
+  --text: #e6ecf5;
+  --text-strong: #f8fafc;
+  --text-on-accent: #ffffff;
+  --muted: #94a3b8;
+  --placeholder: #64748b;
 
-p { text-wrap: pretty; }
+  /* Lines */
+  --border: #253147;
+  --border-strong: #33415a;
+  --border-hover: #475569;
 
-img {
-  max-width: 100%;
-  display: block;
-}
+  /* Accent - lifted so it stays legible on a dark surface */
+  --accent: #60a5fa;
+  --accent-hover: #93c5fd;
+  --accent-soft: rgba(96, 165, 250, 0.12);
+  --accent-ring: rgba(96, 165, 250, 0.24);
+  --accent-gradient: linear-gradient(135deg, #3b82f6, #60a5fa);
+  --button-gradient: linear-gradient(180deg, #3b82f6, #2563eb);
+  --logo-bar: linear-gradient(90deg, #3b82f6, #93c5fd);
+  --danger-hover: #fca5a5;
 
-a {
-  color: var(--accent);
-  text-decoration: none;
-  transition: color var(--dur-fast) ease;
-}
+  /* Feedback */
+  --error: #f87171;
+  --error-bg: rgba(248, 113, 113, 0.12);
+  --error-border: rgba(248, 113, 113, 0.35);
+  --error-ring: rgba(248, 113, 113, 0.22);
+  --success: #4ade80;
+  --success-bg: rgba(74, 222, 128, 0.12);
+  --success-border: rgba(74, 222, 128, 0.32);
 
-/* A single, consistent focus treatment for keyboard users only. */
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
-}
+  /* Structure */
+  --header-bg: rgba(11, 17, 32, 0.72);
+  --overlay-bg: rgba(2, 6, 23, 0.7);
 
-::selection {
-  background: var(--accent);
-  color: #fff;
+  /* Elevation - heavier, because depth reads weaker on dark backgrounds */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.45), 0 2px 4px -2px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 28px -6px rgba(0, 0, 0, 0.55), 0 4px 10px -4px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 28px 60px -12px rgba(0, 0, 0, 0.7);
+  --shadow-button: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 16px -6px var(--accent-ring);
+  --shadow-button-hover: 0 2px 4px rgba(0, 0, 0, 0.45), 0 12px 24px -8px var(--accent-ring);
 }
 
 /* --------------------------------------------------------------------------
    3. Scroll reveal
-   Kept BEFORE the component rules on purpose: these transition declarations
-   would otherwise win the cascade over component transitions (the card hover
+   Kept BEFORE the component rules on purpose: otherwise these transition
+   declarations win the cascade over component transitions (the card hover
    animation) for any element that is also a reveal target.
 
    The module script adds .is-revealed as elements enter the viewport.
@@ -198,7 +216,71 @@ a {
 [data-reveal-group].is-revealed > *:nth-child(4) { transition-delay: 300ms; }
 
 /* --------------------------------------------------------------------------
-   4. Layout primitives
+   4. Reset & base
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.65;
+  color: var(--text);
+  background:
+    radial-gradient(1100px 520px at 50% -240px, var(--accent-soft), transparent 70%),
+    var(--bg);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-synthesis-weight: none;
+  /* Theme swaps cross-fade instead of snapping */
+  transition: background-color var(--dur) var(--ease-out), color var(--dur) var(--ease-out);
+}
+
+h1, h2, h3 {
+  color: var(--text-strong);
+  line-height: 1.18;
+  letter-spacing: -0.022em;
+  font-weight: 700;
+  text-wrap: balance;
+}
+
+p { text-wrap: pretty; }
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color var(--dur-fast) ease;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--text-on-accent);
+}
+
+/* --------------------------------------------------------------------------
+   5. Layout primitives
    -------------------------------------------------------------------------- */
 .container {
   width: min(1120px, 90%);
@@ -206,13 +288,13 @@ a {
 }
 
 /* --------------------------------------------------------------------------
-   5. Header & navigation
+   6. Header & navigation
    -------------------------------------------------------------------------- */
 header {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--header-bg);
   backdrop-filter: saturate(180%) blur(14px);
   -webkit-backdrop-filter: saturate(180%) blur(14px);
   border-bottom: 1px solid var(--border);
@@ -235,7 +317,6 @@ nav {
   flex-shrink: 0;
 }
 
-/* Small "beta-ish" accent bar under the logo adds brand colour without noise */
 .logo::after {
   content: "";
   display: block;
@@ -243,13 +324,13 @@ nav {
   width: 1.6rem;
   margin-top: 2px;
   border-radius: var(--radius-pill);
-  background: linear-gradient(90deg, var(--accent), #60a5fa);
+  background: var(--logo-bar);
 }
 
 .header-controls {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   flex-shrink: 0;
 }
 
@@ -269,7 +350,6 @@ nav {
   transition: color var(--dur-fast) ease;
 }
 
-/* Animated underline reads as polish and gives hover real feedback */
 .nav-links > li > a::after {
   content: "";
   position: absolute;
@@ -292,7 +372,6 @@ nav {
   transform: scaleX(1);
 }
 
-/* Guard: the logout link is styled by .logout-link, not the underline rule. */
 .nav-links .logout-link::after { display: none; }
 
 .user-item {
@@ -312,7 +391,7 @@ nav {
   margin-left: var(--space-3);
 }
 
-.logout-link:hover { color: #b91c1c; }
+.logout-link:hover { color: var(--danger-hover); }
 
 .is-hidden { display: none !important; }
 
@@ -334,8 +413,8 @@ nav {
 
 .menu-toggle:hover { background: var(--surface-2); }
 
-/* ---------- Language toggle ---------- */
-.lang-toggle {
+/* ---------- Segmented toggles (language + theme) ---------- */
+.seg-toggle {
   display: flex;
   gap: 2px;
   padding: 3px;
@@ -345,30 +424,31 @@ nav {
   flex-shrink: 0;
 }
 
-.lang-toggle button {
+.seg-toggle button {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.3rem 0.7rem;
+  padding: 0.3rem 0.65rem;
   border-radius: var(--radius-pill);
   font-family: inherit;
   font-size: var(--text-xs);
   font-weight: 600;
+  line-height: 1.2;
   color: var(--muted);
   transition: background var(--dur-fast) ease, color var(--dur-fast) ease,
     box-shadow var(--dur-fast) ease;
 }
 
-.lang-toggle button:hover { color: var(--text-strong); }
+.seg-toggle button:hover { color: var(--text-strong); }
 
-.lang-toggle button[aria-pressed="true"] {
+.seg-toggle button[aria-pressed="true"] {
   background: var(--card);
   color: var(--text-strong);
   box-shadow: var(--shadow-sm);
 }
 
 /* --------------------------------------------------------------------------
-   6. Hero
+   7. Hero
    -------------------------------------------------------------------------- */
 .hero {
   display: flex;
@@ -384,7 +464,7 @@ nav {
   letter-spacing: -0.035em;
   max-width: 20ch;
   margin-bottom: var(--space-4);
-  background: linear-gradient(180deg, var(--text-strong) 55%, #334155 100%);
+  background: linear-gradient(180deg, var(--text-strong) 55%, var(--muted) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -398,7 +478,7 @@ nav {
 }
 
 /* --------------------------------------------------------------------------
-   7. Features
+   8. Features
    -------------------------------------------------------------------------- */
 .features {
   padding: var(--space-9) 0;
@@ -435,7 +515,6 @@ nav {
     border-color var(--dur) var(--ease-out);
 }
 
-/* Accent wash that fades in on hover - subtle depth without a heavy shadow */
 .card::before {
   content: "";
   position: absolute;
@@ -450,13 +529,12 @@ nav {
 
 .card:hover {
   transform: translateY(-4px);
-  border-color: var(--border-strong);
+  border-color: var(--border-hover);
   box-shadow: var(--shadow-lg);
 }
 
 .card:hover::before { opacity: 1; }
 
-/* Coloured tick above each card title, i18n-safe because it is pure CSS */
 /* Icon tile sits in normal flow above the title, so a long translated title
    wraps onto the next line instead of colliding with the icon. */
 .card-icon {
@@ -465,7 +543,7 @@ nav {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 11px;
-  background: linear-gradient(135deg, var(--accent), #60a5fa);
+  background: var(--accent-gradient);
   box-shadow: 0 6px 14px -6px var(--accent-ring);
   transition: transform var(--dur) var(--ease-spring);
 }
@@ -485,8 +563,8 @@ nav {
 .card-icon--1::after {
   width: 0.8rem;
   height: 0.8rem;
-  border-left: 2.5px solid #fff;
-  border-bottom: 2.5px solid #fff;
+  border-left: 2.5px solid var(--text-on-accent);
+  border-bottom: 2.5px solid var(--text-on-accent);
   transform: translate(-50%, -60%) rotate(-45deg);
 }
 
@@ -494,7 +572,7 @@ nav {
 .card-icon--2::after {
   width: 1rem;
   height: 1rem;
-  border: 2.5px solid #fff;
+  border: 2.5px solid var(--text-on-accent);
   border-radius: 50%;
   transform: translate(-50%, -50%);
 }
@@ -503,9 +581,9 @@ nav {
 .card-icon--3::after {
   width: 1.05rem;
   height: 2.5px;
-  background: #fff;
+  background: var(--text-on-accent);
   border-radius: 2px;
-  box-shadow: 0 -0.35rem 0 #fff, 0 0.35rem 0 #fff;
+  box-shadow: 0 -0.35rem 0 var(--text-on-accent), 0 0.35rem 0 var(--text-on-accent);
   transform: translate(-50%, -50%);
 }
 
@@ -520,355 +598,7 @@ nav {
 }
 
 /* --------------------------------------------------------------------------
-   8. Footer
-   -------------------------------------------------------------------------- */
-footer {
-  padding: var(--space-6) 0;
-  text-align: center;
-  color: var(--muted);
-  font-size: var(--text-sm);
-  border-top: 1px solid var(--border);
-  background: var(--surface);
-}
-
-/* --------------------------------------------------------------------------
-   9. Buttons
-   -------------------------------------------------------------------------- */
-.btn {
-  display: inline-block;
-  background: linear-gradient(180deg, #3b82f6, var(--accent));
-  color: #fff;
-  padding: 0.8rem 1.9rem;
-  border: none;
-  border-radius: var(--radius);
-  font-family: inherit;
-  font-size: var(--text-base);
-  font-weight: 600;
-  text-align: center;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 6px 16px -6px var(--accent-ring);
-  transition: transform var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur) var(--ease-out),
-    filter var(--dur-fast) ease;
-}
-
-.btn:hover {
-  filter: brightness(1.06);
-  transform: translateY(-2px);
-  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.1), 0 12px 24px -8px var(--accent-ring);
-  text-decoration: none;
-}
-
-.btn:active {
-  transform: translateY(0);
-  filter: brightness(0.97);
-  box-shadow: var(--shadow-xs);
-}
-
-/* --------------------------------------------------------------------------
-   10. Forms
-   -------------------------------------------------------------------------- */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-textarea {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  font-size: var(--text-base);
-  font-family: inherit;
-  color: var(--text);
-  background: var(--card);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease,
-    background var(--dur-fast) ease;
-}
-
-input::placeholder { color: #94a3b8; }
-
-input[type="text"]:hover,
-input[type="email"]:hover,
-input[type="password"]:hover,
-textarea:hover {
-  border-color: #b9c4d4;
-}
-
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="password"]:focus,
-textarea:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3.5px var(--accent-ring);
-}
-
-input[type="checkbox"] {
-  accent-color: var(--accent);
-  width: 1rem;
-  height: 1rem;
-  margin-top: 0.15rem;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-
-.form-group { margin-bottom: var(--space-4); }
-
-.modal label {
-  display: block;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--text-strong);
-  margin-bottom: 0.4rem;
-}
-
-.password-wrapper { position: relative; }
-.password-wrapper input { padding-right: 3.75rem; }
-
-.toggle-password {
-  position: absolute;
-  top: 50%;
-  right: 0.5rem;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--muted);
-  font-size: var(--text-xs);
-  font-weight: 600;
-  font-family: inherit;
-  padding: 0.3rem 0.55rem;
-  border-radius: var(--radius-sm);
-  transition: color var(--dur-fast) ease, background var(--dur-fast) ease;
-}
-
-.toggle-password:hover {
-  color: var(--accent);
-  background: var(--accent-soft);
-}
-
-.form-options {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  font-size: var(--text-sm);
-  margin-bottom: var(--space-5);
-}
-
-.remember,
-.terms {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
-  cursor: pointer;
-  color: var(--muted);
-  font-size: var(--text-sm);
-}
-
-.terms {
-  margin-bottom: var(--space-5);
-  line-height: 1.5;
-}
-
-.forgot {
-  font-weight: 600;
-  font-size: var(--text-sm);
-  white-space: nowrap;
-}
-
-/* --------------------------------------------------------------------------
-   11. Auth modal
-   -------------------------------------------------------------------------- */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-4);
-  overflow-y: auto;
-  background: rgba(15, 23, 42, 0.55);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-
-.modal-overlay.active {
-  display: flex;
-  animation: overlayIn var(--dur) var(--ease-out);
-}
-
-@keyframes overlayIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-.modal {
-  position: relative;
-  width: 100%;
-  max-width: 440px;
-  margin: auto;
-  padding: var(--space-6);
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xl);
-  animation: modalIn var(--dur-slow) var(--ease-spring);
-}
-
-@keyframes modalIn {
-  from { opacity: 0; transform: translateY(16px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.modal-close {
-  position: absolute;
-  top: var(--space-4);
-  right: var(--space-4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  font-size: 1.35rem;
-  line-height: 1;
-  color: var(--muted);
-  background: none;
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background var(--dur-fast) ease, color var(--dur-fast) ease;
-}
-
-.modal-close:hover {
-  background: var(--surface-2);
-  color: var(--text-strong);
-}
-
-/* ---------- Tabs ---------- */
-.tabs {
-  display: flex;
-  gap: 2px;
-  padding: 4px;
-  margin-bottom: var(--space-5);
-  background: var(--surface-2);
-  border-radius: var(--radius);
-}
-
-.tab {
-  flex: 1;
-  padding: 0.55rem;
-  font-family: inherit;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  text-align: center;
-  color: var(--muted);
-  background: none;
-  border: none;
-  border-radius: 9px;
-  cursor: pointer;
-  transition: background var(--dur-fast) ease, color var(--dur-fast) ease,
-    box-shadow var(--dur-fast) ease;
-}
-
-.tab:hover { color: var(--text-strong); }
-
-.tab.active {
-  background: var(--card);
-  color: var(--text-strong);
-  box-shadow: var(--shadow-sm);
-}
-
-.modal h2 {
-  text-align: center;
-  font-size: var(--text-2xl);
-  margin-bottom: var(--space-2);
-}
-
-.modal .subtitle {
-  text-align: center;
-  color: var(--muted);
-  font-size: var(--text-sm);
-  margin-bottom: var(--space-5);
-}
-
-.panel { display: none; }
-.panel.active { display: block; animation: panelIn var(--dur) var(--ease-out); }
-
-@keyframes panelIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.modal .btn {
-  display: block;
-  width: 100%;
-  padding: 0.85rem;
-}
-
-.switch-prompt {
-  text-align: center;
-  font-size: var(--text-sm);
-  color: var(--muted);
-  margin-top: var(--space-5);
-}
-
-.switch-prompt a {
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* ---------- Reset-password panel ---------- */
-.back-link {
-  display: inline-block;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  margin-bottom: var(--space-4);
-}
-
-.reset-help {
-  color: var(--muted);
-  font-size: var(--text-xs);
-  line-height: 1.6;
-  margin-bottom: var(--space-5);
-}
-
-.verify-prompt { margin-top: var(--space-3); }
-
-/* --------------------------------------------------------------------------
-   12. Status messages
-   -------------------------------------------------------------------------- */
-.error-message {
-  display: none;
-  padding: 0.75rem 1rem;
-  margin-bottom: var(--space-5);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  text-align: center;
-  border-radius: var(--radius);
-  border: 1px solid var(--error-border);
-  background: var(--error-bg);
-  color: var(--error);
-}
-
-.error-message.show {
-  display: block;
-  animation: statusIn var(--dur) var(--ease-out);
-}
-
-.error-message.success {
-  background: var(--success-bg);
-  border-color: var(--success-border);
-  color: var(--success);
-}
-
-@keyframes statusIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* --------------------------------------------------------------------------
-   About & contact
+   9. About & contact
    -------------------------------------------------------------------------- */
 .eyebrow {
   display: inline-block;
@@ -877,6 +607,15 @@ input[type="checkbox"] {
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* An eyebrow is a <p>, and the prose rules further down (.about-copy p,
+   .contact-intro > p) are one step more specific than a bare class, so they
+   were overriding the accent colour with the muted one. Matching their
+   specificity here restores the accent. */
+.about-copy .eyebrow,
+.contact-intro .eyebrow {
   color: var(--accent);
 }
 
@@ -1012,15 +751,369 @@ textarea {
   resize: vertical;
 }
 
-/* Invalid-field state, toggled from the contact form handler */
 .field-error {
   border-color: var(--error) !important;
-  box-shadow: 0 0 0 3.5px rgba(220, 38, 38, 0.14) !important;
+  box-shadow: 0 0 0 3.5px var(--error-ring) !important;
 }
 
 /* --------------------------------------------------------------------------
-   13. Responsive
+   10. Footer
    -------------------------------------------------------------------------- */
+footer {
+  padding: var(--space-6) 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+/* --------------------------------------------------------------------------
+   11. Buttons
+   -------------------------------------------------------------------------- */
+.btn {
+  display: inline-block;
+  background: var(--button-gradient);
+  color: var(--text-on-accent);
+  padding: 0.8rem 1.9rem;
+  border: none;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-button);
+  transition: transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out),
+    filter var(--dur-fast) ease;
+}
+
+.btn:hover {
+  filter: brightness(1.06);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-button-hover);
+  text-decoration: none;
+}
+
+.btn:active {
+  transform: translateY(0);
+  filter: brightness(0.97);
+  box-shadow: var(--shadow-xs);
+}
+
+/* --------------------------------------------------------------------------
+   12. Forms
+   -------------------------------------------------------------------------- */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: var(--text-base);
+  font-family: inherit;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease,
+    background var(--dur-fast) ease;
+}
+
+input::placeholder,
+textarea::placeholder { color: var(--placeholder); }
+
+input[type="text"]:hover,
+input[type="email"]:hover,
+input[type="password"]:hover,
+textarea:hover {
+  border-color: var(--border-hover);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3.5px var(--accent-ring);
+}
+
+input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.form-group { margin-bottom: var(--space-4); }
+
+.modal label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-strong);
+  margin-bottom: 0.4rem;
+}
+
+.password-wrapper { position: relative; }
+.password-wrapper input { padding-right: 3.75rem; }
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  font-family: inherit;
+  padding: 0.3rem 0.55rem;
+  border-radius: var(--radius-sm);
+  transition: color var(--dur-fast) ease, background var(--dur-fast) ease;
+}
+
+.toggle-password:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.form-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-5);
+}
+
+.remember,
+.terms {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  cursor: pointer;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.terms {
+  margin-bottom: var(--space-5);
+  line-height: 1.5;
+}
+
+.forgot {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   13. Auth modal
+   -------------------------------------------------------------------------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  overflow-y: auto;
+  background: var(--overlay-bg);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.modal-overlay.active {
+  display: flex;
+  animation: overlayIn var(--dur) var(--ease-out);
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  margin: auto;
+  padding: var(--space-6);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  animation: modalIn var(--dur-slow) var(--ease-spring);
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-close {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.35rem;
+  line-height: 1;
+  color: var(--muted);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--dur-fast) ease, color var(--dur-fast) ease;
+}
+
+.modal-close:hover {
+  background: var(--surface-2);
+  color: var(--text-strong);
+}
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  margin-bottom: var(--space-5);
+  background: var(--surface-2);
+  border-radius: var(--radius);
+}
+
+.tab {
+  flex: 1;
+  padding: 0.55rem;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-align: center;
+  color: var(--muted);
+  background: none;
+  border: none;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background var(--dur-fast) ease, color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease;
+}
+
+.tab:hover { color: var(--text-strong); }
+
+.tab.active {
+  background: var(--card);
+  color: var(--text-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+.modal h2 {
+  text-align: center;
+  font-size: var(--text-2xl);
+  margin-bottom: var(--space-2);
+}
+
+.modal .subtitle {
+  text-align: center;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-5);
+}
+
+.panel { display: none; }
+.panel.active { display: block; animation: panelIn var(--dur) var(--ease-out); }
+
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.modal .btn {
+  display: block;
+  width: 100%;
+  padding: 0.85rem;
+}
+
+.switch-prompt {
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--muted);
+  margin-top: var(--space-5);
+}
+
+.switch-prompt a {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.back-link {
+  display: inline-block;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+}
+
+.reset-help {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  margin-bottom: var(--space-5);
+}
+
+.verify-prompt { margin-top: var(--space-3); }
+
+/* --------------------------------------------------------------------------
+   14. Status messages
+   -------------------------------------------------------------------------- */
+.error-message {
+  display: none;
+  padding: 0.75rem 1rem;
+  margin-bottom: var(--space-5);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-align: center;
+  border-radius: var(--radius);
+  border: 1px solid var(--error-border);
+  background: var(--error-bg);
+  color: var(--error);
+}
+
+.error-message.show {
+  display: block;
+  animation: statusIn var(--dur) var(--ease-out);
+}
+
+.error-message.success {
+  background: var(--success-bg);
+  border-color: var(--success-border);
+  color: var(--success);
+}
+
+@keyframes statusIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --------------------------------------------------------------------------
+   15. Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 860px) {
+  .about-grid,
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+}
+
 @media (max-width: 720px) {
   .nav-links {
     display: none;
@@ -1033,7 +1126,7 @@ textarea {
     gap: var(--space-2);
     padding: var(--space-5) 0;
     text-align: center;
-    background: #ffffff;
+    background: var(--card);
     border-bottom: 1px solid var(--border);
     box-shadow: var(--shadow-lg);
   }
@@ -1053,24 +1146,18 @@ textarea {
 
   .about, .contact { padding: var(--space-8) 0; }
 
-  .about-grid,
-  .contact-grid {
-    grid-template-columns: 1fr;
-    gap: var(--space-6);
-  }
-
-  .about-stats { grid-template-columns: repeat(2, 1fr); }
-
   .form-options { flex-wrap: wrap; gap: var(--space-2); }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .modal { padding: var(--space-5) var(--space-4); }
 
-  .lang-toggle button {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
+  .seg-toggle button {
+    padding: 0.25rem 0.45rem;
+    font-size: 0.72rem;
   }
+
+  .header-controls { gap: var(--space-1); }
 }
 
 /* --------------------------------------------------------------------------

@@ -13,6 +13,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+  <meta name="theme-color" content="#ffffff" data-theme-color>
+  <!-- Apply the stored theme before first paint so there is no flash of the wrong theme. -->
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem("xcope-theme") || "auto";
+        var dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var resolved = stored === "auto" ? (dark ? "dark" : "light") : stored;
+        document.documentElement.setAttribute("data-theme", resolved);
+        document.documentElement.setAttribute("data-theme-choice", stored);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -38,9 +53,14 @@
 
       <!-- Right-hand cluster: language switcher + mobile menu button -->
       <div class="header-controls">
-        <div class="lang-toggle" role="group" data-i18n-aria-label="nav.switchLanguage" aria-label="Switch language">
+        <div class="seg-toggle lang-toggle" role="group" data-i18n-aria-label="nav.switchLanguage" aria-label="Switch language">
           <button type="button" data-lang="en" aria-pressed="true">EN</button>
           <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+        </div>
+        <div class="seg-toggle theme-toggle" id="themeToggle" role="group" data-i18n-aria-label="theme.label" aria-label="Colour theme">
+          <button type="button" data-theme-set="light" aria-pressed="false" data-i18n-aria-label="theme.light" aria-label="Light">☀</button>
+          <button type="button" data-theme-set="auto" aria-pressed="true" data-i18n-aria-label="theme.auto" aria-label="Auto">◐</button>
+          <button type="button" data-theme-set="dark" aria-pressed="false" data-i18n-aria-label="theme.dark" aria-label="Dark">☾</button>
         </div>
         <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">☰</button>
       </div>
@@ -402,6 +422,10 @@
         "err.unauthorizedDomain": "This domain is not authorised in Firebase Authentication.",
         "err.popupBlocked": "Your browser blocked the sign-in window.",
         "err.resetNeedsEmail": "Enter the email address you signed up with, then try again.",
+        "theme.label": "Colour theme",
+        "theme.light": "Light theme",
+        "theme.auto": "Match system theme",
+        "theme.dark": "Dark theme",
         "about.eyebrow": "About",
         "about.title": "Built for people who ship",
         "about.body": "XCOPE started as a single page and grew into a small toolkit for getting ideas online quickly. No build step, no framework, no lock-in - just clean HTML, CSS and JavaScript you can read top to bottom.",
@@ -519,6 +543,10 @@
         "err.unauthorizedDomain": "此網域尚未加入 Firebase Authentication 的授權清單。",
         "err.popupBlocked": "瀏覽器阻擋了登入視窗。",
         "err.resetNeedsEmail": "請輸入你註冊時使用的電子郵件再試一次。",
+        "theme.label": "主題色系",
+        "theme.light": "亮色主題",
+        "theme.auto": "跟隨系統主題",
+        "theme.dark": "暗色主題",
         "about.eyebrow": "關於",
         "about.title": "為實作的人而做",
         "about.body": "XCOPE 從單一頁面起步，成長為一套輕量工具，協助你快速把想法送上網。沒有建置流程、沒有框架、不會被綁死——只有幹淨、從頭到尾都讀得懂的 HTML、CSS 舎 JavaScript。",
@@ -1037,6 +1065,66 @@
         setContactStatus("contact.opened", "success");
       });
     })();
+
+    /* ---------- Colour theme ---------- */
+    const THEME_KEY = "xcope-theme";
+    const THEMES = ["light", "auto", "dark"];
+    const THEME_COLORS = { light: "#ffffff", dark: "#0b1120" };
+
+    function systemPrefersDark() {
+      return !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    }
+
+    function storedTheme() {
+      try {
+        const value = localStorage.getItem(THEME_KEY);
+        if (value && THEMES.indexOf(value) !== -1) return value;
+      } catch (e) { /* storage blocked - fall back to auto */ }
+      return "auto";
+    }
+
+    function resolvedTheme(choice) {
+      if (choice === "auto") return systemPrefersDark() ? "dark" : "light";
+      return choice === "dark" ? "dark" : "light";
+    }
+
+    function paintTheme(choice) {
+      const resolved = resolvedTheme(choice);
+      const root = document.documentElement;
+      root.setAttribute("data-theme", resolved);
+      root.setAttribute("data-theme-choice", choice);
+
+      // Keep the browser chrome (mobile address bar) in step with the theme.
+      const meta = document.querySelector("[data-theme-color]");
+      if (meta) meta.setAttribute("content", THEME_COLORS[resolved]);
+
+      document.querySelectorAll("[data-theme-set]").forEach((btn) => {
+        btn.setAttribute("aria-pressed", String(btn.dataset.themeSet === choice));
+      });
+    }
+
+    function setTheme(choice) {
+      const next = THEMES.indexOf(choice) === -1 ? "auto" : choice;
+      try { localStorage.setItem(THEME_KEY, next); } catch (e) { /* ignore */ }
+      paintTheme(next);
+    }
+
+    document.querySelectorAll("[data-theme-set]").forEach((btn) => {
+      btn.addEventListener("click", () => setTheme(btn.dataset.themeSet));
+    });
+
+    // "Auto" has to follow the OS while the page is open.
+    if (window.matchMedia) {
+      const scheme = window.matchMedia("(prefers-color-scheme: dark)");
+      const onSchemeChange = () => {
+        if (storedTheme() === "auto") paintTheme("auto");
+      };
+      if (scheme.addEventListener) scheme.addEventListener("change", onSchemeChange);
+      else if (scheme.addListener) scheme.addListener(onSchemeChange);
+    }
+
+    // Sync the UI with whatever the head script already applied.
+    paintTheme(storedTheme());
 
     /* ---------- Scroll reveal (progressive enhancement) ---------- */
     function initScrollReveal() {
