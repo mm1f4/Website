@@ -46,7 +46,10 @@
   
           <!-- Shown when logged IN -->
           <li id="userItem" class="user-item is-hidden">
-            <span id="userName" class="user-name"></span>
+            <a href="#profile" data-route id="profileNavLink" class="user-link">
+              <span class="avatar avatar--sm" id="navAvatar" data-profile-avatar aria-hidden="true"></span>
+              <span data-i18n="nav.profile">Profile</span>
+            </a>
             <a href="#" id="logoutLink" class="logout-link" data-i18n="nav.logout">Logout</a>
           </li>
         </ul>
@@ -67,7 +70,7 @@
     </nav>
   </header>
 
-  <main>
+  <main data-page="home">
     <section class="hero container is-reveal">
       <h1 data-i18n="hero.title">Build something great</h1>
       <p data-i18n="hero.subtitle">A minimal starting point for your next web project. Clean, responsive, and ready to customise.</p>
@@ -173,9 +176,177 @@
     </section>
   </main>
 
+  <!-- ==========================================================
+       Profile & settings page (hash route: #profile)
+       ========================================================== -->
+  <section class="page is-hidden" id="profilePage" data-page="profile" aria-labelledby="profileHeading">
+    <div class="container">
+      <div class="page-head">
+        <h1 id="profileHeading" data-i18n="profile.title">Your profile</h1>
+        <p data-i18n="profile.subtitle">Manage how you appear and how the site behaves for you.</p>
+      </div>
+
+      <div class="profile-layout">
+        <!-- Side navigation -->
+        <aside class="profile-side">
+          <div class="profile-card">
+            <span class="avatar avatar--sm" data-profile-avatar aria-hidden="true"></span>
+            <div class="profile-meta">
+              <strong data-profile-name>&mdash;</strong>
+              <span data-profile-email>&mdash;</span>
+            </div>
+          </div>
+
+          <ul class="profile-nav">
+            <li><a href="#profile" data-route data-i18n="profile.sectionProfile">Profile</a></li>
+            <li><a href="#panel-account" data-i18n="profile.sectionAccount">Account</a></li>
+            <li><a href="#panel-password" data-i18n="profile.sectionPassword">Password</a></li>
+            <li><a href="#panel-preferences" data-i18n="profile.sectionPreferences">Preferences</a></li>
+            <li><a href="#panel-signout" class="nav-danger" data-i18n="profile.sectionSignout">Sign out</a></li>
+          </ul>
+        </aside>
+
+        <div class="profile-main">
+          <!-- Profile details -->
+          <div class="panel-card" id="panel-details">
+            <h2 data-i18n="profile.detailsTitle">Profile details</h2>
+            <p class="panel-hint" data-i18n="profile.detailsHint">Your name is shown in the header and attached to your account.</p>
+
+            <div class="error-message" id="profileStatus" role="alert" aria-live="polite"></div>
+
+            <button type="button" class="avatar-button" id="avatarButton" data-i18n-aria-label="profile.avatarLabel" aria-label="Profile photo">
+              <span class="avatar" id="profileAvatar" data-profile-avatar aria-hidden="true"></span>
+              <span class="avatar-button-text">
+                <strong data-i18n="profile.avatarLabel">Profile photo</strong>
+                <span data-i18n="profile.avatarHint">Signed in with Google? Your Google photo is used automatically.</span>
+              </span>
+            </button>
+
+            <form id="profileForm" novalidate>
+              <div class="field-row">
+                <div class="form-group">
+                  <label for="profileDisplayName" data-i18n="profile.displayName">Display name</label>
+                  <input type="text" id="profileDisplayName" maxlength="60" autocomplete="name" placeholder="Jane Doe" data-i18n-placeholder="profile.displayNamePlaceholder" />
+                </div>
+                <div class="form-group">
+                  <label for="profileEmail" data-i18n="profile.emailReadonly">Email address</label>
+                  <input type="email" id="profileEmail" readonly data-i18n-aria-label="profile.emailHint" aria-label="Email cannot be changed here." />
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn" data-i18n="profile.save">Save changes</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Account -->
+          <div class="panel-card" id="panel-account">
+            <h2 data-i18n="profile.accountTitle">Account</h2>
+            <p class="panel-hint" data-i18n="profile.accountHint">Details from your XCOPE account.</p>
+
+            <dl class="info-list">
+              <div class="info-row">
+                <dt data-i18n="profile.emailReadonly">Email address</dt>
+                <dd data-profile-email>&mdash;</dd>
+              </div>
+              <div class="info-row">
+                <dt data-i18n="profile.provider">Sign-in method</dt>
+                <dd data-i18n="profile.providerPassword">Email and password</dd>
+              </div>
+              <div class="info-row">
+                <dt data-i18n="profile.created">Account created</dt>
+                <dd data-profile-created>&mdash;</dd>
+              </div>
+              <div class="info-row">
+                <dt data-i18n="profile.lastSignIn">Last sign-in</dt>
+                <dd data-profile-last>&mdash;</dd>
+              </div>
+              <div class="info-row">
+                <dt data-i18n="profile.verified">Verified</dt>
+                <dd><span class="pill" id="verifyPill">&mdash;</span></dd>
+              </div>
+            </dl>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-ghost is-hidden" id="profileVerifyBtn" data-i18n="profile.verifyNow">Resend verification email</button>
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="panel-card" id="panel-password">
+            <h2 data-i18n="profile.passwordTitle">Change password</h2>
+            <p class="panel-hint" data-i18n="profile.passwordHint">For security, confirm your current password first.</p>
+
+            <div class="error-message" id="passwordStatus" role="alert" aria-live="polite"></div>
+
+            <form id="passwordForm" novalidate>
+              <div class="form-group">
+                <label for="currentPassword" data-i18n="profile.currentPassword">Current password</label>
+                <input type="password" id="currentPassword" autocomplete="current-password" />
+              </div>
+              <div class="field-row">
+                <div class="form-group">
+                  <label for="newPassword" data-i18n="profile.newPassword">New password</label>
+                  <input type="password" id="newPassword" autocomplete="new-password" placeholder="At least 6 characters" data-i18n-placeholder="auth.newPasswordPlaceholder" />
+                </div>
+                <div class="form-group">
+                  <label for="confirmNewPassword" data-i18n="profile.confirmNewPassword">Confirm new password</label>
+                  <input type="password" id="confirmNewPassword" autocomplete="new-password" placeholder="Re-enter your password" data-i18n-placeholder="auth.confirmPlaceholder" />
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn" data-i18n="profile.updatePassword">Update password</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Preferences -->
+          <div class="panel-card" id="panel-preferences">
+            <h2 data-i18n="profile.prefsTitle">Preferences</h2>
+            <p class="panel-hint" data-i18n="profile.prefsHint">These are stored in this browser only.</p>
+
+            <div class="pref-row">
+              <div class="pref-label">
+                <strong data-i18n="profile.prefLanguage">Language</strong>
+                <span data-i18n="profile.prefLanguageHint">Which language the interface uses.</span>
+              </div>
+              <div class="seg-toggle" role="group" data-i18n-aria-label="nav.switchLanguage" aria-label="Switch language">
+                <button type="button" data-lang="en" data-profile-lang="en" aria-pressed="false">EN</button>
+                <button type="button" data-lang="zh" data-profile-lang="zh" aria-pressed="false">中文</button>
+              </div>
+            </div>
+
+            <div class="pref-row">
+              <div class="pref-label">
+                <strong data-i18n="profile.prefTheme">Colour theme</strong>
+                <span data-i18n="profile.prefThemeHint">Match your system, or pick one.</span>
+              </div>
+              <div class="seg-toggle" role="group" data-i18n-aria-label="theme.label" aria-label="Colour theme">
+                <button type="button" data-theme-set="light" data-profile-theme="light" aria-pressed="false" data-i18n-aria-label="theme.light" aria-label="Light">☀</button>
+                <button type="button" data-theme-set="auto" data-profile-theme="auto" aria-pressed="true" data-i18n-aria-label="theme.auto" aria-label="Auto">◐</button>
+                <button type="button" data-theme-set="dark" data-profile-theme="dark" aria-pressed="false" data-i18n-aria-label="theme.dark" aria-label="Dark">☾</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sign out -->
+          <div class="panel-card" id="panel-signout">
+            <h2 data-i18n="profile.signoutTitle">Sign out</h2>
+            <p class="panel-hint" data-i18n="profile.signoutHint">You will need to sign in again to reach this page.</p>
+            <div class="form-actions">
+              <button type="button" class="btn btn-ghost" id="profileSignOut" data-i18n="nav.logout">Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
   <footer class="is-reveal">
     <div class="container">
       <p>&copy; <span id="year"></span> <span data-i18n="footer.rights">X COPE. All rights reserved.</span></p>
+      <p class="footer-links"><a href="#profile" data-route data-i18n="nav.profile">Profile</a></p>
     </div>
   </footer>
 
@@ -272,8 +443,12 @@
           <button type="submit" class="btn" data-i18n="auth.createAccount">Create account</button>
         </form>
 
+        <p class="switch-prompt is-hidden" id="settingsPrompt">
+          <a href="#profile" data-route id="openSettingsLink" data-i18n="profile.title">Your profile</a>
+        </p>
+
         <p class="switch-prompt">
-          <span data-i18n="auth.haveAccount">Already have an account?</span>
+          Already have an account?
           <a id="switchToLogin" data-i18n="auth.signIn">Sign in</a>
         </p>
       </div>
@@ -313,7 +488,10 @@
       onAuthStateChanged,
       updateProfile,
       sendEmailVerification,
-      sendPasswordResetEmail
+      sendPasswordResetEmail,
+      updatePassword,
+      EmailAuthProvider,
+      reauthenticateWithCredential
     } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
 
     const firebaseConfig = {
@@ -456,6 +634,59 @@
         "contact.badEmail": "Please enter a valid email address.",
         "contact.needMessage": "Please write a short message.",
         "contact.opened": "Your email app should now be open with the message ready to send.",
+        "nav.profile": "Profile",
+        "profile.title": "Your profile",
+        "profile.subtitle": "Manage how you appear and how the site behaves for you.",
+        "profile.sectionProfile": "Profile",
+        "profile.sectionAccount": "Account",
+        "profile.sectionPassword": "Password",
+        "profile.sectionPreferences": "Preferences",
+        "profile.sectionSignout": "Sign out",
+        "profile.detailsTitle": "Profile details",
+        "profile.detailsHint": "Your name is shown in the header and attached to your account.",
+        "profile.avatarLabel": "Profile photo",
+        "profile.avatarHint": "Signed in with Google? Your Google photo is used automatically.",
+        "profile.displayName": "Display name",
+        "profile.displayNamePlaceholder": "Jane Doe",
+        "profile.emailReadonly": "Email address",
+        "profile.emailHint": "Email cannot be changed here.",
+        "profile.save": "Save changes",
+        "profile.saved": "Your profile has been updated.",
+        "profile.nameEmpty": "Please enter a display name.",
+        "profile.nameTooShort": "Your name needs at least 2 characters.",
+        "profile.nameTooLong": "Your name can be at most 60 characters.",
+        "profile.nameUnchanged": "Nothing has changed yet.",
+        "profile.accountTitle": "Account",
+        "profile.accountHint": "Details from your XCOPE account.",
+        "profile.verified": "Verified",
+        "profile.unverified": "Not verified",
+        "profile.verifyNow": "Resend verification email",
+        "profile.verifySent": "Verification email sent. Check your inbox.",
+        "profile.created": "Account created",
+        "profile.lastSignIn": "Last sign-in",
+        "profile.provider": "Sign-in method",
+        "profile.providerPassword": "Email and password",
+        "profile.passwordTitle": "Change password",
+        "profile.passwordHint": "For security, confirm your current password first.",
+        "profile.currentPassword": "Current password",
+        "profile.newPassword": "New password",
+        "profile.confirmNewPassword": "Confirm new password",
+        "profile.updatePassword": "Update password",
+        "profile.passwordUpdated": "Your password has been changed.",
+        "profile.passwordNeedsCurrent": "Please enter your current password.",
+        "profile.passwordTooShort": "The new password must be at least 6 characters.",
+        "profile.passwordSame": "The new password must differ from the current one.",
+        "profile.passwordMismatch": "The new passwords do not match.",
+        "profile.prefsTitle": "Preferences",
+        "profile.prefsHint": "These are stored in this browser only.",
+        "profile.prefLanguage": "Language",
+        "profile.prefLanguageHint": "Which language the interface uses.",
+        "profile.prefTheme": "Colour theme",
+        "profile.prefThemeHint": "Match your system, or pick one.",
+        "profile.signoutTitle": "Sign out",
+        "profile.signoutHint": "You will need to sign in again to reach this page.",
+        "profile.goHome": "Back to home",
+        "profile.signInRequired": "Please sign in to view your profile.",
       },
       zh: {
         "nav.features": "功能",
@@ -577,6 +808,59 @@
         "contact.badEmail": "請輸入有效的電子郵件。",
         "contact.needMessage": "請簡單描述一下你的需求。",
         "contact.opened": "應該已經開啟你的郵件程式，內容已寫好只等你送出。",
+        "nav.profile": "個人資料",
+        "profile.title": "你的個人資料",
+        "profile.subtitle": "管理你對外的顯示方式，以及網站在你這邊的行為。",
+        "profile.sectionProfile": "個人資料",
+        "profile.sectionAccount": "帳戶",
+        "profile.sectionPassword": "密碼",
+        "profile.sectionPreferences": "偏好設定",
+        "profile.sectionSignout": "登出",
+        "profile.detailsTitle": "個人資料",
+        "profile.detailsHint": "姓名會顯示在頂部並附加到你的帳戶。",
+        "profile.avatarLabel": "大頭貼",
+        "profile.avatarHint": "若使用 Google 登入，會自動使用你的 Google 大頭貼。",
+        "profile.displayName": "顯示名稱",
+        "profile.displayNamePlaceholder": "王小明",
+        "profile.emailReadonly": "電子郵件",
+        "profile.emailHint": "電子郵件無法在此變更。",
+        "profile.save": "儲存變更",
+        "profile.saved": "個人資料已更新。",
+        "profile.nameEmpty": "請輸入顯示名稱。",
+        "profile.nameTooShort": "名稱至少需要 2 個字元。",
+        "profile.nameTooLong": "名稱最多 60 個字元。",
+        "profile.nameUnchanged": "目前沒有任何變更。",
+        "profile.accountTitle": "帳戶",
+        "profile.accountHint": "來自你 XCOPE 帳戶的資料。",
+        "profile.verified": "已驗證",
+        "profile.unverified": "尚未驗證",
+        "profile.verifyNow": "重新傳送驗證信",
+        "profile.verifySent": "驗證信已傳送，請檢查信箱。",
+        "profile.created": "帳戶建立時間",
+        "profile.lastSignIn": "上次登入",
+        "profile.provider": "登入方式",
+        "profile.providerPassword": "電子郵件與密碼",
+        "profile.passwordTitle": "變更密碼",
+        "profile.passwordHint": "為了安全，請先確認目前的密碼。",
+        "profile.currentPassword": "目前密碼",
+        "profile.newPassword": "新密碼",
+        "profile.confirmNewPassword": "確認新密碼",
+        "profile.updatePassword": "更新密碼",
+        "profile.passwordUpdated": "密碼已變更。",
+        "profile.passwordNeedsCurrent": "請輸入目前的密碼。",
+        "profile.passwordTooShort": "新密碼至少需要 6 個字元。",
+        "profile.passwordSame": "新密碼必須與目前密碼不同。",
+        "profile.passwordMismatch": "兩次輸入的新密碼不一致。",
+        "profile.prefsTitle": "偏好設定",
+        "profile.prefsHint": "這些設定只儲存在目前的瀏覽器。",
+        "profile.prefLanguage": "語言",
+        "profile.prefLanguageHint": "介面使用哪一種語言。",
+        "profile.prefTheme": "主題色系",
+        "profile.prefThemeHint": "跟隨系統，或自行挑選。",
+        "profile.signoutTitle": "登出",
+        "profile.signoutHint": "登出後需要重新登入才能進入此頁。",
+        "profile.goHome": "回到首頁",
+        "profile.signInRequired": "請先登入才能查看個人資料。",
       }
     };
 
@@ -649,6 +933,16 @@
       btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
     });
 
+    // Mirror the language state into the profile-page controls too.
+    function syncProfileControls() {
+      document.querySelectorAll("[data-profile-lang]").forEach((btn) => {
+        btn.setAttribute("aria-pressed", String(btn.dataset.profileLang === currentLang));
+      });
+      document.querySelectorAll("[data-profile-theme]").forEach((btn) => {
+        btn.setAttribute("aria-pressed", String(btn.dataset.profileTheme === storedTheme()));
+      });
+    }
+
     /* ---------- Dynamic text (alerts, status, greeting) ---------- */
     let lastStatus = null;
     let lastAlert = null;
@@ -656,8 +950,10 @@
 
     function refreshDynamicTexts() {
       if (lastStatus) setAuthStatus(lastStatus.key, lastStatus.vars);
-      const el = document.getElementById("userName");
-      if (lastAuthUser && el) el.textContent = t("auth.welcomeBack", { name: getName(lastAuthUser) });
+      // The header shows the profile link now, so the name lives on the profile page.
+      document.querySelectorAll("[data-profile-name]").forEach((node) => {
+        if (lastAuthUser) node.textContent = getName(lastAuthUser);
+      });
     }
 
     function getName(user) {
@@ -944,18 +1240,29 @@
     onAuthStateChanged(auth, (user) => {
       const loginItem = document.getElementById("loginItem");
       const userItem = document.getElementById("userItem");
-      const userName = document.getElementById("userName");
 
       lastAuthUser = user;
 
       if (user && user.emailVerified) {
         loginItem.classList.add("is-hidden");
         userItem.classList.remove("is-hidden");
-        userName.textContent = t("auth.welcomeBack", { name: getName(user) });
       } else {
         loginItem.classList.remove("is-hidden");
         userItem.classList.add("is-hidden");
       }
+
+      // The profile page is only reachable while signed in.
+      currentUser = user && user.emailVerified ? user : null;
+      const settingsPrompt = document.getElementById("settingsPrompt");
+      if (settingsPrompt) settingsPrompt.classList.toggle("is-hidden", !currentUser);
+
+      if (!currentUser && currentRoute === PROFILE) {
+        if (window.history && window.history.replaceState) window.history.replaceState(null, "", location.pathname + location.search);
+        goRoute(HOME, false);
+      } else if (currentUser && currentRoute === PROFILE) {
+        renderProfile();
+      }
+      paintAvatars(currentUser || user);
     });
 
     /* ---------- Navigation: offset smooth scroll ---------- */
@@ -966,6 +1273,9 @@
     // letting the browser put the heading underneath it.
     document.querySelectorAll('a[href^="#"]').forEach((link) => {
       link.addEventListener("click", (event) => {
+        // Route links switch pages; the router owns those, not the scroller.
+        if (link.hasAttribute("data-route")) return;
+
         const hash = link.getAttribute("href");
         if (!hash || hash === "#") return;
 
@@ -1101,6 +1411,10 @@
       document.querySelectorAll("[data-theme-set]").forEach((btn) => {
         btn.setAttribute("aria-pressed", String(btn.dataset.themeSet === choice));
       });
+
+      document.querySelectorAll("[data-profile-theme]").forEach((btn) => {
+        btn.setAttribute("aria-pressed", String(btn.dataset.profileTheme === choice));
+      });
     }
 
     function setTheme(choice) {
@@ -1125,6 +1439,268 @@
 
     // Sync the UI with whatever the head script already applied.
     paintTheme(storedTheme());
+
+    /* ---------- Profile & settings page ---------- */
+    const HOME = "home";
+    const PROFILE = "profile";
+
+    let currentUser = null;
+    let currentRoute = HOME;
+    let routeBeforeProfile = HOME;
+
+    const pageHome = document.querySelector('[data-page="home"]');
+    const pageProfile = document.getElementById("profilePage");
+
+    /* ---------- Avatar ---------- */
+    function initialsFor(user) {
+      const source = (user && (user.displayName || user.email)) || "?";
+      const parts = String(source).trim().split(/\s+/).filter(Boolean);
+      if (!parts.length) return "?";
+      if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
+    function paintAvatars(user) {
+      const photo = user && user.photoURL;
+      const initials = initialsFor(user);
+      document.querySelectorAll("[data-profile-avatar]").forEach((el) => {
+        if (photo) {
+          el.style.backgroundImage = 'url("' + photo.replace(/"/g, "%22") + '")';
+          el.textContent = "";
+        } else {
+          el.style.backgroundImage = "";
+          el.textContent = initials;
+        }
+      });
+    }
+
+    /* ---------- Routing (#profile) ---------- */
+    function routeFromHash() {
+      return location.hash === "#profile" ? PROFILE : HOME;
+    }
+
+    function goRoute(route, push) {
+      if (route === PROFILE && !currentUser) {
+        if (push && window.history && window.history.replaceState) window.history.replaceState(null, "", location.pathname + location.search);
+        showPanel("login");
+        openModal("login");
+        setAuthStatus("profile.signInRequired");
+        return;
+      }
+
+      if (route === PROFILE && currentRoute !== PROFILE) routeBeforeProfile = currentRoute;
+      currentRoute = route;
+
+      pageHome.classList.toggle("is-hidden", route !== HOME);
+      pageProfile.classList.toggle("is-hidden", route !== PROFILE);
+
+      if (route === PROFILE) {
+        renderProfile();
+        syncProfileControls();
+        window.scrollTo({ top: 0, behavior: "auto" });
+      }
+    }
+
+    window.addEventListener("hashchange", () => goRoute(routeFromHash(), false));
+
+    document.querySelectorAll("[data-route]").forEach((link) => {
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        const target = link.getAttribute("href") === "#profile" ? PROFILE : HOME;
+        // Update the hash through the router rather than letting the browser jump.
+        if (window.history && window.history.pushState) window.history.pushState(null, "", link.getAttribute("href"));
+        goRoute(target, false);
+      });
+    });
+
+    /* ---------- Render ---------- */
+    function formatDate(value) {
+      if (!value) return "\u2014";
+      const date = new Date(value);
+      if (isNaN(date.getTime())) return "\u2014";
+      try {
+        return date.toLocaleString(currentLang === "zh" ? "zh-Hant" : "en-GB", {
+          year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
+        });
+      } catch (e) {
+        return date.toISOString().slice(0, 16).replace("T", " ");
+      }
+    }
+
+    function renderProfile() {
+      if (!currentUser) return;
+
+      const name = currentUser.displayName || "";
+      const email = currentUser.email || "";
+
+      const nameField = document.getElementById("profileDisplayName");
+      if (nameField && document.activeElement !== nameField) nameField.value = name;
+      const emailField = document.getElementById("profileEmail");
+      if (emailField) emailField.value = email;
+
+      document.querySelectorAll("[data-profile-name]").forEach((el) => {
+        el.textContent = name || email.split("@")[0] || "\u2014";
+      });
+      document.querySelectorAll("[data-profile-email]").forEach((el) => { el.textContent = email || "\u2014"; });
+      document.querySelectorAll("[data-profile-created]").forEach((el) => {
+        el.textContent = formatDate(currentUser.metadata && currentUser.metadata.creationTime);
+      });
+      document.querySelectorAll("[data-profile-last]").forEach((el) => {
+        el.textContent = formatDate(currentUser.metadata && currentUser.metadata.lastSignInTime);
+      });
+
+      const pill = document.getElementById("verifyPill");
+      const verifyBtn = document.getElementById("profileVerifyBtn");
+      const verified = !!currentUser.emailVerified;
+      if (pill) {
+        pill.textContent = t(verified ? "profile.verified" : "profile.unverified");
+        pill.classList.toggle("pill--ok", verified);
+        pill.classList.toggle("pill--warn", !verified);
+      }
+      if (verifyBtn) verifyBtn.classList.toggle("is-hidden", verified);
+
+      paintAvatars(currentUser);
+    }
+
+    /* ---------- Profile status helper ---------- */
+    function setStatus(el, key, type) {
+      if (!el) return;
+      el.textContent = t(key);
+      el.classList.toggle("success", type === "success");
+      el.classList.add("show");
+    }
+
+    function clearStatus(el) {
+      if (!el) return;
+      el.classList.remove("show", "success");
+      el.textContent = "";
+    }
+
+    /* ---------- Save profile ---------- */
+    (function initProfileForm() {
+      const form = document.getElementById("profileForm");
+      if (!form) return;
+      const status = document.getElementById("profileStatus");
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        clearStatus(status);
+        if (!currentUser) return;
+
+        const field = document.getElementById("profileDisplayName");
+        const name = field.value.trim();
+
+        if (!name) return setStatus(status, "profile.nameEmpty");
+        if (name.length < 2) return setStatus(status, "profile.nameTooShort");
+        if (name.length > 60) return setStatus(status, "profile.nameTooLong");
+        if (name === (currentUser.displayName || "")) return setStatus(status, "profile.nameUnchanged");
+
+        try {
+          await updateProfile(currentUser, { displayName: name });
+          setStatus(status, "profile.saved", "success");
+          paintAvatars(currentUser);
+          refreshDynamicTexts();
+          renderProfile();
+        } catch (error) {
+          logAuthError("updateProfile", error);
+          setStatus(status, authErrorKey(error));
+        }
+      });
+    })();
+
+    /* ---------- Change password ---------- */
+    (function initPasswordForm() {
+      const form = document.getElementById("passwordForm");
+      if (!form) return;
+      const status = document.getElementById("passwordStatus");
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        clearStatus(status);
+        if (!currentUser) return;
+
+        const currentField = document.getElementById("currentPassword");
+        const newField = document.getElementById("newPassword");
+        const confirmField = document.getElementById("confirmNewPassword");
+
+        const currentPassword = currentField.value;
+        const newPassword = newField.value;
+        const confirmPassword = confirmField.value;
+
+        if (!currentPassword) return setStatus(status, "profile.passwordNeedsCurrent");
+        if (newPassword.length < 6) return setStatus(status, "profile.passwordTooShort");
+        if (newPassword === currentPassword) return setStatus(status, "profile.passwordSame");
+        if (newPassword !== confirmPassword) return setStatus(status, "profile.passwordMismatch");
+
+        try {
+          // Firebase requires a recent login before a credential change.
+          const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
+          await reauthenticateWithCredential(currentUser, credential);
+          await updatePassword(currentUser, newPassword);
+          form.reset();
+          setStatus(status, "profile.passwordUpdated", "success");
+        } catch (error) {
+          logAuthError("changePassword", error);
+          setStatus(status, authErrorKey(error));
+        }
+      });
+    })();
+
+    /* ---------- Resend verification from the profile page ---------- */
+    (function initProfileVerify() {
+      const btn = document.getElementById("profileVerifyBtn");
+      if (!btn) return;
+      const status = document.getElementById("profileStatus");
+
+      btn.addEventListener("click", async () => {
+        if (!currentUser) return;
+        clearStatus(status);
+        try {
+          await sendEmailVerification(currentUser);
+          setStatus(status, "profile.verifySent", "success");
+        } catch (error) {
+          logAuthError("profileVerify", error);
+          setStatus(status, authErrorKey(error));
+        }
+      });
+    })();
+
+    /* ---------- Sign out from the profile page ---------- */
+    (function initProfileSignOut() {
+      const btn = document.getElementById("profileSignOut");
+      if (!btn) return;
+      btn.addEventListener("click", async () => {
+        try {
+          await signOut(auth);
+          alert(t("auth.signedOut"));
+        } catch (error) {
+          logAuthError("profileSignOut", error);
+          alert(t("auth.genericError"));
+        }
+      });
+    })();
+
+    /* ---------- Avatar button: no uploader yet, so explain that ---------- */
+    (function initAvatarButton() {
+      const btn = document.getElementById("avatarButton");
+      if (!btn) return;
+      btn.addEventListener("click", () => {
+        const status = document.getElementById("profileStatus");
+        setStatus(status, "profile.avatarHint");
+      });
+    })();
+
+    /* ---------- Settings shortcut inside the auth modal ---------- */
+    (function initSettingsPrompt() {
+      const link = document.getElementById("openSettingsLink");
+      if (!link) return;
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        closeModal();
+        if (window.history && window.history.pushState) window.history.pushState(null, "", "#profile");
+        goRoute(PROFILE, false);
+      });
+    })();
 
     /* ---------- Scroll reveal (progressive enhancement) ---------- */
     function initScrollReveal() {
