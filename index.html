@@ -54,6 +54,81 @@
       <a href="#features" class="btn" data-i18n="hero.cta">Get started</a>
     </section>
 
+    <!-- ---------- About ---------- -->
+    <section class="about" id="about">
+      <div class="container about-grid">
+        <div class="about-copy is-reveal">
+          <p class="eyebrow" data-i18n="about.eyebrow">About</p>
+          <h2 data-i18n="about.title">Built for people who ship</h2>
+          <p data-i18n="about.body">XCOPE started as a single page and grew into a small toolkit for getting ideas online quickly. No build step, no framework, no lock-in - just clean HTML, CSS and JavaScript you can read top to bottom.</p>
+          <p data-i18n="about.body2">Everything here works offline, loads fast, and stays out of your way while you focus on the part that matters: the product.</p>
+          <a href="#contact" class="btn btn-ghost" data-i18n="about.cta">Talk to us</a>
+        </div>
+
+        <dl class="about-stats is-reveal">
+          <div class="stat">
+            <dt data-i18n="about.stat1.label">Build step</dt>
+            <dd data-i18n="about.stat1.value">None</dd>
+          </div>
+          <div class="stat">
+            <dt data-i18n="about.stat2.label">Languages</dt>
+            <dd data-i18n="about.stat2.value">2</dd>
+          </div>
+          <div class="stat">
+            <dt data-i18n="about.stat3.label">Dependencies</dt>
+            <dd data-i18n="about.stat3.value">1</dd>
+          </div>
+          <div class="stat">
+            <dt data-i18n="about.stat4.label">Licence</dt>
+            <dd data-i18n="about.stat4.value">Yours</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- ---------- Contact ---------- -->
+    <section class="contact" id="contact">
+      <div class="container contact-grid">
+        <div class="contact-intro is-reveal">
+          <p class="eyebrow" data-i18n="contact.eyebrow">Contact</p>
+          <h2 data-i18n="contact.title">Get in touch</h2>
+          <p data-i18n="contact.body">Questions, bug reports or a project you want to talk through - send a note and we will get back to you.</p>
+          <ul class="contact-details">
+            <li>
+              <span class="contact-label" data-i18n="contact.emailLabel">Email</span>
+              <a href="mailto:6fcymcapsbcc@gmail.com">6fcymcapsbcc@gmail.com</a>
+            </li>
+            <li>
+              <span class="contact-label" data-i18n="contact.replyLabel">Typical reply</span>
+              <span data-i18n="contact.replyValue">Within 2 business days</span>
+            </li>
+          </ul>
+        </div>
+
+        <form class="contact-form is-reveal" id="contactForm" novalidate>
+          <div class="error-message" id="contactStatus" role="alert" aria-live="polite"></div>
+
+          <div class="form-group">
+            <label for="contactName" data-i18n="contact.nameLabel">Your name</label>
+            <input type="text" id="contactName" name="name" autocomplete="name" placeholder="Jane Doe" data-i18n-placeholder="auth.namePlaceholder" required />
+          </div>
+
+          <div class="form-group">
+            <label for="contactEmail" data-i18n="contact.emailFieldLabel">Your email</label>
+            <input type="email" id="contactEmail" name="email" autocomplete="email" placeholder="you@example.com" data-i18n-placeholder="auth.emailPlaceholder" required />
+          </div>
+
+          <div class="form-group">
+            <label for="contactMessage" data-i18n="contact.messageLabel">Message</label>
+            <textarea id="contactMessage" name="message" rows="5" maxlength="2000" placeholder="How can we help?" data-i18n-placeholder="contact.messagePlaceholder" required></textarea>
+          </div>
+
+          <p class="field-hint" data-i18n="contact.mailtoHint">This opens your own email app with the message ready to send - nothing is uploaded to a server.</p>
+
+          <button type="submit" class="btn" data-i18n="contact.submit">Open email draft</button>
+        </form>
+      </div>
+    </section>
     <section class="features" id="features">
       <div class="container">
         <h2 data-i18n="features.title">What you get</h2>
@@ -326,7 +401,37 @@
         "err.resetNotConfigured": "Password reset is not configured for this project.",
         "err.unauthorizedDomain": "This domain is not authorised in Firebase Authentication.",
         "err.popupBlocked": "Your browser blocked the sign-in window.",
-        "err.resetNeedsEmail": "Enter the email address you signed up with, then try again."
+        "err.resetNeedsEmail": "Enter the email address you signed up with, then try again.",
+        "about.eyebrow": "About",
+        "about.title": "Built for people who ship",
+        "about.body": "XCOPE started as a single page and grew into a small toolkit for getting ideas online quickly. No build step, no framework, no lock-in - just clean HTML, CSS and JavaScript you can read top to bottom.",
+        "about.body2": "Everything here works offline, loads fast, and stays out of your way while you focus on the part that matters: the product.",
+        "about.cta": "Talk to us",
+        "about.stat1.label": "Build step",
+        "about.stat1.value": "None",
+        "about.stat2.label": "Languages",
+        "about.stat2.value": "2",
+        "about.stat3.label": "Dependencies",
+        "about.stat3.value": "2",
+        "about.stat4.label": "Licence",
+        "about.stat4.value": "Yours",
+        "contact.eyebrow": "Contact",
+        "contact.title": "Get in touch",
+        "contact.body": "Questions, bug reports or a project you want to talk through - send a note and we will get back to you.",
+        "contact.emailLabel": "Email",
+        "contact.replyLabel": "Typical reply",
+        "contact.replyValue": "Within 2 business days",
+        "contact.nameLabel": "Your name",
+        "contact.emailFieldLabel": "Your email",
+        "contact.messageLabel": "Message",
+        "contact.messagePlaceholder": "How can we help?",
+        "contact.mailtoHint": "This opens your own email app with the message ready to send - nothing is uploaded to a server.",
+        "contact.submit": "Open email draft",
+        "contact.fixFields": "Please check the highlighted fields.",
+        "contact.emptyName": "Please enter your name.",
+        "contact.badEmail": "Please enter a valid email address.",
+        "contact.needMessage": "Please write a short message.",
+        "contact.opened": "Your email app should now be open with the message ready to send.",
       },
       zh: {
         "nav.features": "功能",
@@ -413,7 +518,37 @@
         "err.resetNotConfigured": "此專案尚未設定密碼重設功能。",
         "err.unauthorizedDomain": "此網域尚未加入 Firebase Authentication 的授權清單。",
         "err.popupBlocked": "瀏覽器阻擋了登入視窗。",
-        "err.resetNeedsEmail": "請輸入你註冊時使用的電子郵件再試一次。"
+        "err.resetNeedsEmail": "請輸入你註冊時使用的電子郵件再試一次。",
+        "about.eyebrow": "關於",
+        "about.title": "為實作的人而做",
+        "about.body": "XCOPE 從單一頁面起步，成長為一套輕量工具，協助你快速把想法送上網。沒有建置流程、沒有框架、不會被綁死——只有幹淨、從頭到尾都讀得懂的 HTML、CSS 舎 JavaScript。",
+        "about.body2": "這裡的每一件事都可離線運作、載入快速，並且不會干擾你——讓你專心在真正重要的部分：產品本身。",
+        "about.cta": "與我們聯絡",
+        "about.stat1.label": "建置流程",
+        "about.stat1.value": "無",
+        "about.stat2.label": "語言",
+        "about.stat2.value": "2",
+        "about.stat3.label": "外部依賴",
+        "about.stat3.value": "2",
+        "about.stat4.label": "授權",
+        "about.stat4.value": "歸你",
+        "contact.eyebrow": "聯絡我們",
+        "contact.title": "與我們取得聯絡",
+        "contact.body": "不管是問題、錯誤回報，或是想聊聊一個專案，都歡迎寄信給我們。",
+        "contact.emailLabel": "電子郵件",
+        "contact.replyLabel": "平均回覆時間",
+        "contact.replyValue": "兩個工作天內",
+        "contact.nameLabel": "你的姓名",
+        "contact.emailFieldLabel": "你的電子郵件",
+        "contact.messageLabel": "訊息內容",
+        "contact.messagePlaceholder": "我們可以幫上什麼忙？",
+        "contact.mailtoHint": "送出後會開啟你自己的郵件程式，內容已寫好只等你送出——不會上傳到任何伺服器。",
+        "contact.submit": "產生郵件草稿",
+        "contact.fixFields": "請檢查標示的欄位。",
+        "contact.emptyName": "請輸入你的姓名。",
+        "contact.badEmail": "請輸入有效的電子郵件。",
+        "contact.needMessage": "請簡單描述一下你的需求。",
+        "contact.opened": "應該已經開啟你的郵件程式，內容已寫好只等你送出。",
       }
     };
 
@@ -794,6 +929,114 @@
         userItem.classList.add("is-hidden");
       }
     });
+
+    /* ---------- Navigation: offset smooth scroll ---------- */
+    const prefersReducedMotion = () =>
+      !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Anchor targets must clear the sticky header, so scroll manually instead of
+    // letting the browser put the heading underneath it.
+    document.querySelectorAll('a[href^="#"]').forEach((link) => {
+      link.addEventListener("click", (event) => {
+        const hash = link.getAttribute("href");
+        if (!hash || hash === "#") return;
+
+        const targetEl = document.querySelector(hash);
+        if (!targetEl) return; // leave genuinely broken anchors alone
+
+        event.preventDefault();
+
+        const header = document.querySelector("header");
+        const headerHeight = header ? header.getBoundingClientRect().height : 0;
+        const top = targetEl.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+
+        window.scrollTo({
+          top: Math.max(top, 0),
+          behavior: prefersReducedMotion() ? "auto" : "smooth"
+        });
+
+        // Keep the URL shareable without triggering the browser's own jump.
+        if (window.history && window.history.pushState) window.history.pushState(null, "", hash);
+      });
+    });
+
+    /* ---------- Contact form (mailto, no backend) ---------- */
+    const CONTACT_INBOX = "6fcymcapsbcc@gmail.com";
+
+    const CONTACT_ERRORS = {
+      emptyName: "contact.emptyName",
+      badEmail: "contact.badEmail",
+      shortMessage: "contact.needMessage"
+    };
+
+    function setContactStatus(messageKey, type) {
+      const el = document.getElementById("contactStatus");
+      if (!el) return;
+      el.textContent = t(messageKey);
+      el.classList.toggle("success", type === "success");
+      el.classList.add("show");
+    }
+
+    function clearContactStatus() {
+      const el = document.getElementById("contactStatus");
+      if (!el) return;
+      el.classList.remove("show", "success");
+      document.querySelectorAll("#contactForm .field-error").forEach((field) => {
+        field.classList.remove("field-error");
+        field.removeAttribute("aria-invalid");
+      });
+    }
+
+    function markContactField(field) {
+      if (!field) return;
+      field.classList.add("field-error");
+      field.setAttribute("aria-invalid", "true");
+    }
+
+    (function initContactForm() {
+      const form = document.getElementById("contactForm");
+      if (!form) return;
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        clearContactStatus();
+
+        const nameField = document.getElementById("contactName");
+        const emailField = document.getElementById("contactEmail");
+        const messageField = document.getElementById("contactMessage");
+
+        const name = nameField.value.trim();
+        const email = emailField.value.trim();
+        const message = messageField.value.trim();
+
+        if (!name) {
+          markContactField(nameField);
+          return setContactStatus(CONTACT_ERRORS.emptyName);
+        }
+        if (!EMAIL_RE.test(email)) {
+          markContactField(emailField);
+          return setContactStatus(CONTACT_ERRORS.badEmail);
+        }
+        if (message.length < 10) {
+          markContactField(messageField);
+          return setContactStatus(CONTACT_ERRORS.shortMessage);
+        }
+
+        const subject = "XCOPE enquiry from " + name;
+        const body = name + " <" + email + ">\n\n" + message;
+        const href = "mailto:" + CONTACT_INBOX +
+          "?subject=" + encodeURIComponent(subject) +
+          "&body=" + encodeURIComponent(body);
+
+        // User data only ever travels to their own mail client, never to a server.
+        const link = document.createElement("a");
+        link.href = href;
+        link.rel = "noopener";
+        link.click();
+
+        setContactStatus("contact.opened", "success");
+      });
+    })();
 
     /* ---------- Scroll reveal (progressive enhancement) ---------- */
     function initScrollReveal() {

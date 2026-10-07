@@ -570,7 +570,8 @@ footer {
    -------------------------------------------------------------------------- */
 input[type="text"],
 input[type="email"],
-input[type="password"] {
+input[type="password"],
+textarea {
   width: 100%;
   padding: 0.75rem 1rem;
   font-size: var(--text-base);
@@ -587,13 +588,15 @@ input::placeholder { color: #94a3b8; }
 
 input[type="text"]:hover,
 input[type="email"]:hover,
-input[type="password"]:hover {
+input[type="password"]:hover,
+textarea:hover {
   border-color: #b9c4d4;
 }
 
 input[type="text"]:focus,
 input[type="email"]:focus,
-input[type="password"]:focus {
+input[type="password"]:focus,
+textarea:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3.5px var(--accent-ring);
@@ -865,6 +868,157 @@ input[type="checkbox"] {
 }
 
 /* --------------------------------------------------------------------------
+   About & contact
+   -------------------------------------------------------------------------- */
+.eyebrow {
+  display: inline-block;
+  margin-bottom: var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  box-shadow: none;
+  padding: 0.7rem 1.6rem;
+}
+
+.btn-ghost:hover {
+  background: var(--accent-soft);
+  filter: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.about {
+  padding: var(--space-9) 0;
+  border-top: 1px solid var(--border);
+}
+
+.about-grid {
+  display: grid;
+  gap: var(--space-8);
+  grid-template-columns: 1.15fr 0.85fr;
+  align-items: start;
+}
+
+.about-copy h2 {
+  font-size: var(--text-3xl);
+  margin-bottom: var(--space-4);
+}
+
+.about-copy p {
+  color: var(--muted);
+  margin-bottom: var(--space-4);
+  max-width: 60ch;
+}
+
+.about-copy .btn-ghost { margin-top: var(--space-2); }
+
+.about-stats {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.stat {
+  padding: var(--space-5);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.stat dt {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: var(--space-1);
+}
+
+.stat dd {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--text-strong);
+  letter-spacing: -0.02em;
+}
+
+.contact {
+  padding: var(--space-9) 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+.contact-grid {
+  display: grid;
+  gap: var(--space-8);
+  grid-template-columns: 0.9fr 1.1fr;
+  align-items: start;
+}
+
+.contact-intro h2 {
+  font-size: var(--text-3xl);
+  margin-bottom: var(--space-4);
+}
+
+.contact-intro > p {
+  color: var(--muted);
+  margin-bottom: var(--space-5);
+  max-width: 46ch;
+}
+
+.contact-details {
+  display: grid;
+  gap: var(--space-3);
+  list-style: none;
+}
+
+.contact-details li {
+  display: grid;
+  gap: 2px;
+}
+
+.contact-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.contact-form {
+  padding: var(--space-6);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+}
+
+.contact-form .btn { width: 100%; }
+
+.field-hint {
+  margin-bottom: var(--space-4);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+textarea {
+  min-height: 7rem;
+  resize: vertical;
+}
+
+/* Invalid-field state, toggled from the contact form handler */
+.field-error {
+  border-color: var(--error) !important;
+  box-shadow: 0 0 0 3.5px rgba(220, 38, 38, 0.14) !important;
+}
+
+/* --------------------------------------------------------------------------
    13. Responsive
    -------------------------------------------------------------------------- */
 @media (max-width: 720px) {
@@ -896,6 +1050,16 @@ input[type="checkbox"] {
 
   .hero { padding: var(--space-8) 0 var(--space-7); }
   .hero .btn { width: 100%; max-width: 320px; }
+
+  .about, .contact { padding: var(--space-8) 0; }
+
+  .about-grid,
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  .about-stats { grid-template-columns: repeat(2, 1fr); }
 
   .form-options { flex-wrap: wrap; gap: var(--space-2); }
 }
