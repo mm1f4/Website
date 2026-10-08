@@ -117,21 +117,11 @@
 
     <!-- ---------- Contact ---------- -->
     <section class="contact" id="contact">
-      <div class="container contact-grid">
+      <div class="container contact-solo">
         <div class="contact-intro is-reveal">
           <p class="eyebrow" data-i18n="contact.eyebrow">Contact</p>
           <h2 data-i18n="contact.title">Get in touch</h2>
-          <p data-i18n="contact.body">Questions, bug reports or a project you want to talk through - send a note and we will get back to you.</p>
-          <ul class="contact-details">
-            <li>
-              <span class="contact-label" data-i18n="contact.emailLabel">Email</span>
-              <a href="mailto:6fcymcapsbcc@gmail.com">6fcymcapsbcc@gmail.com</a>
-            </li>
-            <li>
-              <span class="contact-label" data-i18n="contact.replyLabel">Typical reply</span>
-              <span data-i18n="contact.replyValue">Within 2 business days</span>
-            </li>
-          </ul>
+          <p data-i18n="contact.body">Questions, bug reports or just want to say hello? Join the Discord and talk to us there.</p>
 
           <a class="discord-card" href="https://discord.gg/dFQqAMZkb4" target="_blank" rel="noopener noreferrer">
             <span class="discord-mark" aria-hidden="true">
@@ -143,32 +133,11 @@
               <strong data-i18n="discord.name">Entity | X Cope Discord Server</strong>
               <span data-i18n="discord.hint">Updates, patch notes and other players.</span>
             </span>
-            <span class="btn btn-sm discord-cta" data-i18n="discord.join">Join the server</span>
+            <span class="btn discord-cta" data-i18n="discord.join">Join the server</span>
           </a>
+
+          <p class="field-hint" data-i18n="contact.discordNote">The invite opens in a new tab. There is no contact form and no email address to remember.</p>
         </div>
-
-        <form class="contact-form is-reveal" id="contactForm" novalidate>
-          <div class="error-message" id="contactStatus" role="alert" aria-live="polite"></div>
-
-          <div class="form-group">
-            <label for="contactName" data-i18n="contact.nameLabel">Your name</label>
-            <input type="text" id="contactName" name="name" autocomplete="name" placeholder="Jane Doe" data-i18n-placeholder="auth.namePlaceholder" required />
-          </div>
-
-          <div class="form-group">
-            <label for="contactEmail" data-i18n="contact.emailFieldLabel">Your email</label>
-            <input type="email" id="contactEmail" name="email" autocomplete="email" placeholder="you@example.com" data-i18n-placeholder="auth.emailPlaceholder" required />
-          </div>
-
-          <div class="form-group">
-            <label for="contactMessage" data-i18n="contact.messageLabel">Message</label>
-            <textarea id="contactMessage" name="message" rows="5" maxlength="2000" placeholder="How can we help?" data-i18n-placeholder="contact.messagePlaceholder" required></textarea>
-          </div>
-
-          <p class="field-hint" data-i18n="contact.mailtoHint">This opens your own email app with the message ready to send - nothing is uploaded to a server.</p>
-
-          <button type="submit" class="btn" data-i18n="contact.submit">Open email draft</button>
-        </form>
       </div>
     </section>
     <section class="features" id="features">
@@ -741,21 +710,8 @@
         "about.stat4.value": "Yours",
         "contact.eyebrow": "Contact",
         "contact.title": "Get in touch",
-        "contact.body": "Questions, bug reports or a project you want to talk through - send a note and we will get back to you.",
-        "contact.emailLabel": "Email",
-        "contact.replyLabel": "Typical reply",
-        "contact.replyValue": "Within 2 business days",
-        "contact.nameLabel": "Your name",
-        "contact.emailFieldLabel": "Your email",
-        "contact.messageLabel": "Message",
-        "contact.messagePlaceholder": "How can we help?",
-        "contact.mailtoHint": "This opens your own email app with the message ready to send - nothing is uploaded to a server.",
-        "contact.submit": "Open email draft",
-        "contact.fixFields": "Please check the highlighted fields.",
-        "contact.emptyName": "Please enter your name.",
-        "contact.badEmail": "Please enter a valid email address.",
-        "contact.needMessage": "Please write a short message.",
-        "contact.opened": "Your email app should now be open with the message ready to send.",
+        "contact.body": "Questions, bug reports or just want to say hello? Join the Discord and talk to us there.",
+        "contact.discordNote": "The invite opens in a new tab. There is no contact form and no email address to remember.",
         "nav.profile": "Profile",
         "nav.home": "Back to home",
         "profile.title": "Your profile",
@@ -968,21 +924,8 @@
         "about.stat4.value": "歸你",
         "contact.eyebrow": "聯絡我們",
         "contact.title": "與我們取得聯絡",
-        "contact.body": "不管是問題、錯誤回報，或是想聊聊一個專案，都歡迎寄信給我們。",
-        "contact.emailLabel": "電子郵件",
-        "contact.replyLabel": "平均回覆時間",
-        "contact.replyValue": "兩個工作天內",
-        "contact.nameLabel": "你的姓名",
-        "contact.emailFieldLabel": "你的電子郵件",
-        "contact.messageLabel": "訊息內容",
-        "contact.messagePlaceholder": "我們可以幫上什麼忙？",
-        "contact.mailtoHint": "送出後會開啟你自己的郵件程式，內容已寫好只等你送出——不會上傳到任何伺服器。",
-        "contact.submit": "產生郵件草稿",
-        "contact.fixFields": "請檢查標示的欄位。",
-        "contact.emptyName": "請輸入你的姓名。",
-        "contact.badEmail": "請輸入有效的電子郵件。",
-        "contact.needMessage": "請簡單描述一下你的需求。",
-        "contact.opened": "應該已經開啟你的郵件程式，內容已寫好只等你送出。",
+        "contact.body": "不管是問題、錯誤回報，或是想打個招呼，都歡迎加入 Discord 找我們。",
+        "contact.discordNote": "邀請連結會在新分頁開啟。不需填表單，也不用記住任何電子郵件位址。",
         "nav.profile": "個人資料",
         "nav.home": "回到首頁",
         "profile.title": "你的個人資料",
@@ -1558,84 +1501,6 @@
         if (window.history && window.history.pushState) window.history.pushState(null, "", hash);
       });
     });
-
-    /* ---------- Contact form (mailto, no backend) ---------- */
-    const CONTACT_INBOX = "6fcymcapsbcc@gmail.com";
-
-    const CONTACT_ERRORS = {
-      emptyName: "contact.emptyName",
-      badEmail: "contact.badEmail",
-      shortMessage: "contact.needMessage"
-    };
-
-    function setContactStatus(messageKey, type) {
-      const el = document.getElementById("contactStatus");
-      if (!el) return;
-      el.textContent = t(messageKey);
-      el.classList.toggle("success", type === "success");
-      el.classList.add("show");
-    }
-
-    function clearContactStatus() {
-      const el = document.getElementById("contactStatus");
-      if (!el) return;
-      el.classList.remove("show", "success");
-      document.querySelectorAll("#contactForm .field-error").forEach((field) => {
-        field.classList.remove("field-error");
-        field.removeAttribute("aria-invalid");
-      });
-    }
-
-    function markContactField(field) {
-      if (!field) return;
-      field.classList.add("field-error");
-      field.setAttribute("aria-invalid", "true");
-    }
-
-    (function initContactForm() {
-      const form = document.getElementById("contactForm");
-      if (!form) return;
-
-      form.addEventListener("submit", (event) => {
-        event.preventDefault();
-        clearContactStatus();
-
-        const nameField = document.getElementById("contactName");
-        const emailField = document.getElementById("contactEmail");
-        const messageField = document.getElementById("contactMessage");
-
-        const name = nameField.value.trim();
-        const email = emailField.value.trim();
-        const message = messageField.value.trim();
-
-        if (!name) {
-          markContactField(nameField);
-          return setContactStatus(CONTACT_ERRORS.emptyName);
-        }
-        if (!EMAIL_RE.test(email)) {
-          markContactField(emailField);
-          return setContactStatus(CONTACT_ERRORS.badEmail);
-        }
-        if (message.length < 10) {
-          markContactField(messageField);
-          return setContactStatus(CONTACT_ERRORS.shortMessage);
-        }
-
-        const subject = "XCOPE enquiry from " + name;
-        const body = name + " <" + email + ">\n\n" + message;
-        const href = "mailto:" + CONTACT_INBOX +
-          "?subject=" + encodeURIComponent(subject) +
-          "&body=" + encodeURIComponent(body);
-
-        // User data only ever travels to their own mail client, never to a server.
-        const link = document.createElement("a");
-        link.href = href;
-        link.rel = "noopener";
-        link.click();
-
-        setContactStatus("contact.opened", "success");
-      });
-    })();
 
     /* ---------- Colour theme ---------- */
     const THEME_KEY = "xcope-theme";

@@ -142,6 +142,22 @@ that works:
 Delete every harness afterwards. `git status` should be clean, and no `.dsh-*`
 file should remain.
 
+## Theme handling
+
+Verified working, so treat a change here as a regression to check for:
+
+- Three choices: light, dark, and auto. Auto follows the OS through
+  `prefers-color-scheme` and keeps following it if the OS changes.
+- A first visit follows the OS. Picking light or dark stores an explicit choice
+  that overrides the OS and survives a reload.
+- The stored value is `xcope-theme`; `data-theme-choice` records the intent and
+  `data-theme` the resolved result.
+- An inline script in `<head>` applies the theme before the body paints, so
+  there is no flash of the wrong theme.
+- Both toggles, the header one and the profile one, stay in step.
+- Theme and background are independent: any background works under either theme,
+  and each theme supplies its own scrim so text stays readable.
+
 ## Known gaps
 
 - Roblox link and background choice live in one browser, not synced. Moving them
@@ -153,8 +169,9 @@ file should remain.
   a real browser, not against the live service.
 - Nothing loads Roblox data in-game yet. When the link is synced, the Roblox
   experience would read the stored id to recognise the player.
-- The contact section shows `6fcymcapsbcc@gmail.com` and a Discord invite. Both
-  are intentional and public.
+- The contact section is the Discord invite only
+  (https://discord.gg/dFQqAMZkb4). The mailto form and the email address were
+  deliberately removed, so there is no longer any email route in the site.
 
 ## Non-negotiables
 
