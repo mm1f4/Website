@@ -1,8 +1,8 @@
 {
-  "name": "xcope-roblox-link",
+  "name": "xcope-roblox",
   "version": "1.0.0",
   "private": true,
-  "description": "Server side of the Roblox account link for the XCOPE website. Holds the Roblox client secret that can never live in the browser.",
+  "description": "Roblox proxy plus OAuth code exchange for the XCOPE website. Holds the secrets a browser can never keep.",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",

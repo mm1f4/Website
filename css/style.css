@@ -1436,6 +1436,22 @@ input[type="checkbox"] {
   margin-left: var(--space-1);
 }
 
+.verify-code {
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  text-align: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--text-strong);
+  background: var(--surface-2);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  user-select: all;
+  overflow-wrap: anywhere;
+}
+
 .roblox-empty {
   display: grid;
   gap: 2px;
