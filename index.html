@@ -206,6 +206,7 @@
             <li><a href="#panel-account" data-i18n="profile.sectionAccount">Account</a></li>
             <li><a href="#panel-password" data-i18n="profile.sectionPassword">Password</a></li>
             <li><a href="#panel-preferences" data-i18n="profile.sectionPreferences">Preferences</a></li>
+            <li><a href="#profile-connections" data-i18n="link.title">Connected accounts</a></li>
             <li><a href="#panel-signout" class="nav-danger" data-i18n="profile.sectionSignout">Sign out</a></li>
           </ul>
         </aside>
@@ -340,6 +341,29 @@
             </div>
           </div>
 
+          <!-- Connected accounts -->
+          <div class="panel-card" id="profile-connections">
+            <h2 data-i18n="link.title">Connected accounts</h2>
+            <p class="panel-hint" data-i18n="link.hint">Link your Roblox account so the site can show your character and recognise you in game.</p>
+
+            <div class="error-message" id="linkStatus" role="alert" aria-live="polite"></div>
+
+            <div class="roblox-row">
+              <div class="roblox-profile is-hidden" id="robloxProfile"></div>
+
+              <div class="roblox-empty" id="robloxEmpty">
+                <strong data-i18n="link.notLinked">No Roblox account linked</strong>
+                <span data-i18n="link.notLinkedHint">You will be sent to Roblox to approve the connection.</span>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn" id="robloxLinkBtn" data-i18n="link.connect">Link Roblox account</button>
+                <button type="button" class="btn btn-ghost is-hidden" id="robloxUnlinkBtn" data-i18n="link.disconnect">Unlink</button>
+              </div>
+            </div>
+
+            <p class="field-hint" data-i18n="link.privacy">Only your public Roblox profile is read. Your Roblox password is never shared with this site.</p>
+          </div>
           <!-- Sign out -->
           <div class="panel-card" id="panel-signout">
             <h2 data-i18n="profile.signoutTitle">Sign out</h2>
@@ -503,6 +527,7 @@
       EmailAuthProvider,
       reauthenticateWithCredential
     } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
+    import { createRobloxLink, renderRobloxLink } from './js/roblox-link.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyDyJrVYdADEy8Eb18JfQYK2x_l5DZ90NKc",
@@ -698,6 +723,22 @@
         "profile.signoutHint": "You will need to sign in again to reach this page.",
         "profile.goHome": "Back to home",
         "profile.signInRequired": "Please sign in to view your profile.",
+        "link.title": "Connected accounts",
+        "link.hint": "Link your Roblox account so the site can show your character and recognise you in game.",
+        "link.notLinked": "No Roblox account linked",
+        "link.notLinkedHint": "You will be sent to Roblox to approve the connection.",
+        "link.connect": "Link Roblox account",
+        "link.disconnect": "Unlink",
+        "link.privacy": "Only your public Roblox profile is read. Your Roblox password is never shared with this site.",
+        "link.linked": "Roblox account linked.",
+        "link.unlinked": "Roblox account unlinked.",
+        "link.unlinkFailed": "The link was removed here, but Roblox could not be told.",
+        "link.notConfigured": "Roblox linking is not set up yet. The site owner still needs to deploy the link service.",
+        "link.needSignIn": "Please sign in before linking a Roblox account.",
+        "link.expired": "That link has expired. Please try again.",
+        "link.stateMismatch": "The security check failed, so the link was refused.",
+        "link.failed": "The Roblox account could not be linked.",
+        "link.working": "Waiting for Roblox\u2026",
         "profile.avatarChange": "Upload photo",
         "profile.avatarRemove": "Remove photo",
         "profile.avatarUploaded": "Your photo has been updated.",
@@ -881,6 +922,22 @@
         "profile.signoutHint": "登出後需要重新登入才能進入此頁。",
         "profile.goHome": "回到首頁",
         "profile.signInRequired": "請先登入才能查看個人資料。",
+        "link.title": "已連結的帳戶",
+        "link.hint": "連結你的 Roblox 帳戶，網站就能顯示你的角色，並在遊戲中辨認你。",
+        "link.notLinked": "尚未連結 Roblox 帳戶",
+        "link.notLinkedHint": "系統會導向 Roblox 請你授權。",
+        "link.connect": "連結 Roblox 帳戶",
+        "link.disconnect": "解除連結",
+        "link.privacy": "只會讀取你的 Roblox 公開資料，你的 Roblox 密碼不會分享給本網站。",
+        "link.linked": "Roblox 帳戶已連結。",
+        "link.unlinked": "Roblox 帳戶已解除連結。",
+        "link.unlinkFailed": "已在本站移除連結，但無法通知 Roblox。",
+        "link.notConfigured": "Roblox 連結尚未設定完成，網站管理者還需要部署連結服務。",
+        "link.needSignIn": "請先登入再連結 Roblox 帳戶。",
+        "link.expired": "連結已過期，請重新嘗試。",
+        "link.stateMismatch": "安全檢查失敗，已拒絕此連結。",
+        "link.failed": "無法連結 Roblox 帳戶。",
+        "link.working": "等待 Roblox 回應\u2026",
         "profile.avatarChange": "上傳照片",
         "profile.avatarRemove": "移除照片",
         "profile.avatarUploaded": "大頭貼已更新。",
@@ -1975,6 +2032,104 @@
         closeModal();
         if (window.history && window.history.pushState) window.history.pushState(null, "", "#profile");
         goRoute(PROFILE, false);
+      });
+    })();
+
+    /* ---------- Roblox account link ---------- */
+    // Fill these in after deploying the Worker (see worker/README.md).
+    // clientId is public: it is the OAuth application id, not a password.
+    const ROBLOX_LINK_ENDPOINT = "";
+    const ROBLOX_CLIENT_ID = "";
+
+    const ROBLOX_STORAGE_KEY = "xcope-roblox-link";
+
+    const robloxLink = createRobloxLink({
+      endpoint: ROBLOX_LINK_ENDPOINT,
+      clientId: ROBLOX_CLIENT_ID,
+      // Roblox returns to the page it was started from.
+      redirectUri: location.origin + location.pathname,
+      getIdToken: () => (currentUser ? currentUser.getIdToken() : Promise.resolve(null)),
+      storage: {
+        save: (profile) => { try { localStorage.setItem(ROBLOX_STORAGE_KEY, JSON.stringify(profile)); } catch (e) {} },
+        load: () => { try { return JSON.parse(localStorage.getItem(ROBLOX_STORAGE_KEY) || "null"); } catch (e) { return null; } },
+        clear: () => { try { localStorage.removeItem(ROBLOX_STORAGE_KEY); } catch (e) {} }
+      },
+      onLinked: () => renderRobloxPanel(),
+      onError: (error) => reportRobloxError(error)
+    });
+
+    function setLinkStatus(key, type) {
+      const el = document.getElementById("linkStatus");
+      if (!el) return;
+      el.textContent = t(key);
+      el.classList.toggle("success", type === "success");
+      el.classList.add("show");
+    }
+
+    function clearLinkStatus() {
+      const el = document.getElementById("linkStatus");
+      if (!el) return;
+      el.classList.remove("show", "success");
+      el.textContent = "";
+    }
+
+    function reportRobloxError(error) {
+      const message = String((error && error.message) || "");
+      if (/not configured|not set up/i.test(message)) return setLinkStatus("link.notConfigured");
+      if (/expired/i.test(message)) return setLinkStatus("link.expired");
+      if (/security check/i.test(message)) return setLinkStatus("link.stateMismatch");
+      if (/sign in/i.test(message)) return setLinkStatus("link.needSignIn");
+      if (message) console.error("[robloxLink]", message);
+      setLinkStatus("link.failed");
+    }
+
+    function renderRobloxPanel() {
+      const profile = robloxLink.load();
+      const container = document.getElementById("robloxProfile");
+      const empty = document.getElementById("robloxEmpty");
+      const linkBtn = document.getElementById("robloxLinkBtn");
+      const unlinkBtn = document.getElementById("robloxUnlinkBtn");
+
+      if (container) renderRobloxLink(container, profile);
+      if (empty) empty.classList.toggle("is-hidden", !!profile);
+      if (linkBtn) linkBtn.classList.toggle("is-hidden", !!profile);
+      if (unlinkBtn) unlinkBtn.classList.toggle("is-hidden", !profile);
+    }
+
+    (function initRobloxLink() {
+      const linkBtn = document.getElementById("robloxLinkBtn");
+      const unlinkBtn = document.getElementById("robloxUnlinkBtn");
+      if (!linkBtn && !unlinkBtn) return;
+
+      if (linkBtn) {
+        linkBtn.addEventListener("click", async () => {
+          clearLinkStatus();
+          if (!currentUser) return setLinkStatus("link.needSignIn");
+          if (!robloxLink.isConfigured()) return setLinkStatus("link.notConfigured");
+          setLinkStatus("link.working");
+          await robloxLink.start();
+        });
+      }
+
+      if (unlinkBtn) {
+        unlinkBtn.addEventListener("click", async () => {
+          clearLinkStatus();
+          await robloxLink.unlink();
+          renderRobloxPanel();
+          setLinkStatus("link.unlinked", "success");
+        });
+      }
+
+      renderRobloxPanel();
+
+      // Consume ?code=&state= when Roblox sends the visitor back.
+      robloxLink.handleRedirect().then((profile) => {
+        if (!profile) return;
+        renderRobloxPanel();
+        setLinkStatus("link.linked", "success");
+        // Land on the profile page so the result is visible.
+        if (window.history && window.history.pushState) window.history.pushState(null, "", "#profile");
+        if (typeof goRoute === "function") goRoute("profile", false);
       });
     })();
 
