@@ -791,7 +791,7 @@
         "link.needSignIn": "Please sign in before linking a Roblox account.",
         "link.failed": "The Roblox account could not be linked.",
         "bg.title": "Background",
-        "bg.hint": "Pick the backdrop independently of the light or dark theme: any background here works with either.",
+        "bg.hint": "Pick the backdrop independently of the light or dark theme. The gradient presets come in a light and a dark version and follow whichever theme you choose.",
         "bg.styleLabel": "Background style",
         "bg.animated": "Animated",
         "bg.aurora": "Aurora",
@@ -1005,7 +1005,7 @@
         "link.needSignIn": "請先登入再連結 Roblox 帳戶。",
         "link.failed": "無法連結 Roblox 帳戶。",
         "bg.title": "背景",
-        "bg.hint": "背景與深淺色主題是兩個獨立選擇：這裡選的背景在兩種主題下都能用。",
+        "bg.hint": "背景與深淺色主題是兩個獨立選擇。漸層預設各有淺色與深色兩版，會跟著你選的主題切換。",
         "bg.styleLabel": "背景樣式",
         "bg.animated": "動態背景",
         "bg.aurora": "極光",
@@ -1530,6 +1530,13 @@
       root.setAttribute("data-theme", resolved);
       root.setAttribute("data-theme-choice", choice);
 
+      // A gradient follows the theme through CSS, but a picture needs its
+      // light-mode base repainted, which only JavaScript can do.
+      if (typeof applyBackground === "function" && typeof readBgState === "function") {
+        const bgState = readBgState();
+        if (bgState.kind === "image") applyBackground(bgState);
+      }
+
       // Keep the browser chrome (mobile address bar) in step with the theme.
       const meta = document.querySelector("[data-theme-color]");
       if (meta) meta.setAttribute("content", THEME_COLORS[resolved]);
@@ -2051,13 +2058,11 @@
     // data URL well under that so the rest of the settings still fit.
     const BG_STORE_BUDGET = 2.4 * 1024 * 1024;
 
-    // Fixed gradients, all on a dark base so both themes read well.
-    const BG_PRESETS = {
-      aurora: "linear-gradient(140deg, #04141f 0%, #0b3b4a 34%, #1f6f6b 58%, #6f4bd8 100%)",
-      sunset: "linear-gradient(160deg, #2a0f2e 0%, #7a1f4d 40%, #d9534f 72%, #f0a24b 100%)",
-      ocean: "linear-gradient(160deg, #031525 0%, #0a3557 45%, #14689b 75%, #48b3d6 100%)",
-      ember: "linear-gradient(160deg, #1a0b06 0%, #4a1608 40%, #a3341a 72%, #e8843c 100%)"
-    };
+    // Each preset carries a light and a dark variant, defined in the stylesheet
+    // as --bg-<name>. The chosen variant follows the theme, so no re-render is
+    // needed when the theme changes.
+    const BG_PRESETS = ["aurora", "sunset", "ocean", "ember"];
+    const BG_IMAGE_BASE = "linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45))";
 
     const bgLayer = document.getElementById("bgLayer");
 
@@ -2065,7 +2070,7 @@
       try {
         const raw = JSON.parse(localStorage.getItem(BG_KEY) || "null");
         if (!raw || !raw.kind) return { kind: "animated" };
-        if (raw.kind === "gradient" && !BG_PRESETS[raw.name]) return { kind: "animated" };
+        if (raw.kind === "gradient" && BG_PRESETS.indexOf(raw.name) === -1) return { kind: "animated" };
         if (raw.kind === "image" && !raw.value) return { kind: "animated" };
         return raw;
       } catch (e) {
@@ -2085,10 +2090,16 @@
       if (choice.kind === "gradient") {
         bgLayer.setAttribute("data-bg-kind", "gradient");
         bgLayer.setAttribute("data-bg-name", choice.name);
-        bgLayer.style.backgroundImage = BG_PRESETS[choice.name];
+        // The variable holds the light or dark variant, depending on the theme.
+        bgLayer.style.backgroundImage = "var(--bg-" + choice.name + ")";
       } else if (choice.kind === "image") {
         bgLayer.setAttribute("data-bg-kind", "image");
-        bgLayer.style.backgroundImage = 'url("' + String(choice.value).replace(/"/g, "%22") + '")';
+        // The scrim alone cannot make white heading text readable over a bright
+        // picture, so light mode lays a translucent white base under the image.
+        const base = document.documentElement.getAttribute("data-theme") === "light"
+          ? BG_IMAGE_BASE + ", "
+          : "";
+        bgLayer.style.backgroundImage = base + 'url("' + String(choice.value).replace(/"/g, "%22") + '")';
       } else {
         bgLayer.setAttribute("data-bg-kind", "animated");
       }
@@ -2123,7 +2134,7 @@
       // Fill the gradient swatches from the same definitions used to paint.
       document.querySelectorAll("[data-bg-swatch]").forEach((el) => {
         const name = el.getAttribute("data-bg-swatch");
-        if (BG_PRESETS[name]) el.style.backgroundImage = BG_PRESETS[name];
+        if (BG_PRESETS.indexOf(name) !== -1) el.style.backgroundImage = "var(--bg-" + name + ")";
       });
 
       const removeBtn = document.getElementById("bgRemove");
@@ -2225,7 +2236,7 @@
 
         if (choice === "animated") return setBackground({ kind: "animated" }, "bg.removed");
         if (choice === "upload") return input && input.click();
-        if (BG_PRESETS[choice]) return setBackground({ kind: "gradient", name: choice }, "bg.applied");
+        if (BG_PRESETS.indexOf(choice) !== -1) return setBackground({ kind: "gradient", name: choice }, "bg.applied");
       });
 
       if (input) {

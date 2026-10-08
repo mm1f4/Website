@@ -114,6 +114,13 @@
   --overlay-bg: rgba(15, 23, 42, 0.55);
   --body-veil: radial-gradient(1100px 520px at 50% -240px, var(--accent-soft), transparent 70%);
   --card-translucent: rgba(255, 255, 255, 0.74);
+
+  /* Background presets, light variant: pale and airy, so dark text sits on
+     them comfortably. The dark variants are in the dark theme below. */
+  --bg-aurora: linear-gradient(140deg, #eaf2ff 0%, #dceaf7 30%, #cfe7e4 58%, #e6dcff 100%);
+  --bg-sunset: linear-gradient(160deg, #fff1e6 0%, #ffe0d6 34%, #ffd2cf 62%, #ffe9c9 100%);
+  --bg-ocean: linear-gradient(160deg, #e8f4fb 0%, #d6e9f6 38%, #c3e0f0 68%, #d8f0f6 100%);
+  --bg-ember: linear-gradient(160deg, #fff3e3 0%, #ffe2ca 36%, #ffd6c2 64%, #fff0d6 100%);
   --border-soft: rgba(228, 233, 240, 0.6);
   --surface-translucent: rgba(246, 248, 251, 0.7);
   --header-translucent: rgba(255, 255, 255, 0.66);
@@ -173,6 +180,12 @@
   --overlay-bg: rgba(2, 6, 23, 0.7);
   --body-veil: radial-gradient(1100px 520px at 50% -240px, var(--accent-soft), transparent 70%);
   --card-translucent: rgba(20, 29, 47, 0.66);
+
+  /* Background presets, dark variant. */
+  --bg-aurora: linear-gradient(140deg, #04141f 0%, #0b3b4a 34%, #1f6f6b 58%, #6f4bd8 100%);
+  --bg-sunset: linear-gradient(160deg, #2a0f2e 0%, #7a1f4d 40%, #d9534f 72%, #f0a24b 100%);
+  --bg-ocean: linear-gradient(160deg, #031525 0%, #0a3557 45%, #14689b 75%, #48b3d6 100%);
+  --bg-ember: linear-gradient(160deg, #1a0b06 0%, #4a1608 40%, #a3341a 72%, #e8843c 100%);
   --border-soft: rgba(37, 49, 71, 0.7);
   --surface-translucent: rgba(16, 24, 39, 0.6);
   --header-translucent: rgba(11, 17, 32, 0.66);
@@ -1268,8 +1281,40 @@ footer {
   --body-veil: none;
 }
 
-:root[data-has-custom-bg="true"][data-theme="light"] { --bg-scrim: rgba(255, 255, 255, 0.62); }
-:root[data-has-custom-bg="true"][data-theme="dark"] { --bg-scrim: rgba(5, 9, 20, 0.66); }
+/* Light mode needs the heavier scrim: white section headings sit directly on the
+   backdrop, so a bright picture has to be washed back a long way. */
+:root[data-has-custom-bg="true"][data-theme="light"] { --bg-scrim: rgba(255, 255, 255, 0.86); }
+:root[data-has-custom-bg="true"][data-theme="dark"] { --bg-scrim: rgba(5, 9, 20, 0.6); }
+
+/* With a picture behind it, the frosted surfaces need to be more solid than they
+   are over the wash, because a photograph has far more contrast than a gradient. */
+:root[data-has-custom-bg="true"] {
+  --card-translucent: rgba(255, 255, 255, 0.82);
+  --surface-translucent: rgba(255, 255, 255, 0.72);
+}
+
+:root[data-has-custom-bg="true"][data-theme="dark"] {
+  --card-translucent: rgba(20, 29, 47, 0.74);
+  --surface-translucent: rgba(16, 24, 39, 0.68);
+}
+
+:root[data-has-custom-bg="true"] header {
+  background: var(--header-translucent);
+}
+
+/* With a picture behind it, a pale one could still swallow the large headings, so
+   give them a soft halo. It is invisible over the wash and over flat colour. */
+:root[data-has-custom-bg="true"][data-bg-kind="image"] h1,
+:root[data-has-custom-bg="true"][data-bg-kind="image"] h2,
+:root[data-has-custom-bg="true"][data-bg-kind="image"] .hero p {
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9), 0 0 18px rgba(255, 255, 255, 0.7);
+}
+
+:root[data-has-custom-bg="true"][data-bg-kind="image"][data-theme="dark"] h1,
+:root[data-has-custom-bg="true"][data-bg-kind="image"][data-theme="dark"] h2,
+:root[data-has-custom-bg="true"][data-bg-kind="image"][data-theme="dark"] .hero p {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75), 0 0 18px rgba(0, 0, 0, 0.5);
+}
 
 /* ---------- Background picker ---------- */
 /* Names the group under the theme control, so the two read as separate

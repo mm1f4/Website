@@ -37,7 +37,11 @@ link-service/       optional Cloudflare Worker (see below); not deployed yet
   background. Stored under `xcope-theme`.
 - **Background**: animated default, four preset gradients, or the visitor's own
   picture. Independent of the theme: any background works under either theme.
-  Stored under `xcope-background`.
+  Stored under `xcope-background`. The gradients moved out of JavaScript and
+  into the stylesheet as `--bg-<name>`, defined once per theme, so each preset
+  has a light and a dark variant that swaps with the theme through pure CSS. The
+  stored value records only the preset name, never the variant. A picture needs
+  its light-mode base repainted by script, which `paintTheme` does.
 - **Accounts** via Firebase Authentication (email and password), including
   sign-up, sign-in, password reset, email verification and a resend path.
 - **Profile page** at `#profile`, guarded so only signed-in visitors reach it.
@@ -157,6 +161,17 @@ Verified working, so treat a change here as a regression to check for:
 - Both toggles, the header one and the profile one, stay in step.
 - Theme and background are independent: any background works under either theme,
   and each theme supplies its own scrim so text stays readable.
+
+## Background strength
+
+A picture behind the page needs a scrim or white headings become unreadable, and
+the two modes need very different amounts. As it stands the light scrim is
+strong (`0.86`), which keeps everything readable but washes a picture back
+noticeably; the dark scrim is `0.6` and lets far more of the picture through.
+Presets do not have this problem, because their light variants are pale by
+design. If the washed-out look in light mode is unwanted, the fix is to reduce
+the scrim and give the hero its own frosted panel, rather than to weaken the
+scrim alone.
 
 ## Known gaps
 
