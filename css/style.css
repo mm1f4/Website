@@ -253,6 +253,17 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  /* Anchor targets must clear the sticky header (section 6). The profile panels
+     are plain anchors, so without this the browser puts their heading underneath
+     the header. The scroll script uses the same offset for its own scrolls. */
+  scroll-padding-top: 97px;
+}
+
+/* Restoring the position someone left is not navigation and must not animate:
+   a refreshed page should look as though it was always there. Set for the one
+   frame in which the router puts the visitor back. */
+html.is-jumping {
+  scroll-behavior: auto;
 }
 
 body {

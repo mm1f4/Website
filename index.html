@@ -598,6 +598,22 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
+    // The browser's own scroll function. The options form of scrollTo is not
+    // reliable here: a page that has just revealed an element can swallow it and
+    // leave the visitor at the top, with no error. The two-argument form is
+    // dependable, and html { scroll-behavior: smooth } still animates it.
+    const PAGE_SCROLL = (x, y) => window.scrollTo(x, y);
+
+    // Restoring a position is not navigation, so it must not animate: arriving at
+    // a panel should look like the page was always there. Smoothing is suppressed
+    // through .is-jumping, which overrides scroll-behavior for that one frame.
+    const JUMP_CLASS = "is-jumping";
+    const scrollNow = (top) => {
+      document.documentElement.classList.add(JUMP_CLASS);
+      PAGE_SCROLL(0, top);
+      requestAnimationFrame(() => document.documentElement.classList.remove(JUMP_CLASS));
+    };
+
     /* ==========================================================
        I18N - dictionary-driven translation with browser detection
        ========================================================== */
@@ -1447,11 +1463,17 @@
         authReady = true;
       }
 
-      // Apply a deep link once the state is actually known.
+      // Apply a deep link once the state is actually known. The boot code has
+      // already cleared the hash, so a panel is restored by hand here: the
+      // browser's own fragment scroll fires before the profile is visible, when
+      // the panel has no box, and is then simply lost. `true` marks this as a
+      // restore, not a navigation, so it does not animate.
       if (bootRoute === PROFILE && (authHasUser || authSignedOut)) {
+        const panel = panelExists(panelFromHash()) ? panelFromHash() : bootstrapPanel;
+        bootstrapPanel = "";
         bootRoute = HOME;
         currentRoute = HOME; // force goRoute down its profile branch
-        goRoute(PROFILE, false);
+        goRoute(PROFILE, false, undefined, panel || undefined, true);
         return;
       }
 
@@ -1470,11 +1492,9 @@
     });
 
     /* ---------- Navigation: offset smooth scroll ---------- */
-    const prefersReducedMotion = () =>
-      !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
     // Anchor targets must clear the sticky header, so scroll manually instead of
-    // letting the browser put the heading underneath it.
+    // letting the browser put the heading underneath it. Smoothing is left to the
+    // stylesheet, which also turns it off for reduced-motion visitors.
     document.querySelectorAll('a[href^="#"]').forEach((link) => {
       link.addEventListener("click", (event) => {
         // Route links switch pages; the router owns those, not the scroller.
@@ -1492,10 +1512,7 @@
         const headerHeight = header ? header.getBoundingClientRect().height : 0;
         const top = targetEl.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
 
-        window.scrollTo({
-          top: Math.max(top, 0),
-          behavior: prefersReducedMotion() ? "auto" : "smooth"
-        });
+        PAGE_SCROLL(0, Math.max(top, 0));
 
         // Keep the URL shareable without triggering the browser's own jump.
         if (window.history && window.history.pushState) window.history.pushState(null, "", hash);
@@ -1615,8 +1632,86 @@
     }
 
     /* ---------- Routing (#profile) ---------- */
+    const PANEL_KEY = "xcope-panel";
+    const SCROLL_KEY = "xcope-scroll";
+
+    // A profile panel is any .panel-card whose id starts with "panel-". The
+    // sidebar links to them as plain anchors and the browser scrolls to them on
+    // its own, so the hash is the only record that they are part of #profile.
+    function panelFromHash() {
+      const match = /^#(panel-[A-Za-z0-9_-]+)$/.exec(location.hash || "");
+      return match ? match[1] : "";
+    }
+
+    function rememberedPanel() {
+      try {
+        return sessionStorage.getItem(PANEL_KEY) || "";
+      } catch (e) {
+        return ""; // storage blocked, fall back to the hash
+      }
+    }
+
+    function rememberPanel(id) {
+      try {
+        if (id) sessionStorage.setItem(PANEL_KEY, id);
+        else sessionStorage.removeItem(PANEL_KEY);
+      } catch (e) { /* storage blocked; the hash still carries the panel */ }
+    }
+
+    function panelExists(id) {
+      return !!(id && document.getElementById(id));
+    }
+
+    // A panel hash means the visitor is on #profile, not the landing page. That
+    // is the whole point: without it, changing the hash to #panel-password and
+    // then refreshing replayed the hash but showed the landing page, because the
+    // old check only accepted "#profile" verbatim.
     function routeFromHash() {
-      return location.hash === "#profile" ? PROFILE : HOME;
+      return location.hash === "#profile" || panelExists(panelFromHash()) ? PROFILE : HOME;
+    }
+
+    // Which page to show on load. The hash wins when it names something real;
+    // otherwise the panel this tab was last looking at is restored, so an
+    // in-page refresh lands back on the same panel even if the hash was lost.
+    function resolveRoute() {
+      const fromHash = panelFromHash();
+      if (panelExists(fromHash)) return { route: PROFILE, panel: fromHash };
+      if (location.hash === "#profile") return { route: PROFILE, panel: rememberedPanel() };
+      return { route: routeFromHash(), panel: rememberedPanel() };
+    }
+
+    // Restores the reading position of the scrolled-to page. Without it a
+    // refresh returns to the right panel but at the top of it.
+    function rememberedScroll() {
+      try {
+        const value = parseInt(sessionStorage.getItem(SCROLL_KEY), 10);
+        return isNaN(value) ? null : value;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function rememberScroll(value) {
+      try {
+        sessionStorage.setItem(SCROLL_KEY, String(Math.round(value)));
+      } catch (e) { /* storage blocked */ }
+    }
+
+    // A scroll command issued while the profile page is still hidden is silently
+    // dropped: the element has no box yet, so the page cannot move to it. The
+    // profile is revealed during boot and then filled in by the auth callback, so
+    // the restore waits for a frame in which the target can actually be seen.
+    function whenVisible(el, run) {
+      if (!el) return;
+      if (el.offsetParent !== null || el.getClientRects().length) {
+        run();
+        return;
+      }
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (el.offsetParent !== null || el.getClientRects().length) run();
+        });
+      });
     }
 
     // Section links live on the landing page, so from #profile they must first
@@ -1630,7 +1725,7 @@
       const headerHeight = header ? header.getBoundingClientRect().height : 0;
       requestAnimationFrame(() => {
         const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
-        window.scrollTo({ top: Math.max(top, 0), behavior: prefersReducedMotion() ? "auto" : "smooth" });
+        PAGE_SCROLL(0, Math.max(top, 0));
       });
     }
 
@@ -1654,7 +1749,7 @@
         if (window.history && window.history.replaceState) window.history.replaceState(null, "", cleanUrl);
 
         goRoute(HOME, false);
-        window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+        PAGE_SCROLL(0, 0);
       });
     });
 
@@ -1689,7 +1784,28 @@
     let authSignedOut = false;
     let bootRoute = HOME;
 
-    function goRoute(route, push, notify) {
+    function scrollToPanel(id, instant) {
+      const el = id && document.getElementById(id);
+      if (!el) return;
+      const header = document.querySelector("header");
+      const headerHeight = header ? header.getBoundingClientRect().height : 0;
+      const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+      const clamped = Math.max(0, Math.round(top));
+      if (instant) scrollNow(clamped);
+      else PAGE_SCROLL(0, clamped);
+    }
+
+    // The panel a load was asked to restore. Kept until the auth callback has
+    // finished, because that is the pass that actually renders the profile.
+    let bootstrapPanel = "";
+    // True only while boot is removing the fragment from the URL.
+    let booting = false;
+
+    // targetPanel is only meaningful on the way in from a load or a refresh.
+    // Deliberate navigation leaves it undefined and starts at the top, which is
+    // what opening a page should do. instant says the position is being restored
+    // rather than navigated to, so it must not animate.
+    function goRoute(route, push, notify, targetPanel, instant) {
       if (route === PROFILE && !authReady) {
         // Firebase has not reported the persisted session yet. Show the page
         // straight away and let onAuthStateChanged finish, so a refresh neither
@@ -1697,6 +1813,7 @@
         // once authHasUser or authSignedOut is set.
         bootRoute = PROFILE;
         currentRoute = PROFILE;
+        bootstrapPanel = targetPanel || "";
         currentUser = auth.currentUser;
         pageHome.classList.add("is-hidden");
         pageProfile.classList.remove("is-hidden");
@@ -1704,6 +1821,11 @@
           renderProfile();
           syncProfileControls();
         }
+        // Deliberately no scrolling here. This pass exists only to stop the page
+        // flashing, and on a refresh it runs before Firebase has restored the
+        // session, when the profile is still empty and therefore far too short to
+        // scroll. The scroll belongs to the auth pass below, which is the one
+        // that renders the real content.
         return;
       }
 
@@ -1723,20 +1845,95 @@
       }
 
       if (route === PROFILE && currentRoute !== PROFILE) routeBeforeProfile = currentRoute;
+      // Whether the profile page was already on screen. Opening it should start
+      // at the top; arriving at it because a panel hash changed must not, or the
+      // scroll would fight the anchor that the browser just jumped to.
+      const wasOnProfile = currentRoute === PROFILE;
       currentRoute = route;
 
       pageHome.classList.toggle("is-hidden", route !== HOME);
       pageProfile.classList.toggle("is-hidden", route !== PROFILE);
 
       if (route === PROFILE) {
+        // Hand the panel to the browser as a fragment again, once the page is on
+        // screen and the restore below has run. pushState does not scroll, so
+        // this records the destination without re-triggering anything.
+        if (targetPanel && window.history && window.history.pushState) {
+          window.history.pushState(null, "", "#" + targetPanel);
+        } else if (!panelFromHash() && !panelExists(rememberedPanel()) &&
+            window.history && window.history.pushState && location.hash !== "#profile") {
+          // Keep #profile in the URL. The profile page is a real destination, so a
+          // refresh or a shared link must come back to it rather than to the
+          // landing page, and the hash is what records that.
+          window.history.pushState(null, "", "#profile");
+        }
         renderProfile();
         syncProfileControls();
         if (typeof renderBackgroundPicker === "function") renderBackgroundPicker();
-        window.scrollTo({ top: 0, behavior: "auto" });
       }
+
+      // Last, because it has to run once the page is actually on screen: a
+      // scroll while #profile is still hidden lands on the landing page.
+      if (targetPanel) restoreEntry(targetPanel, !!instant);
+      else if (route === PROFILE && !wasOnProfile) PAGE_SCROLL(0, 0);
     }
 
-    window.addEventListener("hashchange", () => goRoute(routeFromHash(), false));
+    // Puts the visitor back where an in-page refresh left them: same panel and
+    // the same reading position inside it.
+    function restoreEntry(panel, instant) {
+      const el = panel ? document.getElementById(panel) : null;
+      if (el) {
+        whenVisible(el, () => scrollToPanel(panel, instant));
+        return;
+      }
+      const saved = rememberedScroll();
+      const target = saved === null ? 0 : saved;
+      whenVisible(pageProfile, () => (instant ? scrollNow(target) : PAGE_SCROLL(0, target)));
+    }
+
+    window.addEventListener("hashchange", () => {
+      // While boot clears the fragment, the hashchange this fires must not be
+      // mistaken for the visitor choosing a different panel.
+      if (booting) return;
+      const fromHash = panelFromHash();
+      const panel = panelExists(fromHash) ? fromHash : "";
+      rememberPanel(panel);
+      goRoute(routeFromHash(), false);
+      // Scroll it here rather than trusting the browser's fragment jump: that
+      // jump ignores the sticky header, and it does not happen at all when the
+      // hash is changed by script rather than by clicking the link.
+      if (panel && currentRoute === PROFILE) scrollToPanel(panel);
+    });
+
+    // The last position is kept per tab, so a refresh can restore it.
+    let scrollSaveTimer = 0;
+    window.addEventListener("scroll", () => {
+      if (currentRoute !== PROFILE) return;
+      if (scrollSaveTimer) return;
+      scrollSaveTimer = window.setTimeout(() => {
+        scrollSaveTimer = 0;
+        rememberScroll(window.scrollY);
+      }, 200);
+    }, { passive: true });
+
+    // Sidebar links inside the profile page are plain anchors, so the router
+    // never sees the click. Record the choice here, otherwise it would survive
+    // only in the hash and be lost the moment the hash is cleared.
+    document.querySelectorAll(".profile-nav a[href^='#']").forEach((link) => {
+      link.addEventListener("click", () => {
+        const href = link.getAttribute("href") || "";
+        const target = href.slice(1);
+        if (href === "#profile") {
+          // The sidebar's "Profile" entry means the top of the page, not the
+          // last panel. Clicking it has to forget the remembered panel or a
+          // later refresh would jump back down.
+          rememberPanel("");
+          PAGE_SCROLL(0, 0);
+          return;
+        }
+        if (panelExists(target)) rememberPanel(target);
+      });
+    });
 
     document.querySelectorAll("[data-route]").forEach((link) => {
       link.addEventListener("click", (event) => {
@@ -2448,9 +2645,26 @@
 
     // Honour a deep link such as #profile on a fresh load or a refresh. GitHub
     // Pages normalises the URL, so no hashchange event fires here; the router has
-    // to be asked once.
-    bootRoute = routeFromHash();
-    if (bootRoute === PROFILE) goRoute(PROFILE, false);
+    // to be asked once. A refresh restores the panel and the reading position the
+    // visitor left, not just the page.
+    const entry = resolveRoute();
+    bootRoute = entry.route;
+    // The panel this load was asked to restore, captured before the hash is
+    // cleared below. The auth callback reaches for it, because it fires later.
+    bootstrapPanel = entry.panel || "";
+    // The fragment is deliberately taken out of the URL while booting. A panel
+    // mostly does not exist yet at this point, because the profile page is hidden
+    // and the auth callback has not rendered it: the browser would aim its
+    // fragment scroll at nothing, drop it, and leave the visitor at the top. The
+    // restore below puts the panel back in the URL once it has been reached.
+    if (bootRoute === PROFILE && window.history && window.history.replaceState) {
+      booting = true;
+      window.history.replaceState(null, "", cleanPath());
+    }
+    // The pre-auth pass only reveals the page; the restore belongs to the auth
+    // pass, and is instant because it is a restore rather than a navigation.
+    if (bootRoute === PROFILE) goRoute(PROFILE, false, undefined, entry.panel || undefined, true);
+    booting = false;
     if (lastAlert) alert(t(lastAlert.key));
   </script>
 </body>

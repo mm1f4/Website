@@ -46,7 +46,14 @@ link-service/       optional Cloudflare Worker (see below); not deployed yet
   sign-up, sign-in, password reset, email verification and a resend path.
 - **Profile page** at `#profile`, guarded so only signed-in visitors reach it.
   Holds profile details, account info, password change, preferences, background
-  and connected accounts.
+  and connected accounts. The sidebar sections are plain anchors
+  (`#panel-account`, `#panel-password`, …) and are part of the profile route, not
+  separate pages: refreshing on one keeps you there.
+- **Refresh keeps your place.** Reloading on a profile panel returns to that
+  panel, at the position you left, without animating. The panel is remembered in
+  `sessionStorage` under `xcope-panel` and the position under `xcope-scroll`, so
+  the URL is not the only record. See "Routing and restore" below; there are
+  several traps here.
 - **Avatar upload**: resized on the device and stored on the user record as a
   small data URL, so it syncs across devices without Cloud Storage.
 - **Roblox linking** by username plus an About me verification code. Stored in
@@ -145,6 +152,34 @@ that works:
 
 Delete every harness afterwards. `git status` should be clean, and no `.dsh-*`
 file should remain.
+
+## Routing and restore
+
+Why a refresh on `#panel-password` used to land on the landing page, and what the
+fix has to keep doing. Each of these was found by driving a real headless browser,
+not by reading the code:
+
+- The router only accepted `location.hash === "#profile"` verbatim, so any panel
+  hash fell through to `HOME`. A panel hash now means the profile route.
+- **The fragment is removed from the URL at boot**, and put back once the panel
+  has been reached. Chrome fires its fragment scroll while the profile page is
+  still `display: none`, so the target has no box, the jump is dropped, and the
+  visitor is left at the top. `#profile` and the panel then go into the URL
+  through `pushState`, which does not scroll.
+- **The restore belongs to the auth pass, not the boot pass.** The boot pass runs
+  before Firebase has restored the session, when the profile is empty and far too
+  short to scroll to a panel; scrolling there silently does nothing.
+- **A scroll issued while the target is hidden is dropped.** `whenVisible` waits
+  for a frame in which the element has a box before scrolling.
+- **Use the two-argument `scrollTo(x, y)`.** The `{ top, behavior }` form is
+  swallowed on this page after it reveals an element, leaving the visitor at the
+  top with no error. `PAGE_SCROLL` exists for that reason.
+- **`html.is-jumping` suppresses smoothing for the restore only.** A refresh
+  should look as though the page was always there; clicking a link should still
+  animate.
+- `scroll-padding-top` (97px, the sticky header plus the script's 12px gap) makes
+  the browser's own fragment jumps clear the header. The script uses the same
+  offset for its own scrolls.
 
 ## Theme handling
 
