@@ -274,29 +274,85 @@ async function handleUser(id) {
 
 /* ------------------------------------------------------------ OAuth tokens */
 
+/**
+ * Turns an error response body into something that can be acted on.
+ *
+ * The token endpoint answers a rejection with a short JSON body such as
+ * {"error":"invalid_grant","error_description":"..."}, and that body is the only
+ * thing that can tell the two likely causes apart: a redirect_uri that does not
+ * match the one used at authorisation time, versus a code that is expired,
+ * already redeemed, or paired with the wrong PKCE verifier. Reporting just the
+ * status code throws that away and leaves nothing but guessing.
+ */
+function describeUpstreamError(raw) {
+  const text = String(raw === undefined || raw === null ? '' : raw).trim();
+  if (!text) return '(empty body)';
+  try {
+    const parsed = JSON.parse(text);
+    const parts = [];
+    if (parsed.error) parts.push(String(parsed.error));
+    if (parsed.error_description) parts.push(String(parsed.error_description));
+    if (parts.length) return parts.join(': ');
+  } catch (e) {
+    /* not JSON, fall through to the raw text */
+  }
+  return text.slice(0, 300);
+}
+
+/**
+ * Reads a configuration value, trimming it and complaining when that changed
+ * anything.
+ *
+ * A secret pasted into `wrangler secret put` often carries a trailing newline or
+ * space. Roblox compares these values as strings, so a stray space produces a
+ * rejection that looks exactly like a mismatch and gives no clue which value is
+ * at fault. Trimming means the flow works anyway, and the warning means the
+ * stored value still gets corrected rather than quietly staying wrong.
+ */
+function configValue(env, name) {
+  const raw = env[name];
+  if (raw === undefined || raw === null) return '';
+  const text = String(raw);
+  const trimmed = text.trim();
+  if (!trimmed) return '';
+  if (trimmed !== text) {
+    console.warn('[config] ' + name + ' has leading or trailing whitespace; using the trimmed value. ' +
+      'Re-set it with: npx wrangler secret put ' + name);
+  }
+  return trimmed;
+}
+
 async function exchangeCode(env, code, codeVerifier) {
   const body = new URLSearchParams({
     grant_type: 'authorization_code',
     code: code,
     code_verifier: codeVerifier,
-    client_id: env.ROBLOX_CLIENT_ID,
-    client_secret: env.ROBLOX_CLIENT_SECRET,
-    redirect_uri: env.ROBLOX_REDIRECT_URI,
+    client_id: configValue(env, 'ROBLOX_CLIENT_ID'),
+    client_secret: configValue(env, 'ROBLOX_CLIENT_SECRET'),
+    redirect_uri: configValue(env, 'ROBLOX_REDIRECT_URI'),
   });
   const res = await fetch(ROBLOX_TOKEN_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),
   });
-  if (!res.ok) throw new Error('roblox token exchange failed with status ' + res.status);
-  return JSON.parse(await res.text());
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error('roblox token exchange failed with status ' + res.status +
+      ': ' + describeUpstreamError(text));
+  }
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    throw new Error('roblox token exchange returned a body that is not JSON');
+  }
 }
 
 async function revokeToken(env, refreshToken) {
   const body = new URLSearchParams({
     token: refreshToken,
-    client_id: env.ROBLOX_CLIENT_ID,
-    client_secret: env.ROBLOX_CLIENT_SECRET,
+    client_id: configValue(env, 'ROBLOX_CLIENT_ID'),
+    client_secret: configValue(env, 'ROBLOX_CLIENT_SECRET'),
   });
   const res = await fetch(ROBLOX_REVOKE_URL, {
     method: 'POST',
