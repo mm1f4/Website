@@ -1,0 +1,116 @@
+/* ==========================================================================
+   XCOPE - legal pages
+   Styles for privacy.html and terms.html only. index.html does not use this
+   file.
+
+   These pages reuse the tokens and the header/footer rules from style.css, so
+   the only thing defined here is the reading column: a narrower measure than
+   the marketing pages, because these are long-form documents. Nothing below
+   hardcodes a colour, so both themes keep working through the token swap.
+   ========================================================================== */
+
+.legal-main {
+  padding: var(--space-8) 0 var(--space-9);
+}
+
+/* Roughly 70 characters per line, which is the comfortable limit for a page
+   someone actually has to read to the end. */
+.legal {
+  max-width: 68ch;
+}
+
+.legal h1 {
+  font-size: var(--text-3xl);
+  margin-bottom: var(--space-2);
+}
+
+/* The date is the first thing a reviewer looks for, so it sits above the
+   contents rather than buried in the footer. */
+.legal-meta {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-6);
+}
+
+.legal section + section {
+  margin-top: var(--space-6);
+}
+
+.legal h2 {
+  font-size: var(--text-xl);
+  margin-bottom: var(--space-3);
+}
+
+.legal h3 {
+  font-size: var(--text-base);
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+.legal p + p,
+.legal p + ul,
+.legal ul + p {
+  margin-top: var(--space-3);
+}
+
+.legal ul {
+  padding-left: var(--space-5);
+}
+
+.legal li + li {
+  margin-top: var(--space-2);
+}
+
+.legal li::marker {
+  color: var(--muted);
+}
+
+.legal strong {
+  color: var(--text-strong);
+}
+
+.legal code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-strong);
+}
+
+/* Used for the "this is not affiliated with Roblox" disclaimer, which should
+   read as a notice rather than as body copy. */
+.legal-note {
+  background: var(--card-translucent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-4) var(--space-5);
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+/* Cross-reference to the sibling document. */
+.legal-links {
+  margin-top: var(--space-7);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border);
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 640px) {
+  .legal-main {
+    padding: var(--space-6) 0 var(--space-8);
+  }
+
+  .legal h1 {
+    font-size: var(--text-2xl);
+  }
+
+  .legal h2 {
+    font-size: var(--text-lg);
+  }
+}

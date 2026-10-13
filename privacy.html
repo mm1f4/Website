@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Privacy Policy for the X Cope website, including what the site stores and how to have it deleted." />
+  <title>Privacy Policy - X Cope</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+  <meta name="theme-color" content="#ffffff" data-theme-color>
+  <!-- Apply the stored theme before first paint so there is no flash of the wrong
+       theme. This is the same snippet index.html uses, so a visitor who already
+       chose a theme gets it here too. -->
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem("xcope-theme") || "auto";
+        var dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var resolved = stored === "auto" ? (dark ? "dark" : "light") : stored;
+        document.documentElement.setAttribute("data-theme", resolved);
+        document.documentElement.setAttribute("data-theme-choice", stored);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/legal.css">
+</head>
+
+<body>
+  <header>
+    <nav class="container">
+      <a class="logo" href="index.html" aria-label="X Cope home">XCOPE</a>
+      <div class="header-controls">
+        <a href="index.html">&larr; Back to the site</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="legal-main">
+    <div class="container">
+      <article class="legal">
+        <h1>Privacy Policy</h1>
+        <p class="legal-meta">Last updated: 13 October 2026</p>
+
+        <p>
+          This policy explains what the X Cope website (the "site") stores about you, why it
+          stores it, and how to have it removed. It covers the site and the small backend
+          service that supports Roblox account linking. It is written to match what the
+          site actually does, so you can check any claim here against the published code.
+        </p>
+
+        <section>
+          <h2>1. Who runs this site</h2>
+          <p>
+            The site is an independent fan project for the Roblox experience <strong>X Cope</strong>,
+            maintained by its operator. It is not operated by, endorsed by, or affiliated with
+            Roblox Corporation. The only contact channel is the official Discord server linked
+            from the site; there is no contact form and no published email address.
+          </p>
+        </section>
+
+        <section>
+          <h2>2. What the site stores</h2>
+
+          <h3>Account information</h3>
+          <p>
+            Creating an account requires an email address and a password. These are handled by
+            Google Firebase Authentication. <strong>The operator never sees or stores your
+            password</strong>; Firebase receives it directly and stores a cryptographic hash.
+            The email address is used for sign-in, for verification messages, and for password
+            resets.
+          </p>
+
+          <h3>Profile details</h3>
+          <p>
+            If you set a display name, it is saved to your account and shown in the site header
+            and on your profile page. If you upload a profile picture, the image is
+            <strong>resized on your own device before it is uploaded</strong>, then stored on
+            your account as a small embedded image. The site does not use cloud file storage
+            for this.
+          </p>
+
+          <h3>Roblox account linking (optional)</h3>
+          <p>
+            Linking a Roblox account is optional and only happens if you choose to do it. Two
+            methods exist, and they collect different things:
+          </p>
+          <ul>
+            <li>
+              <strong>Username plus a verification code.</strong> You enter a Roblox username,
+              the site reads that account's <em>public</em> profile (account id, username,
+              display name and avatar image) to confirm the account exists, and you prove you
+              control it by temporarily placing a code in your Roblox profile's "About me"
+              field. Only public information is read.
+            </li>
+            <li>
+              <strong>Official Roblox sign-in (OAuth 2.0).</strong> If this method is enabled,
+              you sign in on Roblox's own site and Roblox returns only your account id,
+              username, display name, avatar image and profile link. The site requests just
+              the <code>openid</code> and <code>profile</code> permissions and cannot read your
+              Roblox password, email address, Robux, inventory or messages.
+            </li>
+          </ul>
+          <p>
+            In both cases the resulting link is currently stored <strong>in your own browser</strong>,
+            not on the server, so it does not follow you to another device. If official Roblox
+            sign-in is used, the backend service receives the Roblox access and refresh tokens
+            needed to complete the exchange; those tokens are held only as encrypted secrets in
+            the backend and are never placed in the page or in a file.
+          </p>
+
+          <h3>Preferences and session state</h3>
+          <p>
+            The site remembers a few choices in your browser's local storage: the language you
+            picked, the colour theme, the background you chose, and whether you asked to stay
+            signed in. Your current position in the profile page is kept separately in session
+            storage, which your browser discards when the tab is closed. None of this is sent
+            anywhere.
+          </p>
+        </section>
+
+        <section>
+          <h2>3. What the site does not do</h2>
+          <ul>
+            <li>No advertising, and no advertising or remarketing identifiers.</li>
+            <li>
+              No analytics or behavioural tracking. The site loads no analytics module and runs
+              no tracking script. A measurement identifier appears in the site's Firebase
+              configuration, but no analytics code is loaded, so it is unused.
+            </li>
+            <li>No selling, renting or trading of personal information to anyone.</li>
+            <li>No collection of payment details, and nothing on the site costs money.</li>
+            <li>No access to your Roblox password, Robux, inventory or private messages.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>4. Who else is involved</h2>
+          <p>
+            Running the site depends on a few outside services. They process data on the
+            operator's behalf or because your browser contacts them directly:
+          </p>
+          <ul>
+            <li>
+              <strong>Google Firebase Authentication</strong> — stores your account credentials
+              and profile details, and sends verification and password-reset emails.
+            </li>
+            <li>
+              <strong>Cloudflare Workers</strong> — hosts the backend that talks to Roblox and
+              verifies signed-in visitors. It holds the Roblox credentials as encrypted
+              secrets.
+            </li>
+            <li>
+              <strong>Google Fonts</strong> — supplies the site's typefaces. Your browser
+              requests the font files from Google's servers, which means Google receives your
+              IP address and browser details as part of serving that request.
+            </li>
+            <li>
+              <strong>GitHub Pages</strong> — serves the site's files.
+            </li>
+            <li>
+              <strong>Discord</strong> — hosts the community server. Following the invite means
+              leaving the site and becoming subject to Discord's own privacy policy.
+            </li>
+          </ul>
+          <p>
+            Roblox itself processes the sign-in and public profile data described above under
+            its own privacy policy. This site is not responsible for how those providers handle
+            data.
+          </p>
+        </section>
+
+        <section>
+          <h2>5. How long it is kept</h2>
+          <p>
+            Account information is kept for as long as your account exists. Information held in
+            your browser stays until you clear your browser storage or remove it through the
+            site. Data is deleted when the account is deleted, apart from anything a provider
+            retains in routine backups.
+          </p>
+        </section>
+
+        <section>
+          <h2>6. Deleting your data</h2>
+          <p>
+            You can remove the browser-side data yourself at any time by clearing this site's
+            storage in your browser settings.
+          </p>
+          <p>
+            The site does not yet offer a self-service "delete my account" button, so removing
+            an account is done on request. Ask in the official Discord server and the account
+            and the profile details attached to it will be deleted. You can also ask to see
+            what is stored, correct it, or receive a copy of it.
+          </p>
+        </section>
+
+        <section>
+          <h2>7. Children</h2>
+          <p>
+            The site is not directed at children under 13. If you are under 13, please use it
+            only with the involvement of a parent or guardian, and do not create an account or
+            link a Roblox account without their permission. A request to delete an account
+            belonging to a child will be honoured on request through the Discord server.
+          </p>
+        </section>
+
+        <section>
+          <h2>8. Security</h2>
+          <p>
+            Passwords are handled by Firebase and are never stored by the site. Roblox
+            credentials are kept as encrypted secrets in the backend and never written into
+            the site's files. No system is perfectly secure, so please use a password you do
+            not use anywhere else.
+          </p>
+        </section>
+
+        <section>
+          <h2>9. Changes to this policy</h2>
+          <p>
+            This policy may be updated if the site changes how it handles data. The date at
+            the top shows when it last changed. Continued use of the site after a change means
+            you accept the updated policy.
+          </p>
+        </section>
+
+        <section>
+          <h2>10. Contact</h2>
+          <p class="legal-note">
+            For any question about this policy, or any request to see, correct or delete your
+            data, use the official Discord server linked from the site's Contact section.
+          </p>
+        </section>
+
+        <p class="legal-links">
+          See also the <a href="terms.html">Terms of Service</a> &middot;
+          <a href="index.html">Back to the site</a>
+        </p>
+      </article>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; <span id="year">2026</span> X COPE. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html>
