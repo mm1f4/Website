@@ -1807,6 +1807,27 @@ footer {
   min-width: 0;
 }
 
+/* Separates the official Roblox sign-in from the manual code method, which is
+   kept as a fallback rather than removed. */
+.roblox-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-5) 0 var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.roblox-divider::before,
+.roblox-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
 .roblox-empty strong {
   font-size: var(--text-sm);
   color: var(--text-strong);

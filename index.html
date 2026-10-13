@@ -388,6 +388,17 @@
               </div>
             </div>
 
+            <!-- Official Roblox sign-in. Shown only when the client id, the
+                 redirect URI and the Worker are all configured. -->
+            <div id="robloxOauthBlock" class="is-hidden">
+              <div class="form-actions">
+                <button type="button" class="btn" id="robloxOauthBtn" data-i18n="link.oauthButton">Continue with Roblox</button>
+              </div>
+              <p class="field-hint" data-i18n="link.oauthPrivacy">You sign in on Roblox's own site. This app only asks to see your account ID, username, display name and avatar, and only while linking.</p>
+
+              <p class="roblox-divider" data-i18n="link.orManual">Or verify a code instead</p>
+            </div>
+
             <!-- Step 1: username -->
             <div id="robloxStepUsername">
               <div class="form-group">
@@ -589,6 +600,10 @@
       createRobloxLink, renderRobloxLink, RobloxLinkError,
       generateVerificationCode, descriptionHasCode, setProxyEndpoint
     } from './js/roblox.js';
+    import {
+      setOAuthConfig, isOAuthConfigured, beginOAuth, completeOAuth,
+      revokeOAuth, takeCallback, takeResult, stashResult, RobloxOAuthError
+    } from './js/roblox-oauth.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyDyJrVYdADEy8Eb18JfQYK2x_l5DZ90NKc",
@@ -800,6 +815,18 @@
         "link.disconnect": "Unlink",
         "link.privacy": "Only your public Roblox profile and About me are read. Your Roblox password is never shared with this site.",
         "link.codeReady": "Code ready. Paste it into your Roblox About me, then press Verify.",
+        "link.oauthButton": "Continue with Roblox",
+        "link.oauthPrivacy": "You sign in on Roblox's own site. This app only asks to see your account ID, username, display name and avatar, and only while linking.",
+        "link.orManual": "Or verify a code instead",
+        "link.oauthLinked": "Roblox account linked.",
+        "link.oauthCancelled": "Roblox sign-in was cancelled.",
+        "link.oauthFailed": "Roblox sign-in could not be completed. Please try again.",
+        "link.oauthExpired": "That sign-in took too long and expired. Please press Continue with Roblox again.",
+        "link.oauthCodeExpired": "The Roblox sign-in expired before it finished. Please press Continue with Roblox again.",
+        "link.oauthStateMismatch": "That sign-in did not start in this browser, so it was refused.",
+        "link.oauthNotConfigured": "Roblox sign-in is not configured on this site yet.",
+        "link.oauthUnsupported": "This browser cannot do the secure sign-in that Roblox requires.",
+        "link.unlinkedLocal": "Roblox account unlinked here. Roblox could not be reached to revoke the authorisation.",
         "link.linked": "Roblox account linked.",
         "link.unlinked": "Roblox account unlinked.",
         "link.enterUsername": "Please enter your Roblox username.",
@@ -1014,6 +1041,18 @@
         "link.disconnect": "解除連結",
         "link.privacy": "只會讀取你的 Roblox 公開資料與「關於我」，你的 Roblox 密碼不會分享給本網站。",
         "link.codeReady": "驗證碼已產生。請貼到你的 Roblox「關於我」，然後按「驗證」。",
+        "link.oauthButton": "使用 Roblox 繼續",
+        "link.oauthPrivacy": "你會在 Roblox 官方網站上登入。本應用程式只要求讀取你的帳戶 ID、使用者名稱、顯示名稱與頭像，且僅在連結時讀取。",
+        "link.orManual": "或改用驗證碼",
+        "link.oauthLinked": "Roblox 帳戶已連結。",
+        "link.oauthCancelled": "已取消 Roblox 登入。",
+        "link.oauthFailed": "Roblox 登入未能完成，請再試一次。",
+        "link.oauthExpired": "這次登入逾時失效了，請再按一次「使用 Roblox 繼續」。",
+        "link.oauthCodeExpired": "Roblox 登入在完成前已失效，請再按一次「使用 Roblox 繼續」。",
+        "link.oauthStateMismatch": "這次登入不是從這個瀏覽器開始的，因此已拒絕。",
+        "link.oauthNotConfigured": "本網站尚未設定 Roblox 登入。",
+        "link.oauthUnsupported": "此瀏覽器不支援 Roblox 要求的安全登入方式。",
+        "link.unlinkedLocal": "已在此解除連結，但無法連上 Roblox 撤銷授權。",
         "link.linked": "Roblox 帳戶已連結。",
         "link.unlinked": "Roblox 帳戶已解除連結。",
         "link.enterUsername": "請輸入你的 Roblox 使用者名稱。",
@@ -1479,6 +1518,9 @@
         bootRoute = HOME;
         currentRoute = HOME; // force goRoute down its profile branch
         goRoute(PROFILE, false, undefined, panel || undefined, true);
+        // Runs here as well as below: this branch returns. The OAuth exchange
+        // needs a signed-in visitor, which is exactly what has just been settled.
+        if (currentUser) finishRobloxOAuth();
         return;
       }
 
@@ -1493,6 +1535,7 @@
       } else if (currentUser && currentRoute === PROFILE) {
         renderProfile();
       }
+      if (currentUser) finishRobloxOAuth();
       paintAvatars(currentUser || user);
     });
 
@@ -2476,6 +2519,23 @@
     const ROBLOX_PROXY_ENDPOINT = "https://xcope-roblox.xcope.workers.dev";
     setProxyEndpoint(ROBLOX_PROXY_ENDPOINT);
 
+    // Official OAuth 2.0, the reviewed path. The client id is public; the secret
+    // never leaves the Worker. REDIRECT_URI must match the Roblox app setting
+    // exactly, character for character, or the exchange is refused.
+    const ROBLOX_CLIENT_ID = "3025970434055453261";
+    const ROBLOX_REDIRECT_URI = "https://mm1f4.github.io/Website/";
+    setOAuthConfig({
+      clientId: ROBLOX_CLIENT_ID,
+      redirectUri: ROBLOX_REDIRECT_URI,
+      endpoint: ROBLOX_PROXY_ENDPOINT
+    });
+
+    // Read the OAuth callback before anything else touches the fragment: the
+    // router reads the hash during boot and clears it, which would throw the
+    // authorisation code away. takeCallback() also strips it from the URL, so the
+    // code does not linger in history.
+    const robloxOAuthCallback = takeCallback();
+
     const robloxLink = createRobloxLink();
 
     function linkStatus(key, type) {
@@ -2512,6 +2572,7 @@
       const linkedBox = document.getElementById("robloxLinked");
       const stepUser = document.getElementById("robloxStepUsername");
       const stepVerify = document.getElementById("robloxStepVerify");
+      const oauthBlock = document.getElementById("robloxOauthBlock");
 
       if (linkedBox) {
         linkedBox.classList.toggle("is-hidden", !linked);
@@ -2525,6 +2586,11 @@
       const showVerify = !linked && !!pending;
       if (stepVerify) stepVerify.classList.toggle("is-hidden", !showVerify);
       if (stepUser) stepUser.classList.toggle("is-hidden", !!linked || showVerify);
+      // The sign-in button only makes sense while nothing is linked and no
+      // code is mid-flight, and only when the OAuth pieces are actually set.
+      if (oauthBlock) {
+        oauthBlock.classList.toggle("is-hidden", !!linked || showVerify || !isOAuthConfigured());
+      }
 
       if (showVerify) {
         const codeEl = document.getElementById("robloxCode");
@@ -2546,12 +2612,47 @@
         message: (error && error.message) || String(error),
         at: Date.now()
       };
-      if (error instanceof RobloxLinkError && error.key) {
+      // Both link errors carry a translatable key, so they are reported the same
+      // way whichever path raised them.
+      const isKeyed = (error instanceof RobloxLinkError) || (error instanceof RobloxOAuthError);
+      if (isKeyed && error.key) {
         if (error.detail) console.error("[robloxLink]", error.key, error.detail);
         return linkStatus(error.key);
       }
       console.error("[robloxLink]", error && error.message ? error.message : error);
       linkStatus("link.failed");
+    }
+
+    // Finishes an OAuth callback. Called from the auth pass, because the exchange
+    // needs a Firebase ID token and therefore a signed-in visitor.
+    async function finishRobloxOAuth() {
+      if (!robloxOAuthCallback) return;
+      if (robloxOAuthCallback.error) {
+        if (robloxOAuthCallback.error !== "access_denied") {
+          console.error("[robloxOAuth] Roblox returned", robloxOAuthCallback.error, robloxOAuthCallback.errorDescription);
+        }
+        linkStatus(robloxOAuthCallback.error === "access_denied" ? "link.oauthCancelled" : "link.oauthFailed");
+        return;
+      }
+      if (!robloxOAuthCallback.code) return;
+
+      try {
+        const { profile, refreshToken } = await completeOAuth(robloxOAuthCallback, () => currentUser.getIdToken(), {
+          storageKey: "xcope-roblox-link"
+        });
+        // The refresh token is what makes Unlink able to revoke the grant on
+        // Roblox's side, so it is kept with the link. It never leaves this browser
+        // except back to the Worker, which holds the secret needed to use it.
+        if (refreshToken) {
+          try { localStorage.setItem("xcope-roblox-refresh", refreshToken); } catch (e) { /* storage blocked */ }
+        }
+        stashResult({ key: "link.oauthLinked", username: profile.username });
+        renderRobloxPanel();
+        linkStatus("link.oauthLinked", "success");
+        console.log("[robloxOAuth] linked", profile.username, profile.id);
+      } catch (error) {
+        reportLinkError(error);
+      }
     }
 
     (function initRobloxLink() {
@@ -2579,6 +2680,22 @@
       if (usernameField) {
         usernameField.addEventListener("keydown", (event) => {
           if (event.key === "Enter") { event.preventDefault(); lookupBtn.click(); }
+        });
+      }
+
+      const oauthBtn = document.getElementById("robloxOauthBtn");
+      if (oauthBtn) {
+        oauthBtn.addEventListener("click", async () => {
+          clearLinkStatus();
+          oauthBtn.disabled = true;
+          try {
+            // beginOAuth navigates away on success, so the disabled state only
+            // matters if it throws.
+            await beginOAuth(() => (currentUser ? currentUser.getIdToken() : null));
+          } catch (error) {
+            reportLinkError(error);
+            oauthBtn.disabled = false;
+          }
         });
       }
 
@@ -2611,10 +2728,27 @@
 
       const unlinkBtn = document.getElementById("robloxUnlinkBtn");
       if (unlinkBtn) {
-        unlinkBtn.addEventListener("click", () => {
+        unlinkBtn.addEventListener("click", async () => {
+          const linked = robloxLink.load();
+          let refreshToken = null;
+          try { refreshToken = localStorage.getItem("xcope-roblox-refresh"); } catch (e) { /* storage blocked */ }
+
+          // Forget it locally first, so the button always does what it says even
+          // if Roblox cannot be reached.
           robloxLink.unlink();
+          try { localStorage.removeItem("xcope-roblox-refresh"); } catch (e) { /* storage blocked */ }
           renderRobloxPanel();
-          linkStatus("link.unlinked", "success");
+
+          if (linked && linked.viaOauth && refreshToken) {
+            unlinkBtn.disabled = true;
+            // Ask the Worker to revoke the grant, so unlinking here also ends the
+            // authorisation on Roblox's side rather than only forgetting it.
+            const revoked = await revokeOAuth(refreshToken, () => (currentUser ? currentUser.getIdToken() : null));
+            unlinkBtn.disabled = false;
+            linkStatus(revoked ? "link.unlinked" : "link.unlinkedLocal", "success");
+          } else {
+            linkStatus("link.unlinked", "success");
+          }
         });
       }
 
