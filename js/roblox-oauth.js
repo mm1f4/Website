@@ -163,6 +163,36 @@ export function takeResult() {
   } catch (e) { return null; }
 }
 
+/* -------------------------------------------------------------- return trip */
+
+/**
+ * Where the visitor was standing when they pressed the button.
+ *
+ * Leaving for Roblox is a full navigation, and the panel this tab was reading is
+ * remembered through the URL fragment. That fragment is gone by the time the
+ * callback comes back, so the panel has to be parked here instead or the
+ * visitor returns to the landing page with no sign of what they just did.
+ */
+const RETURN_PANEL_KEY = 'xcope-roblox-oauth-panel';
+
+/** Parks the panel the callback should return to. */
+export function rememberReturnPanel(id) {
+  try {
+    if (id) sessionStorage.setItem(RETURN_PANEL_KEY, String(id));
+    else sessionStorage.removeItem(RETURN_PANEL_KEY);
+  } catch (e) { /* storage blocked */ }
+  return id || '';
+}
+
+/** Reads the parked panel without consuming it, so a reload still restores it. */
+export function peekReturnPanel() {
+  try { return sessionStorage.getItem(RETURN_PANEL_KEY) || ''; } catch (e) { return ''; }
+}
+
+export function clearReturnPanel() {
+  try { sessionStorage.removeItem(RETURN_PANEL_KEY); } catch (e) { /* storage blocked */ }
+}
+
 /* ------------------------------------------------------------------- start */
 
 /**

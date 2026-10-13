@@ -602,7 +602,8 @@
     } from './js/roblox.js';
     import {
       setOAuthConfig, isOAuthConfigured, beginOAuth, completeOAuth,
-      revokeOAuth, takeCallback, takeResult, stashResult, RobloxOAuthError
+      revokeOAuth, takeCallback, takeResult, stashResult, RobloxOAuthError,
+      rememberReturnPanel, peekReturnPanel, clearReturnPanel
     } from './js/roblox-oauth.js';
 
     const firebaseConfig = {
@@ -1725,6 +1726,14 @@
       const fromHash = panelFromHash();
       if (panelExists(fromHash)) return { route: PROFILE, panel: fromHash };
       if (location.hash === "#profile") return { route: PROFILE, panel: rememberedPanel() };
+      // Returning from Roblox. The callback fragment is neither #profile nor a
+      // panel hash, so without this the visitor is dropped on the landing page
+      // with no sign of the linking they just completed. The route is forced back
+      // to the profile, and to the panel they pressed the button on.
+      if (robloxOAuthCallback) {
+        const parked = peekReturnPanel();
+        return { route: PROFILE, panel: panelExists(parked) ? parked : "profile-connections" };
+      }
       return { route: routeFromHash(), panel: rememberedPanel() };
     }
 
@@ -2647,10 +2656,14 @@
           try { localStorage.setItem("xcope-roblox-refresh", refreshToken); } catch (e) { /* storage blocked */ }
         }
         stashResult({ key: "link.oauthLinked", username: profile.username });
+        // The return trip is over, so a later refresh should behave normally
+        // rather than forcing its way back to this panel again.
+        clearReturnPanel();
         renderRobloxPanel();
         linkStatus("link.oauthLinked", "success");
         console.log("[robloxOAuth] linked", profile.username, profile.id);
       } catch (error) {
+        clearReturnPanel();
         reportLinkError(error);
       }
     }
@@ -2687,12 +2700,19 @@
       if (oauthBtn) {
         oauthBtn.addEventListener("click", async () => {
           clearLinkStatus();
+          // Leaving for Roblox is a full navigation and the panel this tab is on
+          // is normally remembered through the URL fragment, which will be gone
+          // by the time the callback arrives. Park it so the return trip lands
+          // back here rather than on the landing page.
+          if (panelExists(panelFromHash())) rememberReturnPanel(panelFromHash());
+          else rememberReturnPanel("profile-connections");
           oauthBtn.disabled = true;
           try {
             // beginOAuth navigates away on success, so the disabled state only
             // matters if it throws.
             await beginOAuth(() => (currentUser ? currentUser.getIdToken() : null));
           } catch (error) {
+            clearReturnPanel();
             reportLinkError(error);
             oauthBtn.disabled = false;
           }
