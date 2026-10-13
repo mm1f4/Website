@@ -2473,7 +2473,7 @@
     // Many networks block Roblox outright, and Roblox does not always send CORS
     // headers, so the browser tries Roblox first and falls back to this Worker.
     // Leave it empty to run without a proxy.
-    const ROBLOX_PROXY_ENDPOINT = "";
+    const ROBLOX_PROXY_ENDPOINT = "https://xcope-roblox.xcope.workers.dev";
     setProxyEndpoint(ROBLOX_PROXY_ENDPOINT);
 
     const robloxLink = createRobloxLink();

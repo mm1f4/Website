@@ -15,18 +15,30 @@ optional backend service.
 | Hosting | GitHub Pages, `main` branch, `/ (root)`, no build step |
 | Deployment | push to `main`; Pages rebuilds in about 1–2 minutes |
 
-The site is three files plus assets, and it deliberately has **no build step**:
-`index.html` holds the markup, styles and one inline ES module; `css/style.css`
-holds all styling; `js/roblox.js` is a separate module for Roblox linking.
+The site is a handful of files plus assets, and it deliberately has **no build
+step**: `index.html` holds the markup, styles and one inline ES module;
+`css/style.css` holds all styling; `js/roblox.js` is a separate module for Roblox
+linking; and the two legal pages are plain documents that reuse the same
+stylesheet.
 
 ```
 index.html          markup, i18n dictionaries, the whole page script
 css/style.css       every style, organised into numbered sections
+css/legal.css       the reading column for privacy.html and terms.html only
 js/roblox.js        Roblox username lookup + About me code verification
-link-service/       optional Cloudflare Worker (see below); not deployed yet
+privacy.html        Privacy Policy; a required field on the Roblox app form
+terms.html          Terms of Service; the other required field
+link-service/       Cloudflare Worker, deployed as xcope-roblox
 .nojekyll           tells Pages to serve files as-is
 .gitattributes      keeps line endings LF so diffs stay readable
 ```
+
+`privacy.html` and `terms.html` are registered as the Privacy Policy URL and
+Terms of Service URL on the Roblox OAuth application, so their URLs are load
+bearing: `https://mm1f4.github.io/Website/privacy.html` and
+`.../terms.html`. Renaming or moving either one breaks the Roblox app
+registration. They are deliberately single-language English, because the forms
+that consume them are English.
 
 ## Live features
 
@@ -70,8 +82,12 @@ These need console access I do not have. Ask before assuming they are done.
    `xcope.photo.probe2@gmail.com`, and several `domain.probe.*@example.com`.
 2. **Firestore** — not enabled. Needed if the Roblox link and the background
    should sync across devices instead of living in one browser.
-3. **Roblox OAuth app** — not registered. See "Roblox" below.
-4. **Cloudflare Worker** — `link-service/` is written but not deployed.
+3. **Roblox OAuth app** — registered. Client ID `3025970434055453261`, category
+   Account Linking Tools, scopes `openid profile`. The secret could not be read
+   back, so treat the Worker's copy as the only one.
+4. **Cloudflare Worker** — deployed as `xcope-roblox` at
+   `https://xcope-roblox.xcope.workers.dev`, and its URL is already in
+   `ROBLOX_PROXY_ENDPOINT`. `/health` answers without any secret at all.
 
 ## Roblox
 
@@ -79,39 +95,68 @@ Two paths exist, and the choice matters.
 
 **In use now: username + About me code.** The visitor types their username, the
 site shows a code, they paste it into their Roblox profile's About me, then press
-Verify. This proves they control the account. No backend and no Roblox review is
-needed.
+Verify. This proves they control the account. No Roblox review is needed.
 
-**Written but inactive: official OAuth 2.0.** Roblox's token exchange requires
-the app's client secret, which can never be in a browser, so it needs the Worker
-in `link-service/`. The Worker already implements the exchange and verifies the
-caller's Firebase ID token. To switch:
+This path is **not** independent of the Worker, which an earlier version of this
+file got wrong. Roblox sends no CORS headers on any of the three endpoints this
+uses - `users.roblox.com/v1/usernames/users`, `users.roblox.com/v1/users/<id>` and
+`thumbnails.roblox.com/v1/users/avatar-headshot` all answer 200 with no
+`access-control-allow-origin`, and the username POST answers 405 to a preflight -
+so a browser can never read them directly. Reaching Roblox from the page is only
+possible through the Worker, which is server-to-server and so not subject to
+CORS. The direct attempt in `js/roblox.js` is kept because it costs one failed
+request and would start working if Roblox ever added the header.
 
-1. Register an app at
-   https://create.roblox.com/dashboard/credentials?activeTab=OAuthTab with
-   category **Account Linking Tools**, scopes `openid profile`, and the redirect
-   URL `https://mm1f4.github.io/Website/`.
+Consequence worth remembering: the Worker's `ALLOWED_ORIGINS` must contain the
+exact origin the site is served from. Opening `index.html` from the filesystem,
+or from a Live Server port that is not listed, makes every lookup fail. The list
+is `https://mm1f4.github.io` plus ports 5501 on `127.0.0.1` and `localhost`,
+matching `.vscode/settings.json`.
+
+**Written but inactive: official OAuth 2.0.** The app is registered (see above)
+and the Worker implements the exchange, including verifying the caller's Firebase
+ID token, but nothing drives it from the page yet. To switch, the page has to be
+changed to use `/exchange`; the secrets are already set:
+
+1. ~~Register an app~~ done, at
+   https://create.roblox.com/dashboard/credentials?activeTab=OAuthTab.
 2. `cd link-service && npm install && npx wrangler login && npx wrangler deploy`
+   — done; redeploy after any Worker edit.
 3. `npx wrangler secret put` for `ROBLOX_CLIENT_ID`, `ROBLOX_CLIENT_SECRET`,
-   `ROBLOX_REDIRECT_URI`, `FIREBASE_PROJECT_ID`.
-4. Put the Worker URL in `ROBLOX_PROXY_ENDPOINT` in `index.html`.
+   `ROBLOX_REDIRECT_URI`, `FIREBASE_PROJECT_ID` — done.
+4. Put the Worker URL in `ROBLOX_PROXY_ENDPOINT` in `index.html` — done.
 
 A new Roblox app is limited to **10 users** until it passes Roblox's review,
 which requires a one minute demo video.
 
-**The Worker is also needed for the current method** if the visitor's network
-blocks Roblox, which is described next. It can proxy the plain public Roblox API
-with no secrets at all (`/roblox/lookup`, `/roblox/user`).
-
 ## Environment facts worth knowing
 
-- **Roblox is unreachable from the owner's machine.** Every Roblox host times
-  out over HTTPS. GitHub, Google and Cloudflare work. This means the Roblox API
-  cannot be exercised from that machine, and the linking feature will not work
-  there without the Worker proxy.
-- **The shell is Windows PowerShell 5.1.** No ternary operator, and quoting
-  through `node -e` from PowerShell breaks often. Prefer writing a small `.cjs`
-  file and running it, rather than long inline commands.
+- **Roblox is reachable from the owner's machine, but not readable by the
+  browser.** An earlier version of this file said every Roblox host times out.
+  That is no longer true: `users.roblox.com`, `thumbnails.roblox.com` and
+  `www.roblox.com` all answer 200, and `apis.roblox.com` answers 401 without a
+  token, which is the expected unauthenticated reply. This was tested with a
+  plain Node request. A direct request does still work for **checking the API by
+  hand**, which is how the Worker's three Roblox endpoints were confirmed
+  against the live service. It does not make the page work without the Worker;
+  see the CORS note under "Roblox" for why.
+- **git is installed per-user at `%LOCALAPPDATA%\Programs\Git`** (2.55.0), with
+  the identity already set to `mm1f4 <6fcymcapsbcc@gmail.com>`. It is on the
+  machine PATH, but a shell started before the install keeps the old
+  environment, so an already-running terminal may need a restart before `git`
+  resolves.
+- **The shell is Windows PowerShell 7 (`pwsh`), not 5.1.** An earlier version of
+  this file said 5.1. The quoting advice still holds and is worth keeping:
+  inline `node -e` through PowerShell breaks often, so prefer writing a small
+  `.cjs` file and running it. Note that `node`, `npm` and `npx` are not on PATH
+  by default, so call Node by full path or add it first.
+- **A browser cannot be launched under the agent sandbox.** Chrome and Edge both
+  die with `mojo platform_channel.cc: Check failed` because the sandbox
+  denies named pipes, so the headless-Chrome verification described below cannot
+  be reproduced from inside a sandboxed session. It still needs a real terminal.
+  Everything reachable without a browser is still worth doing: `node --check`
+  for syntax, importing the modules and stubbing `fetch`, and fetching the live
+  files to compare against the working tree.
 - **OneDrive interferes with atomic file replaces.** Writing a file that was
   recently deleted, or edited by a script, can fail with
   `ReplaceFileW EIO (Win32 1175)`. Retrying usually works; otherwise write to a
@@ -149,6 +194,19 @@ that works:
 - Screenshot with `Page.captureScreenshot` and read the image back to catch
   layout problems that assertions miss. Several real bugs were found this way
   and only this way.
+
+When a browser cannot be launched at all (see the sandbox note above), fall back
+to what does not need one, and say plainly in the commit which checks were
+skipped rather than implying the page was seen:
+
+- `node --check` for syntax on every changed `.js`.
+- Import the real module and stub `fetch`, so the branch under test actually
+  executes. This is what proved the avatar proxy fallback was unreachable.
+- Fetch the deployed files and compare them byte for byte against the working
+  tree, which catches a failed Pages build.
+- Compare the i18n dictionaries key by key, since a key present in only one
+  language silently renders English to a Chinese visitor.
+- Exercise the deployed Worker directly with the production `Origin` header.
 
 Delete every harness afterwards. `git status` should be clean, and no `.dsh-*`
 file should remain.
@@ -212,11 +270,20 @@ scrim alone.
 
 - Roblox link and background choice live in one browser, not synced. Moving them
   to Firestore is the obvious next step and needs the security rules written.
-- `link-service/` has had its logic verified by importing the module and
-  stubbing the upstream network, but it has never run against the real Roblox
-  API, because that API is unreachable from the development machine.
-- The Roblox bio-code path has been exercised against a stubbed Roblox API with
-  a real browser, not against the live service.
+- **The Worker has now been run against the live Roblox API.** `/health`,
+  `/roblox/lookup` and `/roblox/user` were all exercised for real, including the
+  CORS headers for the production origin, the refusal of an unlisted origin, and
+  the real public profile of a Roblox account. The `/exchange` route for official
+  OAuth has **not** been exercised, so that path is still unproven.
+- **The bio-code path still has not been completed end to end against the live
+  service**, because that requires a browser. What was proved without one:
+  `begin()` resolved a real username through the Worker and produced a correctly
+  shaped code, `confirm()` correctly refused with `link.codeNotFound` when the
+  code was not on the profile, and the matching rule tolerates the spaces, case
+  and punctuation Roblox may introduce. Nobody has yet pasted a real code into a
+  real About me and seen the link succeed.
+- Ongoing cost of the Worker CORS list: adding a new test origin means editing
+  `ALLOWED_ORIGINS` and redeploying, or every request from that origin fails.
 - Nothing loads Roblox data in-game yet. When the link is synced, the Roblox
   experience would read the stored id to recognise the player.
 - The contact section is the Discord invite only
