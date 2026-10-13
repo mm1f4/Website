@@ -348,11 +348,25 @@ async function exchangeCode(env, code, codeVerifier) {
   // app, so if the first form is refused as an unknown client the second is
   // tried before giving up. A wrong secret reports the same error under both, so
   // this costs one extra request only when something is already wrong.
+  //
+  // The Basic form must not also carry client_id in the body. Roblox answers
+  // "Ambiguous request because multiple authentication methods are used" when it
+  // sees both, which is not what an unknown client looks like, so the fallback
+  // appeared to fail for a reason of its own making.
   const attempts = [
-    { label: 'client_secret_post', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(Object.assign({}, params, { client_id: clientId, client_secret: clientSecret })) },
-    { label: 'client_secret_basic', headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: basicAuthHeader(clientId, clientSecret) },
-      body: new URLSearchParams(Object.assign({}, params, { client_id: clientId })) },
+    {
+      label: 'client_secret_post',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(Object.assign({}, params, { client_id: clientId, client_secret: clientSecret })),
+    },
+    {
+      label: 'client_secret_basic',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: basicAuthHeader(clientId, clientSecret),
+      },
+      body: new URLSearchParams(params),
+    },
   ];
 
   let last = null;
@@ -387,12 +401,17 @@ async function revokeToken(env, refreshToken) {
   const clientId = configValue(env, 'ROBLOX_CLIENT_ID');
   const clientSecret = configValue(env, 'ROBLOX_CLIENT_SECRET');
 
-  // Same two credential forms as the exchange, for the same reason.
+  // Same two credential forms as the exchange, for the same reason, and with the
+  // same rule: the Basic form must not repeat client_id in the body.
   for (const attempt of [
-    { headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ token: refreshToken, client_id: clientId, client_secret: clientSecret }) },
-    { headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: basicAuthHeader(clientId, clientSecret) },
-      body: new URLSearchParams({ token: refreshToken, client_id: clientId }) },
+    {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ token: refreshToken, client_id: clientId, client_secret: clientSecret }),
+    },
+    {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: basicAuthHeader(clientId, clientSecret) },
+      body: new URLSearchParams({ token: refreshToken }),
+    },
   ]) {
     const res = await fetch(ROBLOX_REVOKE_URL, {
       method: 'POST',
