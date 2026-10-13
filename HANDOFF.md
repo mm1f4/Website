@@ -93,13 +93,17 @@ These need console access I do not have. Ask before assuming they are done.
 
 Two paths exist, and the choice matters.
 
-**In use now: username + About me code.** The visitor types their username, the
-site shows a code, they paste it into their Roblox profile's About me, then press
-Verify. This proves they control the account. No Roblox review is needed.
+**In use now: official OAuth 2.0, alongside the About me code.** The visitor
+presses Continue with Roblox, authorises on Roblox's own site, and comes back
+linked. This is the path Roblox's app review asks for, and it is the one to
+demonstrate. The About me method is kept as a second option on the same panel: it
+needs no review, and the app's 10-user limit does not apply to it, so removing it
+would trade away a working route for nothing.
 
-This path is **not** independent of the Worker, which an earlier version of this
-file got wrong. Roblox sends no CORS headers on any of the three endpoints this
-uses - `users.roblox.com/v1/usernames/users`, `users.roblox.com/v1/users/<id>` and
+**The About me path is not independent of the Worker**, which an earlier version
+of this file got wrong. Roblox sends no CORS headers on any of the three
+endpoints it uses - `users.roblox.com/v1/usernames/users`,
+`users.roblox.com/v1/users/<id>` and
 `thumbnails.roblox.com/v1/users/avatar-headshot` all answer 200 with no
 `access-control-allow-origin`, and the username POST answers 405 to a preflight -
 so a browser can never read them directly. Reaching Roblox from the page is only
@@ -113,15 +117,53 @@ or from a Live Server port that is not listed, makes every lookup fail. The list
 is `https://mm1f4.github.io` plus ports 5501 on `127.0.0.1` and `localhost`,
 matching `.vscode/settings.json`.
 
-**Written but inactive: official OAuth 2.0.** The app is registered (see above)
-and the Worker implements the exchange, including verifying the caller's Firebase
-ID token, but nothing drives it from the page yet. To switch, the page has to be
-changed to use `/exchange`; the secrets are already set:
+**OAuth 2.0 is live and has completed a real authorisation.** Getting there took
+six separate faults, five of them in this repository and none of them reachable
+without a browser signing in for real. They are worth reading before touching
+this path, because every one of them produced a plausible-looking failure:
 
-1. ~~Register an app~~ done, at
-   https://create.roblox.com/dashboard/credentials?activeTab=OAuthTab.
+1. **The callback arrives in the query string, not the fragment.** Roblox appends
+   `?code=...` to the registered redirect URI. `takeCallback` originally looked
+   only inside `#`, so it never matched and the code sat in the address bar until
+   it expired a minute later, with nothing shown to the visitor. It now reads
+   both and strips the URL to the pathname.
+2. **A callback is not a route.** `#roblox-oauth?code=...` is neither `#profile`
+   nor a `#panel-*` hash, so the router sent the visitor to the landing page and
+   the auth pass, which is where the exchange runs, never ran. `resolveRoute` now
+   recognises the callback and returns the profile route.
+3. **The panel the visitor was on has to be parked.** The panel is normally
+   remembered through the fragment, and the fragment is gone by the time Roblox
+   returns. The button parks it in sessionStorage instead.
+4. **`importKey('spki', ...)` was given a whole X.509 certificate.** Google's
+   endpoint returns certificates; WebCrypto wants only the SubjectPublicKeyInfo
+   inside one, and a browser rejects the certificate outright with "Invalid SPKI
+   input". Node's own crypto unwraps it happily, which is why this survived every
+   stubbed test. `extractSpkiFromCertificate` now walks the DER and finds the key
+   by its shape - not by position, because in a v3 certificate the last field of
+   tbsCertificate is the extensions block. Two wrong turns are recorded in that
+   function's comments: assuming a two byte DER header, and assuming the key is
+   the last field.
+5. **Credentials must not be sent twice.** Roblox answers "Ambiguous request
+   because multiple authentication methods are used" if client_id is in the body
+   while an Authorization header is also present. The Basic form now sends only
+   grant_type, code, code_verifier and redirect_uri.
+6. **`FIREBASE_PROJECT_ID` must equal the page's `firebaseConfig.projectId`.**
+   The Worker compares the token's audience against it. The two live in different
+   files and different systems, and nothing said they had to match.
+
+Diagnostics added along the way, all still in place and worth keeping:
+`window.__lastLinkError`, the exchange interceptor pattern in the console, and a
+Worker that reports both sides of a mismatch. The `invalid_client` failure now
+names the client id it sent and the secret's length; neither is sensitive, and
+without them a wrong stored value is indistinguishable from a wrong secret.
+
+1. Register an app at
+   https://create.roblox.com/dashboard/credentials?activeTab=OAuthTab — done,
+   Client ID `3025970434055453261`, category Account Linking Tools, scopes
+   `openid profile`.
 2. `cd link-service && npm install && npx wrangler login && npx wrangler deploy`
-   — done; redeploy after any Worker edit.
+   — done; **redeploy after any Worker edit**, since only secrets take effect
+   immediately.
 3. `npx wrangler secret put` for `ROBLOX_CLIENT_ID`, `ROBLOX_CLIENT_SECRET`,
    `ROBLOX_REDIRECT_URI`, `FIREBASE_PROJECT_ID` — done.
 4. Put the Worker URL in `ROBLOX_PROXY_ENDPOINT` in `index.html` — done.
@@ -270,17 +312,20 @@ scrim alone.
 
 - Roblox link and background choice live in one browser, not synced. Moving them
   to Firestore is the obvious next step and needs the security rules written.
-- **The Worker has now been run against the live Roblox API.** `/health`,
-  `/roblox/lookup` and `/roblox/user` were all exercised for real, including the
-  CORS headers for the production origin, the refusal of an unlisted origin, and
-  the real public profile of a Roblox account. The `/exchange` route for official
-  OAuth has **not** been exercised, so that path is still unproven.
+- **Official OAuth is now proven end to end.** A real visitor signed in on
+  Roblox, authorised the app, came back, and the site stored the link: the
+  success message appeared with the Roblox display name, username, avatar and a
+  working View profile link. `/health`, `/roblox/lookup`, `/roblox/user` and
+  `/exchange` have all been exercised against the live service, along with the
+  CORS headers for the production origin and the refusal of an unlisted origin.
+  `/unlink` has **not** been exercised against the live service, so the revoke
+  call is still unproven.
 - **The bio-code path still has not been completed end to end against the live
-  service**, because that requires a browser. What was proved without one:
-  `begin()` resolved a real username through the Worker and produced a correctly
-  shaped code, `confirm()` correctly refused with `link.codeNotFound` when the
-  code was not on the profile, and the matching rule tolerates the spaces, case
-  and punctuation Roblox may introduce. Nobody has yet pasted a real code into a
+  service.** What was proved without a browser: `begin()` resolved a real username
+  through the Worker and produced a correctly shaped code, `confirm()` correctly
+  refused with `link.codeNotFound` when the code was not on the profile, and the
+  matching rule tolerates the spaces, case and punctuation Roblox may introduce.
+  Nobody has yet pasted a real code into a
   real About me and seen the link succeed.
 - Ongoing cost of the Worker CORS list: adding a new test origin means editing
   `ALLOWED_ORIGINS` and redeploying, or every request from that origin fails.
