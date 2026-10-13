@@ -87,6 +87,16 @@ async function googleCerts() {
   return certCache.certs;
 }
 
+function describeValue(value) {
+  // Names an invisible cause instead of leaving it to be guessed at: a value
+  // pasted with a trailing newline or space looks identical everywhere it is
+  // displayed, and compares unequal forever.
+  const text = String(value === undefined || value === null ? '' : value);
+  if (!text) return '(unset)';
+  if (text !== text.trim()) return JSON.stringify(text) + ' - has leading or trailing whitespace';
+  return JSON.stringify(text);
+}
+
 async function verifyFirebaseToken(idToken, projectId) {
   if (typeof idToken !== 'string' || idToken.split('.').length !== 3) throw new Error('malformed token');
   const [headerPart, payloadPart, signaturePart] = idToken.split('.');
@@ -94,8 +104,17 @@ async function verifyFirebaseToken(idToken, projectId) {
   const payload = decodeJwtPart(payloadPart);
 
   if (header.alg !== 'RS256') throw new Error('unexpected token algorithm');
-  if (payload.aud !== projectId) throw new Error('token audience mismatch');
-  if (payload.iss !== 'https://securetoken.google.com/' + projectId) throw new Error('token issuer mismatch');
+  // The expected value is a public project id, never a secret, so naming it and
+  // the audience it was compared against costs nothing and turns an opaque 401
+  // into something that can be acted on.
+  if (payload.aud !== projectId) {
+    throw new Error('token audience mismatch: token aud is ' + describeValue(payload.aud) +
+      ', FIREBASE_PROJECT_ID is ' + describeValue(projectId));
+  }
+  if (payload.iss !== 'https://securetoken.google.com/' + projectId) {
+    throw new Error('token issuer mismatch: token iss is ' + describeValue(payload.iss) +
+      ', expected https://securetoken.google.com/' + describeValue(projectId));
+  }
 
   const now = Math.floor(Date.now() / 1000);
   if (typeof payload.exp !== 'number' || payload.exp < now) throw new Error('token expired');
