@@ -606,6 +606,10 @@
       rememberReturnPanel, peekReturnPanel, clearReturnPanel
     } from './js/roblox-oauth.js';
 
+    // The Worker verifies the caller's Firebase ID token, and it checks that the
+    // token's audience equals its own FIREBASE_PROJECT_ID secret. That secret must
+    // therefore be exactly the projectId below, or the exchange answers 401 with
+    // "token audience mismatch" and the link never completes. This bit us once.
     const firebaseConfig = {
       apiKey: "AIzaSyDyJrVYdADEy8Eb18JfQYK2x_l5DZ90NKc",
       authDomain: "x-cope-website.firebaseapp.com",
