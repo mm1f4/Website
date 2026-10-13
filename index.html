@@ -826,6 +826,7 @@
         "link.oauthCodeExpired": "The Roblox sign-in expired before it finished. Please press Continue with Roblox again.",
         "link.oauthStateMismatch": "That sign-in did not start in this browser, so it was refused.",
         "link.oauthNotConfigured": "Roblox sign-in is not configured on this site yet.",
+        "link.oauthNeedSignIn": "Please sign in to this site first, then press Continue with Roblox again.",
         "link.oauthUnsupported": "This browser cannot do the secure sign-in that Roblox requires.",
         "link.unlinkedLocal": "Roblox account unlinked here. Roblox could not be reached to revoke the authorisation.",
         "link.linked": "Roblox account linked.",
@@ -1052,6 +1053,7 @@
         "link.oauthCodeExpired": "Roblox 登入在完成前已失效，請再按一次「使用 Roblox 繼續」。",
         "link.oauthStateMismatch": "這次登入不是從這個瀏覽器開始的，因此已拒絕。",
         "link.oauthNotConfigured": "本網站尚未設定 Roblox 登入。",
+        "link.oauthNeedSignIn": "請先登入本網站，再按一次「使用 Roblox 繼續」。",
         "link.oauthUnsupported": "此瀏覽器不支援 Roblox 要求的安全登入方式。",
         "link.unlinkedLocal": "已在此解除連結，但無法連上 Roblox 撤銷授權。",
         "link.linked": "Roblox 帳戶已連結。",
@@ -2636,6 +2638,21 @@
     // needs a Firebase ID token and therefore a signed-in visitor.
     async function finishRobloxOAuth() {
       if (!robloxOAuthCallback) return;
+
+      // The exchange needs a Firebase ID token, so a visitor who is signed out
+      // cannot complete it. Say so instead of failing quietly: the authorisation
+      // code only lives a minute and cannot be kept, so the flow has to be
+      // started again from a signed-in session. Waiting ages here would be worse
+      // than useless, because the code would have expired by the time the
+      // visitor finished signing in.
+      if (!currentUser && !robloxOAuthCallback.error) {
+        const key = robloxOAuthCallback.code ? "link.oauthNeedSignIn" : "";
+        robloxOAuthCallback = null;
+        clearReturnPanel();
+        if (key) linkStatus(key);
+        return;
+      }
+
       if (robloxOAuthCallback.error) {
         if (robloxOAuthCallback.error !== "access_denied") {
           console.error("[robloxOAuth] Roblox returned", robloxOAuthCallback.error, robloxOAuthCallback.errorDescription);
