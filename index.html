@@ -2828,6 +2828,15 @@
     // pass, and is instant because it is a restore rather than a navigation.
     if (bootRoute === PROFILE) goRoute(PROFILE, false, undefined, entry.panel || undefined, true);
     booting = false;
+
+    // A refusal from Roblox (the visitor pressed Cancel on the consent screen, for
+    // instance) never produces a code and so never becomes a link. Reporting it
+    // here means it is seen even if the exchange in the auth pass is never
+    // reached, and the visitor is not left staring at a silent panel.
+    if (robloxOAuthCallback && (robloxOAuthCallback.error || !robloxOAuthCallback.code)) {
+      linkStatus(robloxOAuthCallback.error === "access_denied" ? "link.oauthCancelled" : "link.oauthFailed");
+    }
+
     if (lastAlert) alert(t(lastAlert.key));
   </script>
 </body>

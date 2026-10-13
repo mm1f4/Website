@@ -14,11 +14,12 @@
  *   3. complete() posts the code and verifier to the Worker, which checks the
  *      Firebase ID token, exchanges the code, read the profile and returns it.
  *
- * Why the fragment and not the query string: the redirect URI is registered as
- * the bare site root, and everything after "#" never reaches a server. GitHub
- * Pages therefore still serves index.html, and the code cannot be mistaken for a
- * route. The code is single use and lives one minute, so it is removed from the
- * URL the moment it is read.
+ * Roblox returns the parameters appended to the registered redirect URI as a
+ * query string, so the callback arrives as `/?code=...&state=...`. takeCallback()
+ * reads both the query string and the fragment and strips the code out of the URL
+ * as soon as it has been read. This was initially written the other way round,
+ * expecting the code in the fragment, which meant the callback was never
+ * recognised at all.
  *
  * PKCE is used even though the client is confidential and the Worker proves the
  * caller's Firebase identity. It costs one hash and closes the window where an
@@ -107,26 +108,44 @@ export async function codeChallengeFor(verifier) {
  * Reads the OAuth callback out of the URL and clears it, returning
  * { code, state, error } or null when this load is not a callback.
  *
- * Must be called before anything else touches the fragment, because the router
- * strips it during boot.
+ * Roblox appends the parameters to the registered redirect URI as an ordinary
+ * query string, so `/?code=...` is what actually comes back. An earlier version
+ * of this file only looked inside the fragment, on the assumption that a fragment
+ * would keep the code away from the server. It never matched, so the exchange was
+ * never attempted and the code sat in the address bar until it expired a minute
+ * later with nothing shown to the visitor. Both places are checked now.
+ *
+ * This must run before the router touches the URL, because the router reads the
+ * fragment during boot.
  */
 export function takeCallback() {
+  const search = String(location.search || '');
   const hash = String(location.hash || '');
-  if (hash.indexOf(CALLBACK_MARKER) === -1) return null;
 
-  const q = hash.indexOf('?');
-  const params = new URLSearchParams(q === -1 ? '' : hash.slice(q + 1));
+  const fromSearch = new URLSearchParams(search);
+  const hashQuery = hash.indexOf('?');
+  const fromHash = new URLSearchParams(hashQuery === -1 ? '' : hash.slice(hashQuery + 1));
+
+  // A marker in the fragment is the strongest signal, because only our own
+  // begin() ever puts one there.
+  const viaMarker = hash.indexOf(CALLBACK_MARKER) !== -1;
+  const pick = (name) => fromHash.get(name) || fromSearch.get(name) || '';
+
+  const code = pick('code');
+  const error = pick('error');
+  if (!viaMarker && !code && !error) return null;
+
   const out = {
-    code: params.get('code') || '',
-    state: params.get('state') || '',
-    error: params.get('error') || '',
-    errorDescription: params.get('error_description') || '',
+    code: code,
+    state: pick('state'),
+    error: error,
+    errorDescription: pick('error_description'),
   };
 
-  // Drop it immediately: the code is single use and should not sit in the URL,
-  // in history, or in a screenshot.
+  // Drop it immediately: the code is single use, and leaving it in the URL keeps
+  // it in history and in anything that screenshots the page.
   if (window.history && window.history.replaceState) {
-    window.history.replaceState(null, '', location.pathname + location.search);
+    window.history.replaceState(null, '', location.pathname);
   }
   return out;
 }
