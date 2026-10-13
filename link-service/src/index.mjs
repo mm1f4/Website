@@ -74,6 +74,79 @@ function pemToDer(pem) {
   return bytes;
 }
 
+/* --------------------------------------------------------------- DER (ASN.1) */
+
+/**
+ * Reads one DER element at `offset`, returning its full extent.
+ *
+ * `start` and `end` bracket the whole element including its header, which is what
+ * makes this usable for slicing: a DER header is not always two bytes. A length
+ * of 128 or more is written as a first byte with the high bit set followed by
+ * that many length bytes, so a certificate's outer sequence is four bytes of
+ * header rather than two. Assuming two was the first attempt at this and it
+ * silently returned the wrong slice.
+ */
+function readDerElement(bytes, offset) {
+  const tag = bytes[offset];
+  let length = bytes[offset + 1];
+  let headerLength = 2;
+  if (length & 0x80) {
+    const count = length & 0x7f;
+    length = 0;
+    for (let i = 0; i < count; i++) length = length * 256 + bytes[offset + 2 + i];
+    headerLength = 2 + count;
+  }
+  const contentStart = offset + headerLength;
+  return { tag, start: offset, contentStart, contentLength: length, end: contentStart + length };
+}
+
+/** The elements directly inside the constructed element that starts at `offset`. */
+function derChildren(bytes, offset) {
+  const outer = readDerElement(bytes, offset);
+  const children = [];
+  let p = outer.contentStart;
+  while (p < outer.end) {
+    const el = readDerElement(bytes, p);
+    if (el.end <= el.start) break; // no progress, malformed
+    children.push(el);
+    p = el.end;
+  }
+  return { children, end: outer.end };
+}
+
+/**
+ * Extracts the SubjectPublicKeyInfo from an X.509 certificate.
+ *
+ * This is the whole reason signature verification used to fail. Google's
+ * endpoint hands back full certificates, and importKey('spki', ...) wants only
+ * the public key field inside one, not the certificate wrapping it. Handing it
+ * the whole certificate makes the browser reject the key outright with "Invalid
+ * SPKI input", which is what happened on the first real sign-in. Node's own
+ * crypto happily unwraps a certificate, so nothing caught this until the Worker
+ * met a real browser.
+ *
+ * The field is found by its shape rather than by its position. In a v3
+ * certificate the last field of tbsCertificate is the extensions, not the key,
+ * so counting from either end is wrong; picking the last child returned the
+ * extension block. A SubjectPublicKeyInfo is the only field in there that is a
+ * SEQUENCE of exactly two things whose second is a BIT STRING.
+ */
+export function extractSpkiFromCertificate(der) {
+  const certificate = derChildren(der, 0);
+  if (certificate.children.length < 3) throw new Error('not an X.509 certificate');
+  const tbs = certificate.children[0];
+  const fields = derChildren(der, tbs.start);
+
+  for (const field of fields.children) {
+    if (field.tag !== 0x30) continue;
+    const inner = derChildren(der, field.start);
+    if (inner.children.length === 2 && inner.children[1].tag === 0x03) {
+      return der.slice(field.start, field.end);
+    }
+  }
+  throw new Error('certificate has no subjectPublicKeyInfo');
+}
+
 /* ------------------------------------------------- Firebase ID token check */
 
 let certCache = { at: 0, certs: null };
@@ -125,9 +198,18 @@ async function verifyFirebaseToken(idToken, projectId) {
   const pem = certs[header.kid];
   if (!pem) throw new Error('unknown signing key');
 
+  // The endpoint returns certificates, so the public key has to be taken out of
+  // one before WebCrypto will look at it. See extractSpkiFromCertificate.
+  let spki;
+  try {
+    spki = extractSpkiFromCertificate(pemToDer(pem));
+  } catch (e) {
+    throw new Error('could not read the signing key from the certificate: ' + e.message);
+  }
+
   const key = await crypto.subtle.importKey(
     'spki',
-    pemToDer(pem),
+    spki,
     { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
     false,
     ['verify']
