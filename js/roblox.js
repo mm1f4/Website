@@ -176,7 +176,16 @@ export async function fetchUserById(id) {
   };
 }
 
-/** Avatar headshot URL, or null when Roblox has not generated one. */
+/**
+ * Avatar headshot URL, or null when Roblox has not generated one.
+ *
+ * A non-OK response used to return null straight away, which ended the function
+ * before the proxy was ever tried: an avatar that 429ed or was blocked stayed
+ * missing even on a network where the proxy worked. Only a completed image is
+ * returned from the direct attempt now, so every other outcome still falls
+ * through. This is the one fetch whose failure is treated as cosmetic, so the
+ * caller gets null rather than an error.
+ */
 export async function fetchAvatarUrl(id) {
   try {
     const res = await fetch(
@@ -186,11 +195,11 @@ export async function fetchAvatarUrl(id) {
       const payload = await res.json();
       const first = payload && payload.data && payload.data[0];
       if (first && first.state === 'Completed' && first.imageUrl) return first.imageUrl;
-      return null;
     }
-    return null;
+    // Anything else - a throttle, a missing image, or a request that never
+    // completed - is worth one try through the proxy.
   } catch (e) {
-    // Fall through to the proxy; an avatar is cosmetic, so failures return null.
+    /* fall through to the proxy */
   }
 
   if (!proxyEndpoint) return null;

@@ -792,7 +792,7 @@
         "link.usernameLabel": "Roblox username",
         "link.usernamePlaceholder": "Roblox",
         "link.findAccount": "Find my account",
-        "link.pasteHint": "Paste this code into the About me section of your Roblox profile, then press Verify.",
+        "link.pasteHint": "Open your Roblox profile and press Edit profile, paste this code into About me, save, then come back and press Verify.",
         "link.verify": "Verify",
         "link.openProfile": "Open my Roblox profile",
         "link.cancel": "Cancel",
@@ -806,7 +806,7 @@
         "link.userNotFound": "No Roblox account with that username.",
         "link.codeNotFound": "That code is not in your About me yet. Paste it, save your profile, then press Verify.",
         "link.expired": "This verification expired. Please start again.",
-        "link.blocked": "Roblox could not be reached from this network. The site owner needs to deploy the small link service described in link-service/README.md.",
+        "link.blocked": "Roblox could not be reached from this network. This is usually a temporary block or an outage at Roblox's end, so please try again in a few minutes.",
         "link.rateLimited": "Roblox is rate limiting us. Please wait a moment and try again.",
         "link.lookupFailed": "Roblox did not answer as expected. Please try again.",
         "link.needSignIn": "Please sign in before linking a Roblox account.",
@@ -1006,9 +1006,9 @@
         "link.usernameLabel": "Roblox 使用者名稱",
         "link.usernamePlaceholder": "Roblox",
         "link.findAccount": "找出我的帳戶",
-        "link.pasteHint": "請將這組驗證碼貼到你 Roblox 個人簡介的「關於我」，然後按「驗證」。",
+        "link.pasteHint": "開啟你的 Roblox 個人頁面並按「編輯個人資料」，把驗證碼貼到「關於我」後儲存，再回來按「驗證」。",
         "link.verify": "驗證",
-        "link.openProfile": "開啟我的 Roblox 個人簡介",
+        "link.openProfile": "開啟我的 Roblox 個人資料",
         "link.cancel": "取消",
         "link.viewProfile": "查看個人簡介",
         "link.disconnect": "解除連結",
@@ -1020,7 +1020,7 @@
         "link.userNotFound": "找不到這個 Roblox 使用者名稱。",
         "link.codeNotFound": "你的「關於我」裡還找不到這組驗證碼。請貼上、儲存後再按「驗證」。",
         "link.expired": "驗證已過期，請重新開始。",
-        "link.blocked": "目前網路無法連到 Roblox。網站管理者需要部署 link-service/README.md 裡描述的連結服務。",
+        "link.blocked": "目前網路無法連到 Roblox。這通常是暫時性的封鎖或 Roblox 端的問題，請稍後幾分鐘再試。",
         "link.rateLimited": "Roblox 正在限制請求頻率，請稍後再試。",
         "link.lookupFailed": "Roblox 的回應不如預期，請重試一次。",
         "link.needSignIn": "請先登入再連結 Roblox 帳戶。",
@@ -2530,6 +2530,10 @@
         const codeEl = document.getElementById("robloxCode");
         if (codeEl) codeEl.textContent = pending.code;
         const openEl = document.getElementById("robloxOpenProfile");
+        // Deliberately the plain profile URL. The About me field is only editable
+        // after pressing "Edit profile", and the hint text says so, but this link
+        // is left on the path that is certain to resolve rather than a deeper one
+        // that cannot be checked from here.
         if (openEl) openEl.href = "https://www.roblox.com/users/" + pending.id + "/profile";
         robloxPendingCard(pending);
       }
