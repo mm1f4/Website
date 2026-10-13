@@ -807,6 +807,19 @@ footer {
   background: var(--surface);
 }
 
+/* The legal links sit in their own footer line rather than beside the profile
+   link, so they stay reachable without crowding it. The separator is a real
+   element with aria-hidden, which keeps it out of the accessible name while
+   still spacing the two links apart. */
+.footer-legal {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
 /* --------------------------------------------------------------------------
    11. Buttons
    -------------------------------------------------------------------------- */

@@ -433,6 +433,11 @@
     <div class="container">
       <p>&copy; <span id="year"></span> <span data-i18n="footer.rights">X COPE. All rights reserved.</span></p>
       <p class="footer-links"><a href="#profile" data-route data-i18n="nav.profile">Profile</a></p>
+      <p class="footer-links footer-legal">
+        <a href="terms.html" data-i18n="auth.terms">Terms of Service</a>
+        <span aria-hidden="true">&middot;</span>
+        <a href="privacy.html" data-i18n="auth.privacy">Privacy Policy</a>
+      </p>
     </div>
   </footer>
 
@@ -524,7 +529,7 @@
 
                       <label class="terms">
             <input type="checkbox" id="signupTerms" />
-            <span><span data-i18n="auth.agreePrefix">I agree to the</span> <a href="#" data-i18n="auth.terms">Terms of Service</a> <span data-i18n="auth.and">and</span> <a href="#" data-i18n="auth.privacy">Privacy Policy</a>.</span>
+            <span><span data-i18n="auth.agreePrefix">I agree to the</span> <a href="terms.html" target="_blank" rel="noopener noreferrer" data-i18n="auth.terms">Terms of Service</a> <span data-i18n="auth.and">and</span> <a href="privacy.html" target="_blank" rel="noopener noreferrer" data-i18n="auth.privacy">Privacy Policy</a>.</span>
           </label>
 
           <button type="submit" class="btn" data-i18n="auth.createAccount">Create account</button>
@@ -535,7 +540,7 @@
         </p>
 
         <p class="switch-prompt">
-          Already have an account?
+          <span data-i18n="auth.haveAccount">Already have an account?</span>
           <a id="switchToLogin" data-i18n="auth.signIn">Sign in</a>
         </p>
       </div>
