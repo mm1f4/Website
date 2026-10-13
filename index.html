@@ -619,6 +619,13 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
+    // Exposed for troubleshooting only. The module scope is private, so without
+    // this there is no way to inspect the session from the console when a
+    // sign-in fails, which is exactly when it is needed. It is the same object
+    // the page already uses and holds nothing the visitor cannot already read
+    // out of their own browser storage.
+    window.__xcopeAuth = auth;
+
     // The browser's own scroll function. The options form of scrollTo is not
     // reliable here: a page that has just revealed an element can swallow it and
     // leave the visitor at the top, with no error. The two-argument form is
