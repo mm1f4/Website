@@ -393,8 +393,14 @@ async function exchangeCode(env, code, codeVerifier) {
     if (!/invalid_client/i.test(text)) break;
   }
 
+  // The client id is public - it travels in the authorization URL the browser
+  // builds and is visible in the page source - so naming it costs nothing and is
+  // the only way to tell a wrong stored value from a wrong secret. The secret is
+  // never included.
   throw new Error('roblox token exchange failed with status ' + last.status +
-    ' using ' + last.label + ': ' + last.detail);
+    ' using ' + last.label + ': ' + last.detail +
+    ' [client_id sent: ' + describeValue(configValue(env, 'ROBLOX_CLIENT_ID')) +
+    ', secret length ' + configValue(env, 'ROBLOX_CLIENT_SECRET').length + ']');
 }
 
 async function revokeToken(env, refreshToken) {
