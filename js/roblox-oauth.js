@@ -307,15 +307,23 @@ export async function completeOAuth(callback, getIdToken, options) {
 
   if (!res.ok || !payload || !payload.ok || !payload.roblox) {
     const detail = String((payload && payload.error) || ('HTTP ' + res.status));
-    // Only blame the authorisation code when Roblox itself rejected it. A bare
-    // "expired" is not enough: the Worker answers 401 with "unauthenticated:
-    // token expired" when the *Firebase* token is stale, and telling somebody to
-    // restart the Roblox flow for that would send them the wrong way. The two
-    // need different words because they need different actions: refresh and
-    // retry, versus start again.
-    const robloxRejected = /roblox/i.test(detail) && /invalid_grant|expired|redeem|already/i.test(detail);
-    if (robloxRejected) {
+    // Each of these needs a different action, so each gets its own message.
+    // Grouping them would tell the operator to change something that is already
+    // correct. Matching is deliberately narrow: a bare "expired" must not match,
+    // because the Worker answers 401 with "unauthenticated: token expired" when
+    // the *Firebase* token is stale, and the fix for that is to sign in again,
+    // not to restart the Roblox flow.
+    if (/invalid_client|client authentication|unauthorized_client/i.test(detail)) {
+      throw new RobloxOAuthError('link.oauthClientRejected', detail);
+    }
+    if (/redirect_uri|redirect uri/i.test(detail)) {
+      throw new RobloxOAuthError('link.oauthRedirectMismatch', detail);
+    }
+    if (/roblox/i.test(detail) && /invalid_grant|expired|redeem|already/i.test(detail)) {
       throw new RobloxOAuthError('link.oauthCodeExpired', detail);
+    }
+    if (/not configured/i.test(detail)) {
+      throw new RobloxOAuthError('link.oauthNotConfigured', detail);
     }
     throw new RobloxOAuthError('link.oauthFailed', detail);
   }
