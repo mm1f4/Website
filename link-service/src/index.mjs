@@ -322,44 +322,86 @@ function configValue(env, name) {
   return trimmed;
 }
 
+/** Base64 of "client_id:client_secret", for the Basic authentication scheme. */
+function basicAuthHeader(clientId, clientSecret) {
+  const raw = clientId + ':' + clientSecret;
+  const bytes = new TextEncoder().encode(raw);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return 'Basic ' + btoa(binary);
+}
+
 async function exchangeCode(env, code, codeVerifier) {
-  const body = new URLSearchParams({
+  const clientId = configValue(env, 'ROBLOX_CLIENT_ID');
+  const clientSecret = configValue(env, 'ROBLOX_CLIENT_SECRET');
+  const redirectUri = configValue(env, 'ROBLOX_REDIRECT_URI');
+
+  const params = {
     grant_type: 'authorization_code',
     code: code,
     code_verifier: codeVerifier,
-    client_id: configValue(env, 'ROBLOX_CLIENT_ID'),
-    client_secret: configValue(env, 'ROBLOX_CLIENT_SECRET'),
-    redirect_uri: configValue(env, 'ROBLOX_REDIRECT_URI'),
-  });
-  const res = await fetch(ROBLOX_TOKEN_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: body.toString(),
-  });
-  const text = await res.text();
-  if (!res.ok) {
-    throw new Error('roblox token exchange failed with status ' + res.status +
-      ': ' + describeUpstreamError(text));
+    redirect_uri: redirectUri,
+  };
+
+  // Roblox accepts the credentials either in the body or as HTTP Basic, and the
+  // documentation lists both as supported. It is not stated which are enabled per
+  // app, so if the first form is refused as an unknown client the second is
+  // tried before giving up. A wrong secret reports the same error under both, so
+  // this costs one extra request only when something is already wrong.
+  const attempts = [
+    { label: 'client_secret_post', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(Object.assign({}, params, { client_id: clientId, client_secret: clientSecret })) },
+    { label: 'client_secret_basic', headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: basicAuthHeader(clientId, clientSecret) },
+      body: new URLSearchParams(Object.assign({}, params, { client_id: clientId })) },
+  ];
+
+  let last = null;
+  for (let i = 0; i < attempts.length; i++) {
+    const attempt = attempts[i];
+    const res = await fetch(ROBLOX_TOKEN_URL, {
+      method: 'POST',
+      headers: attempt.headers,
+      body: attempt.body.toString(),
+    });
+    const text = await res.text();
+
+    if (res.ok) {
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        throw new Error('roblox token exchange returned a body that is not JSON');
+      }
+    }
+
+    last = { status: res.status, detail: describeUpstreamError(text), label: attempt.label };
+    // Only an unknown-client complaint is worth retrying the other way. Anything
+    // else (an expired code, a redirect mismatch) will fail identically.
+    if (!/invalid_client/i.test(text)) break;
   }
-  try {
-    return JSON.parse(text);
-  } catch (e) {
-    throw new Error('roblox token exchange returned a body that is not JSON');
-  }
+
+  throw new Error('roblox token exchange failed with status ' + last.status +
+    ' using ' + last.label + ': ' + last.detail);
 }
 
 async function revokeToken(env, refreshToken) {
-  const body = new URLSearchParams({
-    token: refreshToken,
-    client_id: configValue(env, 'ROBLOX_CLIENT_ID'),
-    client_secret: configValue(env, 'ROBLOX_CLIENT_SECRET'),
-  });
-  const res = await fetch(ROBLOX_REVOKE_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: body.toString(),
-  });
-  return res.ok;
+  const clientId = configValue(env, 'ROBLOX_CLIENT_ID');
+  const clientSecret = configValue(env, 'ROBLOX_CLIENT_SECRET');
+
+  // Same two credential forms as the exchange, for the same reason.
+  for (const attempt of [
+    { headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ token: refreshToken, client_id: clientId, client_secret: clientSecret }) },
+    { headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: basicAuthHeader(clientId, clientSecret) },
+      body: new URLSearchParams({ token: refreshToken, client_id: clientId }) },
+  ]) {
+    const res = await fetch(ROBLOX_REVOKE_URL, {
+      method: 'POST',
+      headers: attempt.headers,
+      body: attempt.body.toString(),
+    });
+    if (res.ok) return true;
+  }
+  return false;
 }
 
 /* ------------------------------------------------------------- entry point */
