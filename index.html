@@ -3,8 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="A simple starter website." />
+  <meta name="description" content="X Cope is a Roblox experience, and this is its home on the web: what is here, how to reach the community, and how to link your Roblox account." />
   <title>X Cope</title>
+
+  <!-- What the link looks like when it is pasted into Discord, which is where
+       most of this site's visitors arrive from. -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="X Cope" />
+  <meta property="og:description" content="A Roblox experience and the community around it." />
+  <meta property="og:url" content="https://mm1f4.github.io/Website/" />
+  <meta name="twitter:card" content="summary" />
   <!-- Named explicitly. Without it the browser asks for /favicon.ico, which does
        not exist here, and every load logs a 404 into the console that competes
        with real errors. -->
@@ -18,24 +26,64 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
   <meta name="theme-color" content="#ffffff" data-theme-color>
-  <!-- Apply the stored theme before first paint so there is no flash of the wrong theme. -->
+  <!-- Runs before anything paints, for three reasons: the stored theme is applied
+       so there is no flash of the wrong one; the scroll-reveal styles are only
+       switched on when the observer that undoes them can run; and the intro is
+       decided here so the page never flashes uncovered behind it. -->
   <script>
     (function () {
+      var root = document.documentElement;
+
       try {
         var stored = localStorage.getItem("xcope-theme") || "auto";
         var dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
         var resolved = stored === "auto" ? (dark ? "dark" : "light") : stored;
-        document.documentElement.setAttribute("data-theme", resolved);
-        document.documentElement.setAttribute("data-theme-choice", stored);
+        root.setAttribute("data-theme", resolved);
+        root.setAttribute("data-theme-choice", stored);
       } catch (e) {
-        document.documentElement.setAttribute("data-theme", "light");
+        root.setAttribute("data-theme", "light");
       }
+
+      // The reveal stylesheet hides content that has not scrolled into view, so
+      // it is only enabled when the script that reveals it will actually run.
+      // Without this the page needed JavaScript for its own text to be visible.
+      if ("IntersectionObserver" in window) root.className += " js-reveal";
+
+      // The intro is a first-visit moment, not a toll on every reload: it is
+      // skipped for reduced-motion visitors, for a deep link into the profile,
+      // for the return trip from Roblox, and once this tab has already seen it.
+      // ?intro=1 replays it, which is what the owner uses to preview it.
+      try {
+        var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        var hash = location.hash || "";
+        var deep = hash === "#profile" || hash.indexOf("#panel-") === 0 || hash.indexOf("#roblox-oauth") === 0;
+        var forced = /[?&]intro=1(&|$)/.test(location.search);
+        var seen = sessionStorage.getItem("xcope-intro") === "1";
+        if (!reduce && !deep && (forced || !seen)) root.className += " is-intro";
+      } catch (e) { /* storage blocked: no intro, which is the safe outcome */ }
     })();
   </script>
   <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
+  <!-- Intro: a short branded reveal on the first load of the landing page. It is
+       only shown when the head script adds .is-intro to <html>, so with scripting
+       off it never exists. Every part of the animation is CSS; the module script
+       below only decides when the curtain lifts, so a slow font or a stalled
+       request cannot leave anyone staring at it. -->
+  <div class="intro" id="intro" aria-hidden="true">
+    <div class="intro-inner">
+      <span class="intro-rule" aria-hidden="true"></span>
+      <p class="intro-word" aria-hidden="true"><span>X</span><span>C</span><span>O</span><span>P</span><span>E</span></p>
+      <p class="intro-tag" data-i18n="intro.tagline">Roblox experience</p>
+      <span class="intro-track" aria-hidden="true"><span class="intro-fill"></span></span>
+    </div>
+  </div>
+
+  <!-- Keyboard visitors land here first; it stays invisible until focused. -->
+  <a class="skip-link" href="#main" data-i18n="nav.skip">Skip to content</a>
+
   <!-- Painted background: the animated default, a preset gradient, or a
        picture the visitor chose. Fixed and behind all content. -->
   <div id="bgLayer" data-bg-kind="animated" aria-hidden="true">
@@ -75,16 +123,36 @@
           <button type="button" data-theme-set="auto" aria-pressed="true" data-i18n-aria-label="theme.auto" aria-label="Auto">◐</button>
           <button type="button" data-theme-set="dark" aria-pressed="false" data-i18n-aria-label="theme.dark" aria-label="Dark">☾</button>
         </div>
-        <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">☰</button>
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation"
+                aria-expanded="false" aria-controls="navLinks" data-i18n-aria-label="nav.menu">☰</button>
       </div>
     </nav>
+
+    <!-- Reading progress for the landing page, drawn inside the sticky header so
+         it always sits on the edge the visitor is looking at. -->
+    <div class="scroll-progress" aria-hidden="true"><span id="scrollProgress"></span></div>
   </header>
 
-  <main data-page="home">
-    <section class="hero container is-reveal">
-      <h1 data-i18n="hero.title">Build something great</h1>
-      <p data-i18n="hero.subtitle">A minimal starting point for your next web project. Clean, responsive, and ready to customise.</p>
-      <a href="#features" class="btn" data-i18n="hero.cta">Get started</a>
+  <main id="main" data-page="home" tabindex="-1">
+    <!-- The hero carries its own entrance rather than the shared scroll reveal:
+         when the intro plays, its lines rise as the curtain lifts instead of
+         arriving behind it already finished. -->
+    <section class="hero container">
+      <p class="hero-badge">
+        <span class="hero-badge-dot" aria-hidden="true"></span>
+        <span data-i18n="hero.badge">Roblox experience</span>
+      </p>
+      <h1 id="heroTitle" data-i18n="hero.title">Step into X Cope</h1>
+      <p class="hero-lead" data-i18n="hero.subtitle">A Roblox experience and the community that grew around it. Follow the updates, link your Roblox account, and make this page feel like yours.</p>
+      <div class="hero-actions">
+        <a class="btn btn-lg" href="https://discord.gg/dFQqAMZkb4" target="_blank" rel="noopener noreferrer" data-i18n="hero.cta">Join the Discord</a>
+        <a class="btn btn-ghost btn-lg" href="#about" data-i18n="hero.ctaSecondary">What is here</a>
+      </div>
+      <ul class="hero-facts">
+        <li><span class="hero-fact-dot" aria-hidden="true"></span><span data-i18n="hero.fact1">Built on Roblox</span></li>
+        <li><span class="hero-fact-dot" aria-hidden="true"></span><span data-i18n="hero.fact2">Community on Discord</span></li>
+        <li><span class="hero-fact-dot" aria-hidden="true"></span><span data-i18n="hero.fact3">English and 中文</span></li>
+      </ul>
     </section>
 
     <!-- ---------- About ---------- -->
@@ -92,28 +160,28 @@
       <div class="container about-grid">
         <div class="about-copy is-reveal">
           <p class="eyebrow" data-i18n="about.eyebrow">About</p>
-          <h2 data-i18n="about.title">Built for people who ship</h2>
-          <p data-i18n="about.body">XCOPE started as a single page and grew into a small toolkit for getting ideas online quickly. No build step, no framework, no lock-in - just clean HTML, CSS and JavaScript you can read top to bottom.</p>
-          <p data-i18n="about.body2">Everything here works offline, loads fast, and stays out of your way while you focus on the part that matters: the product.</p>
-          <a href="#contact" class="btn btn-ghost" data-i18n="about.cta">Talk to us</a>
+          <h2 data-i18n="about.title">What X Cope is</h2>
+          <p data-i18n="about.body">X Cope is a Roblox experience. This page is its front door: the place to find the Discord, keep up with updates, and set up an account.</p>
+          <p data-i18n="about.body2">It is written by hand in HTML, CSS and JavaScript - no framework, no build step - so it opens in a blink and reads the same in English and Traditional Chinese.</p>
+          <a href="#contact" class="btn btn-ghost" data-i18n="about.cta">Join the conversation</a>
         </div>
 
         <dl class="about-stats is-reveal">
           <div class="stat">
-            <dt data-i18n="about.stat1.label">Build step</dt>
-            <dd data-i18n="about.stat1.value">None</dd>
+            <dt data-i18n="about.stat1.label">Platform</dt>
+            <dd data-i18n="about.stat1.value">Roblox</dd>
           </div>
           <div class="stat">
-            <dt data-i18n="about.stat2.label">Languages</dt>
-            <dd data-i18n="about.stat2.value">2</dd>
+            <dt data-i18n="about.stat2.label">Language</dt>
+            <dd data-i18n="about.stat2.value">EN · 中文</dd>
           </div>
           <div class="stat">
-            <dt data-i18n="about.stat3.label">Dependencies</dt>
-            <dd data-i18n="about.stat3.value">1</dd>
+            <dt data-i18n="about.stat3.label">Community</dt>
+            <dd data-i18n="about.stat3.value">Discord</dd>
           </div>
           <div class="stat">
-            <dt data-i18n="about.stat4.label">Licence</dt>
-            <dd data-i18n="about.stat4.value">Yours</dd>
+            <dt data-i18n="about.stat4.label">Accounts</dt>
+            <dd data-i18n="about.stat4.value">Free</dd>
           </div>
         </dl>
       </div>
@@ -146,22 +214,25 @@
     </section>
     <section class="features" id="features">
       <div class="container">
-        <h2 data-i18n="features.title">What you get</h2>
+        <div class="section-head is-reveal">
+          <h2 data-i18n="features.title">What is here</h2>
+          <p data-i18n="features.lead">The short version: a community, a profile, and a page that looks the way you want it to.</p>
+        </div>
         <div class="grid" data-reveal-group>
           <article class="card">
             <span class="card-icon card-icon--1" aria-hidden="true"></span>
-            <h3 data-i18n="features.fast.title">Fast</h3>
-            <p data-i18n="features.fast.body">No frameworks, no build step - just open it in your browser and go.</p>
+            <h3 data-i18n="features.community.title">Community first</h3>
+            <p data-i18n="features.community.body">Updates, patch notes and other players all live in the Discord server.</p>
           </article>
           <article class="card">
             <span class="card-icon card-icon--2" aria-hidden="true"></span>
-            <h3 data-i18n="features.responsive.title">Responsive</h3>
-            <p data-i18n="features.responsive.body">Looks good on phones, tablets, and desktops out of the box.</p>
+            <h3 data-i18n="features.profile.title">Your profile</h3>
+            <p data-i18n="features.profile.body">Sign in to set a display name and photo, and to keep your Roblox account linked.</p>
           </article>
           <article class="card">
             <span class="card-icon card-icon--3" aria-hidden="true"></span>
-            <h3 data-i18n="features.custom.title">Customisable</h3>
-            <p data-i18n="features.custom.body">All styling lives in CSS variables at the top, easy to tweak.</p>
+            <h3 data-i18n="features.make.title">Make it yours</h3>
+            <p data-i18n="features.make.body">Light or dark, plus a background you choose. The settings stay in this browser.</p>
           </article>
         </div>
       </div>
@@ -456,6 +527,13 @@
     </div>
   </footer>
 
+  <!-- Only appears once the visitor is far enough down that walking back is
+       work. Kept out of the tab order while hidden, so it cannot be focused
+       from a page that is still at the top. -->
+  <button type="button" class="to-top" id="toTop" data-i18n-aria-label="nav.toTop" aria-label="Back to top">
+    <span aria-hidden="true">&uarr;</span>
+  </button>
+
   <!-- ---------- Auth Modal ---------- -->
   <div class="modal-overlay" id="authModal" role="dialog" aria-modal="true" data-i18n-aria-label="auth.dialogLabel">
     <div class="modal">
@@ -665,16 +743,26 @@
         "nav.login": "Login",
         "nav.logout": "Logout",
         "nav.switchLanguage": "Switch language",
-        "hero.title": "Build something great",
-        "hero.subtitle": "A minimal starting point for your next web project. Clean, responsive, and ready to customise.",
-        "hero.cta": "Get started",
-        "features.title": "What you get",
-        "features.fast.title": "Fast",
-        "features.fast.body": "No frameworks, no build step - just open it in your browser and go.",
-        "features.responsive.title": "Responsive",
-        "features.responsive.body": "Looks good on phones, tablets, and desktops out of the box.",
-        "features.custom.title": "Customisable",
-        "features.custom.body": "All styling lives in CSS variables at the top, easy to tweak.",
+        "nav.skip": "Skip to content",
+        "nav.toTop": "Back to top",
+        "intro.tagline": "Roblox experience",
+        "meta.title": "X Cope - a Roblox experience",
+        "hero.badge": "Roblox experience",
+        "hero.title": "Step into X Cope",
+        "hero.subtitle": "A Roblox experience and the community that grew around it. Follow the updates, link your Roblox account, and make this page feel like yours.",
+        "hero.cta": "Join the Discord",
+        "hero.ctaSecondary": "What is here",
+        "hero.fact1": "Built on Roblox",
+        "hero.fact2": "Community on Discord",
+        "hero.fact3": "English and Chinese",
+        "features.title": "What is here",
+        "features.lead": "The short version: a community, a profile, and a page that looks the way you want it to.",
+        "features.community.title": "Community first",
+        "features.community.body": "Updates, patch notes and other players all live in the Discord server.",
+        "features.profile.title": "Your profile",
+        "features.profile.body": "Sign in to set a display name and photo, and to keep your Roblox account linked.",
+        "features.make.title": "Make it yours",
+        "features.make.body": "Light or dark, plus a background you choose. The settings stay in this browser.",
         "footer.rights": "X COPE. All rights reserved.",
         "auth.dialogLabel": "Account",
         "auth.signIn": "Sign in",
@@ -748,18 +836,18 @@
         "theme.auto": "Match system theme",
         "theme.dark": "Dark theme",
         "about.eyebrow": "About",
-        "about.title": "Built for people who ship",
-        "about.body": "XCOPE started as a single page and grew into a small toolkit for getting ideas online quickly. No build step, no framework, no lock-in - just clean HTML, CSS and JavaScript you can read top to bottom.",
-        "about.body2": "Everything here works offline, loads fast, and stays out of your way while you focus on the part that matters: the product.",
-        "about.cta": "Talk to us",
-        "about.stat1.label": "Build step",
-        "about.stat1.value": "None",
-        "about.stat2.label": "Languages",
-        "about.stat2.value": "2",
-        "about.stat3.label": "Dependencies",
-        "about.stat3.value": "2",
-        "about.stat4.label": "Licence",
-        "about.stat4.value": "Yours",
+        "about.title": "What X Cope is",
+        "about.body": "X Cope is a Roblox experience. This page is its front door: the place to find the Discord, keep up with updates, and set up an account.",
+        "about.body2": "It is written by hand in HTML, CSS and JavaScript - no framework, no build step - so it opens in a blink and reads the same in English and Traditional Chinese.",
+        "about.cta": "Join the conversation",
+        "about.stat1.label": "Platform",
+        "about.stat1.value": "Roblox",
+        "about.stat2.label": "Language",
+        "about.stat2.value": "EN · 中文",
+        "about.stat3.label": "Community",
+        "about.stat3.value": "Discord",
+        "about.stat4.label": "Accounts",
+        "about.stat4.value": "Free",
         "contact.eyebrow": "Contact",
         "contact.title": "Get in touch",
         "contact.body": "Questions, bug reports or just want to say hello? Join the Discord and talk to us there.",
@@ -894,16 +982,26 @@
         "nav.login": "登入",
         "nav.logout": "登出",
         "nav.switchLanguage": "切換語言",
-        "hero.title": "打造出色的作品",
-        "hero.subtitle": "為你下一個網站專案提供最簡潔的起點。乾淨、回應式，隨時可以開始客製。",
-        "hero.cta": "立即開始",
-        "features.title": "你會得到什麼",
-        "features.fast.title": "快速",
-        "features.fast.body": "不需框架、不需建置流程，用瀏覽器打開就能用。",
-        "features.responsive.title": "回應式",
-        "features.responsive.body": "手機、平板、桌機開箱即可使用。",
-        "features.custom.title": "易於客製",
-        "features.custom.body": "所有樣式都在最上方的 CSS 變數裡，輕鬆調整。",
+        "nav.skip": "跳至主要內容",
+        "nav.toTop": "回到頂端",
+        "intro.tagline": "Roblox 體驗",
+        "meta.title": "X Cope - Roblox 體驗",
+        "hero.badge": "Roblox 體驗",
+        "hero.title": "進入 X Cope",
+        "hero.subtitle": "一個 Roblox 體驗，以及圍繞它成長的社群。追蹤更新、連結你的 Roblox 帳戶，並把這個頁面變成你自己的樣子。",
+        "hero.cta": "加入 Discord",
+        "hero.ctaSecondary": "這裡有什麼",
+        "hero.fact1": "建構於 Roblox",
+        "hero.fact2": "社群在 Discord",
+        "hero.fact3": "英文與中文",
+        "features.title": "這裡有什麼",
+        "features.lead": "簡單來說：一個社群、一份個人資料，以及一個能照你喜好調整的頁面。",
+        "features.community.title": "社群優先",
+        "features.community.body": "更新資訊、更新內容與其他玩家，都在 Discord 伺服器裡。",
+        "features.profile.title": "你的個人資料",
+        "features.profile.body": "登入後即可設定顯示名稱與照片，並保持 Roblox 帳戶連結。",
+        "features.make.title": "打造自己的風格",
+        "features.make.body": "淺色或深色，再加上你自己挑的背景。設定只保存在這個瀏覽器。",
         "footer.rights": "X COPE。保留所有權利。",
         "auth.dialogLabel": "帳戶",
         "auth.signIn": "登入",
@@ -977,18 +1075,18 @@
         "theme.auto": "跟隨系統主題",
         "theme.dark": "暗色主題",
         "about.eyebrow": "關於",
-        "about.title": "為實作的人而做",
-        "about.body": "XCOPE 從單一頁面起步，成長為一套輕量工具，協助你快速把想法送上網。沒有建置流程、沒有框架、不會被綁死——只有幹淨、從頭到尾都讀得懂的 HTML、CSS 舎 JavaScript。",
-        "about.body2": "這裡的每一件事都可離線運作、載入快速，並且不會干擾你——讓你專心在真正重要的部分：產品本身。",
-        "about.cta": "與我們聯絡",
-        "about.stat1.label": "建置流程",
-        "about.stat1.value": "無",
+        "about.title": "X Cope 是什麼",
+        "about.body": "X Cope 是一個 Roblox 體驗。這個頁面是它的大門：在這裡找到 Discord、掌握更新，並建立帳戶。",
+        "about.body2": "整站以 HTML、CSS 與 JavaScript 手寫而成——沒有框架、沒有建置流程——所以開啟得很快，而且英文與繁體中文讀起來一樣自然。",
+        "about.cta": "加入討論",
+        "about.stat1.label": "平台",
+        "about.stat1.value": "Roblox",
         "about.stat2.label": "語言",
-        "about.stat2.value": "2",
-        "about.stat3.label": "外部依賴",
-        "about.stat3.value": "2",
-        "about.stat4.label": "授權",
-        "about.stat4.value": "歸你",
+        "about.stat2.value": "EN · 中文",
+        "about.stat3.label": "社群",
+        "about.stat3.value": "Discord",
+        "about.stat4.label": "帳戶",
+        "about.stat4.value": "免費",
         "contact.eyebrow": "聯絡我們",
         "contact.title": "與我們取得聯絡",
         "contact.body": "不管是問題、錯誤回報，或是想打個招呼，都歡迎加入 Discord 找我們。",
@@ -1169,7 +1267,9 @@
         btn.setAttribute("aria-pressed", String(btn.dataset.lang === currentLang));
       });
 
-      document.title = "X Cope - " + t("hero.title");
+      // A key of its own: building the title out of the hero headline produced
+      // "X Cope - Step into X Cope" the moment the two stopped matching.
+      document.title = t("meta.title");
       const yearEl = document.getElementById("year");
       if (yearEl) yearEl.textContent = new Date().getFullYear();
 
@@ -1232,9 +1332,22 @@
     /* ---------- UI logic ---------- */
     const menuToggle = document.getElementById("menuToggle");
     const navLinks = document.getElementById("navLinks");
-    menuToggle.addEventListener("click", () => navLinks.classList.toggle("active"));
+
+    // On a phone this button is the only way to the menu, so its state has to be
+    // announced as well as drawn.
+    function setMenuOpen(open) {
+      navLinks.classList.toggle("active", open);
+      menuToggle.setAttribute("aria-expanded", String(open));
+    }
+
+    menuToggle.addEventListener("click", () => {
+      setMenuOpen(!navLinks.classList.contains("active"));
+    });
     navLinks.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", () => navLinks.classList.remove("active"));
+      link.addEventListener("click", () => setMenuOpen(false));
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && navLinks.classList.contains("active")) setMenuOpen(false);
     });
 
     const loginLink = document.getElementById("loginLink");
@@ -1569,6 +1682,10 @@
       link.addEventListener("click", (event) => {
         // Route links switch pages; the router owns those, not the scroller.
         if (link.hasAttribute("data-route")) return;
+
+        // The skip link has to move focus to the content, not only scroll to it,
+        // so it keeps the browser's own behaviour.
+        if (link.classList.contains("skip-link")) return;
 
         const hash = link.getAttribute("href");
         if (!hash || hash === "#") return;
@@ -2837,10 +2954,150 @@
       });
     }
 
+    /* ---------- Intro reveal ----------
+       The curtain is drawn by CSS before the first paint; this only decides when
+       it lifts. It waits for the page and the fonts so that what sits behind it
+       is ready, but never longer than MAX_WAIT: a stalled request must not trap
+       anyone behind a loading screen. */
+    function initIntro() {
+      const root = document.documentElement;
+      const intro = document.getElementById("intro");
+      if (!intro) return;
+
+      // Not playing: for reduced motion, a deep link, or a tab that has already
+      // seen it. Take the element out rather than leave an invisible fixed layer
+      // covering the page for the rest of the visit.
+      if (!root.classList.contains("is-intro")) {
+        intro.parentNode.removeChild(intro);
+        return;
+      }
+
+      const MIN_SHOW = 1350;   // long enough for the wordmark to be read, not just glimpsed
+      const MAX_WAIT = 2600;
+      const LIFT = 820;        // matches .intro--out in the stylesheet
+      const started = Date.now();
+      let lifting = false;
+
+      function lift(skipWait) {
+        if (lifting) return;
+        lifting = true;
+
+        // Recorded here rather than at load, so closing the tab halfway through
+        // means seeing it again rather than never seeing it.
+        try { sessionStorage.setItem("xcope-intro", "1"); } catch (e) { /* storage blocked */ }
+
+        // Someone who clicked or pressed a key has already decided: do not make
+        // them sit through the rest of the minimum.
+        const wait = skipWait === true ? 0 : Math.max(0, MIN_SHOW - (Date.now() - started));
+        setTimeout(() => {
+          root.classList.add("intro-done");    // the hero lines start rising
+          intro.classList.add("intro--out");   // the curtain starts lifting
+
+          // Hand the page back as soon as it is uncovered: the overlay must not
+          // keep intercepting clicks or holding the scroll lock.
+          setTimeout(() => {
+            root.classList.remove("is-intro");
+            if (intro.parentNode) intro.parentNode.removeChild(intro);
+          }, LIFT);
+        }, wait);
+      }
+
+      // Real readiness rather than a fake progress bar: the load event and the
+      // webfonts, whichever finishes last, capped by MAX_WAIT.
+      const loaded = document.readyState === "complete"
+        ? Promise.resolve()
+        : new Promise((resolve) => window.addEventListener("load", resolve, { once: true }));
+      const fonts = document.fonts && document.fonts.ready
+        ? document.fonts.ready.catch(() => {})
+        : Promise.resolve();
+      Promise.race([
+        Promise.all([loaded, fonts]),
+        new Promise((resolve) => setTimeout(resolve, MAX_WAIT))
+      ]).then(lift);
+
+      // An escape hatch for anyone who does not want to wait: a click, any key,
+      // or the safety timer all lift it.
+      intro.addEventListener("click", () => lift(true));
+      document.addEventListener("keydown", () => lift(true), { once: true });
+      setTimeout(lift, MAX_WAIT + 400);
+    }
+
+    /* ---------- Scroll furniture: progress, current section, back to top ---------- */
+    function initScrollFurniture() {
+      const bar = document.getElementById("scrollProgress");
+      const toTop = document.getElementById("toTop");
+      const sectionLinks = Array.prototype.slice.call(document.querySelectorAll("[data-section-link]"));
+      const reduceMotion = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+      let queued = false;
+
+      // The section the reading line is inside. The line sits just under the
+      // header, so a section counts as current from the moment its top passes it.
+      function currentSection(offset) {
+        let found = "";
+        sectionLinks.forEach((link) => {
+          const section = document.getElementById(link.getAttribute("data-section-link"));
+          if (!section) return;
+          const box = section.getBoundingClientRect();
+          if (box.top <= offset && box.bottom > offset) found = section.id;
+        });
+        return found;
+      }
+
+      function paint() {
+        queued = false;
+
+        const doc = document.documentElement;
+        const travel = doc.scrollHeight - window.innerHeight;
+        const ratio = travel > 0 ? Math.min(1, Math.max(0, window.scrollY / travel)) : 0;
+        if (bar) bar.style.transform = "scaleX(" + ratio.toFixed(4) + ")";
+        if (toTop) toTop.classList.toggle("is-shown", window.scrollY > 640);
+
+        // The section links belong to the landing page, so the highlight is
+        // cleared on the profile where there is nothing for them to point at.
+        // The reading line sits roughly a third of the way down rather than just
+        // under the header: a section should become current when it has taken
+        // over the screen, not the moment its first pixel slides into view.
+        const onHome = !pageHome.classList.contains("is-hidden");
+        const header = document.querySelector("header");
+        const headerHeight = header ? header.getBoundingClientRect().height : 0;
+        const offset = Math.max(headerHeight + 24, window.innerHeight * 0.3);
+        const current = onHome ? currentSection(offset) : "";
+
+        sectionLinks.forEach((link) => {
+          const active = link.getAttribute("data-section-link") === current;
+          link.classList.toggle("is-active", active);
+          if (active) link.setAttribute("aria-current", "true");
+          else link.removeAttribute("aria-current");
+        });
+      }
+
+      function schedule() {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(paint);
+      }
+
+      window.addEventListener("scroll", schedule, { passive: true });
+      window.addEventListener("resize", schedule);
+      paint();
+
+      if (toTop) {
+        toTop.addEventListener("click", () => {
+          // A 600ms glide is the point of the button, but not for someone who
+          // asked the system for less motion.
+          if (reduceMotion) scrollNow(0);
+          else PAGE_SCROLL(0, 0);
+        });
+      }
+    }
+
     /* ---------- Start ---------- */
     currentLang = detectInitialLang();
     applyTranslations();
     initScrollReveal();
+    initScrollFurniture();
+    // Last, so everything the curtain is hiding is already wired up behind it.
+    initIntro();
 
     // Honour a deep link such as #profile on a fresh load or a refresh. GitHub
     // Pages normalises the URL, so no hashchange event fires here; the router has
@@ -2874,6 +3131,29 @@
     }
 
     if (lastAlert) alert(t(lastAlert.key));
+  </script>
+
+  <!-- The intro's last line of defence. Everything above is one ES module: if its
+       imports never arrive (a blocked CDN, an offline visitor, a corporate
+       proxy), none of it runs, and without this the curtain would stay down for
+       good. A classic script cannot be stopped by a failed import, so it lifts
+       the curtain after the module's own 3s ceiling if the curtain is still up.
+       The module lifts first in every normal case, which makes this a no-op. -->
+  <script>
+    (function () {
+      var root = document.documentElement;
+      if (!root.classList.contains("is-intro")) return;
+      setTimeout(function () {
+        if (!root.classList.contains("is-intro")) return;
+        var intro = document.getElementById("intro");
+        root.classList.add("intro-done");
+        if (intro) intro.classList.add("intro--out");
+        setTimeout(function () {
+          root.classList.remove("is-intro");
+          if (intro && intro.parentNode) intro.parentNode.removeChild(intro);
+        }, 820);
+      }, 4000);
+    })();
   </script>
 </body>
 </html>

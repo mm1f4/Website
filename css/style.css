@@ -17,6 +17,8 @@
     14. Status messages
     15. Profile & settings
     16. Responsive
+    17. Intro animation
+    18. Reading aids
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -206,30 +208,32 @@
    declarations win the cascade over component transitions (the card hover
    animation) for any element that is also a reveal target.
 
-   The module script adds .is-revealed as elements enter the viewport.
-   Reduced-motion users never get the hidden state applied at all.
+   The module script adds .is-revealed as elements enter the viewport. The
+   hidden state is scoped to .js-reveal, which the head script only sets when
+   the observer that undoes it can actually run: a visitor without scripting
+   sees the whole page instead of a column of invisible sections.
    -------------------------------------------------------------------------- */
-.is-reveal {
+html.js-reveal .is-reveal {
   opacity: 0;
   transform: translateY(18px);
   transition: opacity var(--dur-slow) var(--ease-out),
     transform var(--dur-slow) var(--ease-out);
 }
 
-.is-reveal.is-revealed {
+html.js-reveal .is-reveal.is-revealed {
   opacity: 1;
   transform: none;
 }
 
 /* Stagger children of a reveal group */
-[data-reveal-group] > * {
+html.js-reveal [data-reveal-group] > * {
   opacity: 0;
   transform: translateY(18px);
   transition: opacity var(--dur-slow) var(--ease-out),
     transform var(--dur-slow) var(--ease-out);
 }
 
-[data-reveal-group].is-revealed > * {
+html.js-reveal [data-reveal-group].is-revealed > * {
   opacity: 1;
   transform: none;
 }
@@ -505,6 +509,8 @@ nav {
    7. Hero
    -------------------------------------------------------------------------- */
 .hero {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -512,24 +518,144 @@ nav {
   padding: var(--space-9) 0 var(--space-8);
 }
 
+/* A soft wash behind the headline, so the top of the page has a focus of its
+   own before anything is scrolled. It lives in the hero's stacking context and
+   never intercepts a pointer. */
+.hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -22%;
+  left: 50%;
+  width: min(940px, 130%);
+  aspect-ratio: 1.7;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, var(--accent-ring), transparent 76%);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+  padding: 0.35rem 0.9rem 0.35rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--card-translucent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--text-strong);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+.hero-badge-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: badgePulse 2.8s var(--ease-out) infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% { box-shadow: 0 0 0 3px var(--accent-ring); }
+  50%      { box-shadow: 0 0 0 7px transparent; }
+}
+
 .hero h1 {
   font-size: var(--text-hero);
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  max-width: 20ch;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.04;
+  max-width: 18ch;
   margin-bottom: var(--space-4);
-  background: linear-gradient(180deg, var(--text-strong) 55%, var(--muted) 100%);
+  /* One accent band drifts slowly across the headline. It is a still gradient
+     for anyone who asked for less motion, because the global rule stops it.
+     The band is kept narrow: a wide one turns half the headline blue and reads
+     as two differently coloured phrases rather than one. */
+  background: linear-gradient(
+    100deg,
+    var(--text-strong) 0%,
+    var(--text-strong) 44%,
+    var(--accent) 50%,
+    var(--text-strong) 56%,
+    var(--text-strong) 100%
+  );
+  background-size: 260% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  animation: heroSheen 11s ease-in-out infinite;
 }
 
-.hero p {
+@keyframes heroSheen {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+.hero-lead {
   color: var(--muted);
   font-size: var(--text-lg);
-  max-width: 52ch;
+  line-height: 1.6;
+  max-width: 56ch;
   margin-bottom: var(--space-6);
 }
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-7);
+}
+
+.hero-facts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2) var(--space-5);
+  list-style: none;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.hero-facts li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.hero-fact-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* The hero rises as the intro curtain lifts. Both states are scoped: .is-intro
+   is only ever set by the head script, so without JavaScript the hero is simply
+   there, and .intro-done is the cue to animate rather than to appear. */
+html.is-intro .hero > * {
+  opacity: 0;
+  transform: translateY(26px);
+}
+
+html.intro-done .hero > * {
+  opacity: 1;
+  transform: none;
+  transition: opacity 760ms var(--ease-out), transform 760ms var(--ease-out);
+}
+
+html.intro-done .hero > *:nth-child(1) { transition-delay: 120ms; }
+html.intro-done .hero > *:nth-child(2) { transition-delay: 180ms; }
+html.intro-done .hero > *:nth-child(3) { transition-delay: 290ms; }
+html.intro-done .hero > *:nth-child(4) { transition-delay: 400ms; }
+html.intro-done .hero > *:nth-child(5) { transition-delay: 500ms; }
 
 /* --------------------------------------------------------------------------
    8. Features
@@ -540,10 +666,21 @@ nav {
   border-top: 1px solid var(--border);
 }
 
-.features h2 {
+/* Centred section heading with a short lead, used by Features. */
+.section-head {
+  max-width: 56ch;
+  margin: 0 auto var(--space-7);
   text-align: center;
+}
+
+.section-head h2 {
   font-size: var(--text-3xl);
-  margin-bottom: var(--space-7);
+  margin-bottom: var(--space-3);
+}
+
+.section-head p {
+  color: var(--muted);
+  font-size: var(--text-lg);
 }
 
 .grid {
@@ -673,7 +810,11 @@ nav {
   color: var(--accent);
 }
 
-.btn-ghost {
+/* Qualified as .btn.btn-ghost on purpose: as a bare class it ties with .btn,
+   which is declared later in this file, so .btn won the cascade and every
+   "ghost" button rendered as a solid one. Two classes settle it wherever the
+   rule sits. */
+.btn.btn-ghost {
   background: transparent;
   color: var(--accent);
   border: 1px solid var(--accent);
@@ -681,7 +822,7 @@ nav {
   padding: 0.7rem 1.6rem;
 }
 
-.btn-ghost:hover {
+.btn.btn-ghost:hover {
   background: var(--accent-soft);
   filter: none;
   box-shadow: var(--shadow-sm);
@@ -852,6 +993,15 @@ footer {
   transform: translateY(0);
   filter: brightness(0.97);
   box-shadow: var(--shadow-xs);
+}
+
+/* The hero pair: a larger target for the one decision the page actually asks
+   for, next to a quieter one for people who are not ready to join yet. Written
+   as .btn.btn-lg so it outranks .btn.btn-ghost, which sets its own padding. */
+.btn.btn-lg {
+  padding: 0.95rem 2.1rem;
+  font-size: var(--text-lg);
+  border-radius: var(--radius-lg);
 }
 
 /* --------------------------------------------------------------------------
@@ -2010,6 +2160,251 @@ input[readonly] {
   }
 
   .header-controls { gap: var(--space-1); }
+}
+
+/* --------------------------------------------------------------------------
+   17. Intro animation
+
+   The first load of the landing page opens on a short brand curtain. The markup
+   is always in the document, but it is only drawn under .is-intro on <html>,
+   which the head script sets before the first paint. Every movement here is CSS;
+   the module script only decides when the curtain lifts, and takes the element
+   out of the document once the page is uncovered, so it can never hold a click.
+   -------------------------------------------------------------------------- */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+  visibility: hidden;
+  background: var(--body-veil), var(--bg);
+  transition: opacity 760ms var(--ease-out), transform 820ms var(--ease-out);
+}
+
+html.is-intro .intro { visibility: visible; }
+
+/* A wash behind the wordmark, so the curtain is a considered surface rather than
+   a blank one. Absolutely positioned, so it does not become a second grid item
+   and shift the word off centre. */
+.intro::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(closest-side, var(--accent-ring), transparent 74%) center / 78% 62% no-repeat;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* The page behind the curtain must not move while it is covered. */
+html.is-intro { overflow: hidden; }
+
+.intro--out {
+  opacity: 0;
+  transform: translateY(-3vh) scale(1.015);
+  pointer-events: none;
+}
+
+.intro-inner {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  text-align: center;
+  transition: opacity 420ms var(--ease-out), transform 720ms var(--ease-out);
+}
+
+.intro--out .intro-inner {
+  opacity: 0;
+  transform: translateY(-14px) scale(0.985);
+}
+
+.intro-rule {
+  width: 2.25rem;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--logo-bar);
+  opacity: 0;
+  animation: introFade 600ms var(--ease-out) 90ms forwards;
+}
+
+.intro-word {
+  display: flex;
+  gap: 0.04em;
+  font-size: clamp(2.75rem, 12vw, 5rem);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text-strong);
+}
+
+.intro-word span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.5em) rotate(9deg);
+  animation: introChar 700ms var(--ease-spring) forwards;
+}
+
+/* Each letter lands a little after the one before it. */
+.intro-word span:nth-child(1) { animation-delay: 110ms; }
+.intro-word span:nth-child(2) { animation-delay: 165ms; }
+.intro-word span:nth-child(3) { animation-delay: 220ms; }
+.intro-word span:nth-child(4) { animation-delay: 275ms; }
+.intro-word span:nth-child(5) { animation-delay: 330ms; }
+
+.intro-word span:last-child { color: var(--accent); }
+
+.intro-tag {
+  opacity: 0;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  animation: introFade 700ms var(--ease-out) 470ms forwards;
+}
+
+.intro-track {
+  position: relative;
+  display: block;
+  width: min(190px, 44vw);
+  height: 2px;
+  margin-top: var(--space-5);
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--border);
+}
+
+/* It fills as the page becomes ready rather than on a timer of its own, so it
+   never claims a percentage that has not been measured. It finishes just before
+   the curtain lifts, so the end of the line is the cue to look up. */
+.intro-fill {
+  position: absolute;
+  inset: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  border-radius: inherit;
+  background: var(--logo-bar);
+  animation: introSweep 950ms var(--ease-out) 200ms forwards;
+}
+
+@keyframes introChar {
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes introFade {
+  to { opacity: 1; }
+}
+
+@keyframes introSweep {
+  to { transform: scaleX(1); }
+}
+
+/* --------------------------------------------------------------------------
+   18. Reading aids
+   The skip link, the progress hairline in the header, the current section in the
+   menu, and the back-to-top button.
+   -------------------------------------------------------------------------- */
+.skip-link {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 300;
+  padding: 0.7rem 1.15rem;
+  transform: translate(-50%, -130%);
+  border-radius: 0 0 var(--radius) var(--radius);
+  background: var(--accent);
+  color: var(--text-on-accent);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
+  transition: transform var(--dur) var(--ease-out);
+}
+
+.skip-link:focus {
+  transform: translate(-50%, 0);
+}
+
+.scroll-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.scroll-progress span {
+  display: block;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: var(--logo-bar);
+  will-change: transform;
+}
+
+/* The section the reading line is currently inside. */
+.nav-links > li > a.is-active { color: var(--text-strong); }
+.nav-links > li > a.is-active::after { transform: scaleX(1); }
+
+.to-top {
+  position: fixed;
+  right: var(--space-5);
+  bottom: var(--space-5);
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--card-translucent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--text-strong);
+  font-family: inherit;
+  font-size: var(--text-lg);
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  /* Hidden really means gone: no click, no tab stop, nothing to misread. */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+  transition: opacity var(--dur) var(--ease-out), transform var(--dur) var(--ease-out),
+    visibility var(--dur), border-color var(--dur-fast) ease, color var(--dur-fast) ease;
+}
+
+.to-top.is-shown {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+.to-top:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 720px) {
+  .to-top {
+    right: var(--space-4);
+    bottom: var(--space-4);
+  }
+
+  /* Two buttons side by side stop being readable at this width. */
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  /* The lead was the same size as body text on a phone and fought the headline
+     for attention; at this width it steps back. */
+  .hero-lead { font-size: var(--text-base); }
+
+  .intro-word { font-size: clamp(2.4rem, 16vw, 3.4rem); }
 }
 
 /* --------------------------------------------------------------------------

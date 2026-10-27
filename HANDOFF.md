@@ -33,6 +33,19 @@ link-service/       Cloudflare Worker, deployed as xcope-roblox
 .gitattributes      keeps line endings LF so diffs stay readable
 ```
 
+How the landing page is put together, in the order it paints:
+
+```
+<head> inline script   theme, the reveal switch, and whether the intro plays
+#intro                 the brand curtain, CSS-animated, removed once lifted
+#bgLayer               the painted background (animated / preset / visitor picture)
+header                 nav, the scroll-progress hairline, language + theme toggles
+main  hero → about → contact → features
+footer                 profile link, legal links
+button#toTop           back to top, appears after 640px of scroll
+auth modal + script    Firebase, i18n, routing, reveal, scroll furniture, intro
+```
+
 `privacy.html` and `terms.html` are registered as the Privacy Policy URL and
 Terms of Service URL on the Roblox OAuth application, so their URLs are load
 bearing: `https://mm1f4.github.io/Website/privacy.html` and
@@ -42,6 +55,14 @@ that consume them are English.
 
 ## Live features
 
+- **Intro reveal** on the first load of the landing page: the XCOPE wordmark
+  arrives letter by letter, a progress line fills as the page and the webfonts
+  actually become ready, then the curtain lifts and the hero lines rise in
+  behind it. See "Intro and first paint" below for the rules that keep it from
+  becoming a trap.
+- **Reading aids**: a scroll-progress hairline in the header, the current
+  section highlighted in the menu, a back-to-top button after 640px, and a skip
+  link that is the first thing a keyboard visitor reaches.
 - **Bilingual** English / Traditional Chinese with a dictionary, a header
   toggle, and detection of the browser language on a first visit. Choice is
   remembered. `?lang=zh` / `?lang=en` override it.
@@ -182,23 +203,32 @@ which requires a one minute demo video.
   hand**, which is how the Worker's three Roblox endpoints were confirmed
   against the live service. It does not make the page work without the Worker;
   see the CORS note under "Roblox" for why.
-- **git is installed per-user at `%LOCALAPPDATA%\Programs\Git`** (2.55.0), with
-  the identity already set to `mm1f4 <6fcymcapsbcc@gmail.com>`. It is on the
-  machine PATH, but a shell started before the install keeps the old
-  environment, so an already-running terminal may need a restart before `git`
-  resolves.
-- **The shell is Windows PowerShell 7 (`pwsh`), not 5.1.** An earlier version of
-  this file said 5.1. The quoting advice still holds and is worth keeping:
-  inline `node -e` through PowerShell breaks often, so prefer writing a small
-  `.cjs` file and running it. Note that `node`, `npm` and `npx` are not on PATH
-  by default, so call Node by full path or add it first.
-- **A browser cannot be launched under the agent sandbox.** Chrome and Edge both
-  die with `mojo platform_channel.cc: Check failed` because the sandbox
-  denies named pipes, so the headless-Chrome verification described below cannot
-  be reproduced from inside a sandboxed session. It still needs a real terminal.
-  Everything reachable without a browser is still worth doing: `node --check`
-  for syntax, importing the modules and stubbing `fetch`, and fetching the live
-  files to compare against the working tree.
+- **git is installed machine-wide at `C:\Program Files\Git\cmd\git.exe`**
+  (2.56.0, installed with `winget install --id Git.Git -e --scope user`). The
+  older note about `%LOCALAPPDATA%\Programs\Git` was wrong for this machine; the
+  per-user location does not exist. It is not on the PATH a fresh shell starts
+  with, so put `C:\Program Files\Git\cmd` on `PATH` for the session or call
+  `git.exe` by full path. The identity is set **per repository** to
+  `mm1f4 <6fcymcapsbcc@gmail.com>`; there is no global identity.
+- **This folder is a git checkout**, `main` tracking `origin/main` of
+  `github.com/mm1f4/Website`. It was adopted rather than cloned: `git init`,
+  `git remote add`, `git fetch`, then `git reset --soft FETCH_HEAD` so the index
+  matched the remote without touching a single working file. That is the way to
+  bring an unversioned copy of a live site under git without a merge.
+- **The shell is Windows PowerShell 5.1**, not 7: a `pwsh` call that looked like
+  it should be 7 reported 5.1.26100. The quoting advice still holds and is worth
+  keeping: inline `node -e` through PowerShell breaks often, so prefer writing a
+  small `.mjs` file and running it. `node`, `npm` and `npx` are not on PATH, so
+  call Node by its full path.
+- **Headless Chrome works when the session runs unsandboxed.** Under a sandbox
+  every launch died with `mojo platform_channel.cc: Check failed`, because the
+  sandbox denies named pipes. With `danger-full-access`,
+  `C:\Program Files\Google\Chrome\Application\chrome.exe --headless=new
+  --remote-debugging-port=…` drives a real page, and `node:crypto`'s global
+  `WebSocket` is enough to speak CDP with no npm dependency. One trap: a
+  *background* headless tab barely produces frames, so `requestAnimationFrame`
+  callbacks and `IntersectionObserver` notifications are throttled. Taking a
+  screenshot forces a frame; read computed styles after one, not before.
 - **OneDrive interferes with atomic file replaces.** Writing a file that was
   recently deleted, or edited by a script, can fail with
   `ReplaceFileW EIO (Win32 1175)`. Retrying usually works; otherwise write to a
@@ -216,6 +246,13 @@ which requires a one minute demo video.
 - **Every user-facing string is a dictionary key.** Add it to both `en` and `zh`
   or the language toggle will show a raw key. A quick check: render the page and
   count elements whose text equals their own `data-i18n` value; it must be 0.
+  That check does not catch a key present in `en` and missing from `zh`, which
+  renders English to a Chinese visitor silently - compare the key sets too.
+- **The landing copy describes the game now, not the template it started as.**
+  The hero, About and the three cards were rewritten because they still said
+  "a minimal starting point for your next web project". Nothing in them invents
+  player counts, modes or dates; keep it that way unless the owner confirms a
+  fact. The page title comes from `meta.title`, not from the hero headline.
 - **Commits** are written as a short imperative subject plus a body explaining
   the reasoning and exactly what was verified. Match that style.
 
@@ -252,6 +289,29 @@ skipped rather than implying the page was seen:
 
 Delete every harness afterwards. `git status` should be clean, and no `.dsh-*`
 file should remain.
+
+The pass that added the intro ran exactly this, with 21 checks, and all of them
+passed. Worth copying rather than re-deriving:
+
+- Load with `?lang=en` so a Chinese-language machine does not decide what the
+  screenshots show.
+- Assert the intro is armed, lifts on its own, and leaves the DOM; then that the
+  hero headline is actually opaque afterwards, which is the failure that a
+  half-finished intro would produce.
+- Assert `.btn-ghost` has no background image. Comparing `background-color`
+  proves nothing, because `.btn` paints a *gradient* and its colour is
+  transparent.
+- Scroll, force a frame, then read the progress hairline and the highlighted
+  menu item. Reading before a frame measures the headless throttle.
+- Click through both themes and both languages; check `document.title` and
+  `documentElement.lang`.
+- Re-run in a second tab with `Emulation.setEmulatedMedia` set to
+  `prefers-reduced-motion: reduce`, and assert the intro never appears.
+- Open `/#profile` in a third tab and assert the same, since a deep link is the
+  other skip condition.
+- Count elements whose text equals their own `data-i18n` key, and separately
+  compare the two dictionaries key by key. The first finds a missing string in
+  the page; only the second finds a key that exists in `en` but not `zh`.
 
 ## Routing and restore
 
@@ -297,6 +357,46 @@ Verified working, so treat a change here as a regression to check for:
 - Theme and background are independent: any background works under either theme,
   and each theme supplies its own scrim so text stays readable.
 
+## Intro and first paint
+
+The curtain is deliberately the last thing anyone can get stuck behind, so each
+rule below exists for a failure that was actually reachable:
+
+- **CSS draws it; the script only decides when to lift it.** If the module never
+  runs at all, a classic script at the end of the body lifts the curtain after
+  four seconds. A blocked CDN import therefore costs a short wait, not a dead
+  page.
+- **It is armed in `<head>`, before the first paint**, by the same inline script
+  that applies the theme. `html.is-intro` is what makes the overlay visible, so
+  with scripting off it never exists.
+- **It is skipped** for `prefers-reduced-motion: reduce`, for a deep link into
+  the profile (`#profile`, `#panel-*`, `#roblox-oauth`), and for a tab that has
+  already seen it. The flag is `sessionStorage["xcope-intro"]`, written when the
+  curtain starts to lift rather than at load, so closing the tab halfway through
+  means seeing it again rather than never seeing it.
+- **`?intro=1` replays it**; that is the quickest way to preview a change to it.
+- **A click or any key lifts it immediately.** Otherwise it waits for the `load`
+  event and `document.fonts.ready`, capped at 2.6s, with a 1.35s minimum so the
+  wordmark can be read rather than glimpsed.
+- **The hero has its own entrance** (`.is-intro` hides, `.intro-done` animates)
+  rather than the shared scroll reveal, so it rises as the curtain lifts instead
+  of arriving behind it already finished.
+- **The overlay is removed from the DOM** once it is out of the way, so it can
+  never intercept a click or hold the scroll lock.
+
+The scroll-reveal styles are scoped to `html.js-reveal`, which the head script
+adds only when `IntersectionObserver` exists. Before that every `.is-reveal`
+section was `opacity: 0` with nothing to undo it, so a visitor with JavaScript
+off saw the hero, About, contact and footer as blank bands.
+
+Two cascade traps are worth remembering, because both were live:
+
+- **`.btn-ghost` lost to `.btn`.** They have the same specificity and `.btn` is
+  declared later, so every "ghost" button rendered as a solid one. Both rules
+  are now written `.btn.btn-ghost`.
+- **Reveal transitions must stay before the component rules** (section 3 of the
+  stylesheet), or they win the cascade over the card hover transition.
+
 ## Background strength
 
 A picture behind the page needs a scrim or white headings become unreadable, and
@@ -310,6 +410,10 @@ scrim alone.
 
 ## Known gaps
 
+- **There is no link to the Roblox experience anywhere on the site**, because no
+  URL was ever supplied and inventing one would be worse than not having it. The
+  hero therefore leads with the Discord invite and a jump to About. Adding a
+  Play button is one anchor in the hero plus two dictionary keys.
 - Roblox link and background choice live in one browser, not synced. Moving them
   to Firestore is the obvious next step and needs the security rules written.
 - **Official OAuth is now proven end to end.** A real visitor signed in on
