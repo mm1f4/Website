@@ -8,8 +8,8 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-  <meta name="theme-color" content="#ffffff" data-theme-color>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+  <meta name="theme-color" content="#f3efe3" data-theme-color>
   <!-- Apply the stored theme before first paint so there is no flash of the wrong
        theme. This is the same snippet index.html uses, so a visitor who already
        chose a theme gets it here too. -->
@@ -23,6 +23,13 @@
         document.documentElement.setAttribute("data-theme-choice", stored);
       } catch (e) {
         document.documentElement.setAttribute("data-theme", "light");
+      }
+
+      // These pages have no toggle, but they still follow the stored theme, so
+      // the browser chrome should follow it too.
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) {
+        meta.setAttribute("content", document.documentElement.getAttribute("data-theme") === "dark" ? "#07080a" : "#f3efe3");
       }
     })();
   </script>

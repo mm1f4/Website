@@ -19,13 +19,13 @@
   <link rel="icon" href="favicon.ico" sizes="any" />
 
   <!-- 🔗 Link to your external CSS file -->
-<!-- xcope-ui-pass:v2 -->
+<!-- xcope-ui-pass:v3 -->
   <!-- Fonts: the CJK family is only fetched by pages that use CJK glyphs,
        and unicode-range keeps the latin subsets small. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
-  <meta name="theme-color" content="#ffffff" data-theme-color>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+  <meta name="theme-color" content="#f3efe3" data-theme-color>
   <!-- Runs before anything paints, for three reasons: the stored theme is applied
        so there is no flash of the wrong one; the scroll-reveal styles are only
        switched on when the observer that undoes them can run; and the intro is
@@ -155,6 +155,15 @@
       </ul>
     </section>
 
+    <!-- Decorative brand band: the seam between the title screen and the page.
+         It carries no information, so it is hidden from assistive technology. -->
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-track">
+        <span>XCOPE ✦ XCOPE ✦ XCOPE ✦ XCOPE ✦ XCOPE ✦ XCOPE ✦</span>
+        <span>XCOPE ✦ XCOPE ✦ XCOPE ✦ XCOPE ✦ XCOPE ✦ XCOPE ✦</span>
+      </div>
+    </div>
+
     <!-- ---------- About ---------- -->
     <section class="about" id="about">
       <div class="container about-grid">
@@ -215,6 +224,7 @@
     <section class="features" id="features">
       <div class="container">
         <div class="section-head is-reveal">
+          <p class="eyebrow" data-i18n="nav.features">Features</p>
           <h2 data-i18n="features.title">What is here</h2>
           <p data-i18n="features.lead">The short version: a community, a profile, and a page that looks the way you want it to.</p>
         </div>
@@ -1709,7 +1719,7 @@
     /* ---------- Colour theme ---------- */
     const THEME_KEY = "xcope-theme";
     const THEMES = ["light", "auto", "dark"];
-    const THEME_COLORS = { light: "#ffffff", dark: "#0b1120" };
+    const THEME_COLORS = { light: "#f3efe3", dark: "#07080a" };
 
     function systemPrefersDark() {
       return !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
@@ -2454,7 +2464,7 @@
     // as --bg-<name>. The chosen variant follows the theme, so no re-render is
     // needed when the theme changes.
     const BG_PRESETS = ["aurora", "sunset", "ocean", "ember"];
-    const BG_IMAGE_BASE = "linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45))";
+    const BG_IMAGE_BASE = "linear-gradient(rgba(243, 239, 227, 0.45), rgba(243, 239, 227, 0.45))";
 
     const bgLayer = document.getElementById("bgLayer");
 

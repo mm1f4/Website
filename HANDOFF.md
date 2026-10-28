@@ -313,6 +313,21 @@ passed. Worth copying rather than re-deriving:
   compare the two dictionaries key by key. The first finds a missing string in
   the page; only the second finds a key that exists in `en` but not `zh`.
 
+The neon restyle was verified the same way, with 59 checks, all passing. Beyond
+the list above it asserted: both webfonts and the CJK face actually loaded;
+dictionary key parity and every `data-i18n` key used in the page; dark, light and
+auto (with an emulated dark OS) including the `theme-color` meta; the Chinese
+heading resolving to the 900 CJK face; all four preset gradients swapping their
+light/dark variants with the theme; WCAG contrast for body text, muted text,
+links and button labels in both themes; no horizontal overflow at 1440, 768 and
+390; the mobile menu opening without overflowing; the footer reveal; the modal
+opening and closing; the intro arming, lifting and leaving the DOM; the intro
+being skipped under `prefers-reduced-motion` and on the `#profile` deep link; and
+both legal pages still laying out, including their stored-theme chrome colour.
+The one real bug it caught was invisible in screenshots: `html[lang="zh"]` never
+matched `zh-Hant`, so Chinese headlines were falling back to a 400-weight face
+next to 400-weight Anton.
+
 ## Routing and restore
 
 Why a refresh on `#panel-password` used to land on the landing page, and what the
@@ -337,9 +352,40 @@ not by reading the code:
 - **`html.is-jumping` suppresses smoothing for the restore only.** A refresh
   should look as though the page was always there; clicking a link should still
   animate.
-- `scroll-padding-top` (97px, the sticky header plus the script's 12px gap) makes
-  the browser's own fragment jumps clear the header. The script uses the same
-  offset for its own scrolls.
+- `scroll-padding-top` (72px) makes the browser's own fragment jumps clear the
+  sticky header. The script measures the real header and adds 12px for its own
+  scrolls, so only native jumps depend on the token.
+
+## Visual identity
+
+The site was restyled in a "neon arcade" pass. The rules that matter:
+
+- **Two colours, three tokens.** `--neon` is the brand lime (`#c9ff3d`) and never
+  changes; `--neon-2` is the violet used for shadow casts and gradient ends.
+  `--accent` is the *readable* version of the brand colour and does change: a
+  deep olive in light (`#3f5d00`), the lime itself in dark. Use `--accent` for
+  body-size text and `--neon` for fills and decoration. Lime text on bone fails
+  contrast, which is why the two are split.
+- **Fonts**: Anton for h1/h2/h3 and the wordmark, Space Grotesk for text, and
+  the system monospace stack for labels and eyebrows. Noto Sans TC carries CJK
+  at 400/500/700/900. Anton has no CJK and only a 400 face, so
+  `html:lang(zh) h1, h2, h3` asks for 900: Anton renders at 400 (with
+  `font-synthesis-weight: none` stopping a fake bold) while the CJK fallback
+  picks the real 900 face. Write `:lang(zh)`, not `[lang="zh"]`, because the
+  page sets `zh-Hant`.
+- **Shape**: 2px radii, 1px borders and hard offset shadows. Elevation is meant
+  to look printed, not glassy; the auth modal is the one soft shadow left.
+- **Both themes are the same design**, printed on bone paper or near-black.
+  `--text-on-accent` is dark in both themes because the button is lime in both.
+- **The ticker** between the hero and About is decorative markup
+  (`aria-hidden`): two identical copies so `translateX(-50%)` loops seamlessly.
+- **Section indexes** (`01 // ABOUT`) come from a CSS counter over `.about`,
+  `.contact` and `.features`, so they follow document order automatically.
+- **The hero fold** is `min-height: calc(100svh - 100px)` so the ticker is fully
+  visible at the bottom of a desktop first screen. It is `overflow: hidden`
+  because the decorative glow would otherwise create horizontal scroll on a
+  phone. If the header or the ticker height changes, retune that 100px and
+  `scroll-padding-top`.
 
 ## Theme handling
 
@@ -360,7 +406,9 @@ Verified working, so treat a change here as a regression to check for:
 ## Intro and first paint
 
 The curtain is deliberately the last thing anyone can get stuck behind, so each
-rule below exists for a failure that was actually reachable:
+rule below exists for a failure that was actually reachable. It is ink in both
+themes on purpose: it is the game's title card, not a page surface, so a light
+visitor sees a short dark reveal and then the bone page.
 
 - **CSS draws it; the script only decides when to lift it.** If the module never
   runs at all, a classic script at the end of the body lifts the curtain after
@@ -399,14 +447,16 @@ Two cascade traps are worth remembering, because both were live:
 
 ## Background strength
 
-A picture behind the page needs a scrim or white headings become unreadable, and
-the two modes need very different amounts. As it stands the light scrim is
-strong (`0.86`), which keeps everything readable but washes a picture back
-noticeably; the dark scrim is `0.6` and lets far more of the picture through.
-Presets do not have this problem, because their light variants are pale by
-design. If the washed-out look in light mode is unwanted, the fix is to reduce
-the scrim and give the hero its own frosted panel, rather than to weaken the
-scrim alone.
+A picture behind the page needs a scrim or headings become unreadable, and the
+two modes need very different amounts. As it stands the light scrim is strong
+(`0.9`, bone rather than white), which keeps everything readable but washes a
+picture back noticeably; the dark scrim is `0.64` and lets far more of the
+picture through. Presets do not have this problem, because their light variants
+are pale by design. The custom-image base painted under the photo in light mode
+is the same bone tone (`BG_IMAGE_BASE` in `index.html`), so an uploaded picture
+warms rather than cools. If the washed-out look in light mode is unwanted, the
+fix is to reduce the scrim and give the hero its own frosted panel, rather than
+to weaken the scrim alone.
 
 ## Known gaps
 
