@@ -773,8 +773,12 @@ html.intro-done .hero > *:nth-child(4) { transition-delay: 400ms; }
 html.intro-done .hero > *:nth-child(5) { transition-delay: 500ms; }
 
 /* ---------- Brand ticker ----------
-   A solid gold band of the wordmark, repeated twice so the loop is seamless at
-   -50%. Purely decorative: the markup is aria-hidden. */
+   A solid gold band of the wordmark and the game name, repeated twice so the
+   loop is seamless at -50%. Purely decorative: the markup is aria-hidden.
+   The loop only closes if each half is at least as wide as the window, since
+   the track translates by exactly one half: 22 pairs of ENTITY / XCOPE is about
+   4.1k pixels at 16px and covers a 4K display. The duration is long so that the
+   wider copy does not also make the band faster. */
 .ticker {
   overflow: hidden;
   background: var(--neon);
@@ -785,7 +789,7 @@ html.intro-done .hero > *:nth-child(5) { transition-delay: 500ms; }
 .ticker-track {
   display: flex;
   width: max-content;
-  animation: ticker 30s linear infinite;
+  animation: ticker 80s linear infinite;
 }
 
 .ticker-track span {

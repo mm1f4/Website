@@ -257,11 +257,13 @@ which requires a one minute demo video.
   count elements whose text equals their own `data-i18n` value; it must be 0.
   That check does not catch a key present in `en` and missing from `zh`, which
   renders English to a Chinese visitor silently - compare the key sets too.
-- **The landing copy describes the game now, not the template it started as.**
-  The hero, About and the three cards were rewritten because they still said
-  "a minimal starting point for your next web project". Nothing in them invents
-  player counts, modes or dates; keep it that way unless the owner confirms a
-  fact. The page title comes from `meta.title`, not from the hero headline.
+- **The landing copy is the owner's facts, not invention.** In this session the
+  owner confirmed two things, and both are now on the page: X Cope is a Roblox
+  game *group* made by `z9de` and `onlyone`, and its game is **Entity: No More
+  Mercy**, a survival game. The hero leads with the game name, the About section
+  explains the group, and the stat cards name the genre and the makers. Nothing
+  invents player counts, modes, dates or a play link - see "Known gaps". The page
+  title comes from `meta.title`, not from the hero headline.
 - **Commits** are written as a short imperative subject plus a body explaining
   the reasoning and exactly what was verified. Match that style.
 
@@ -346,6 +348,15 @@ pages, the reduced-motion intro skip, and the Worker's `/health`. One check
 compared the deployed Pages build against the working tree, which is how the
 push was confirmed to have landed.
 
+The copy pass that named the group and the game was verified with 31 checks. The
+interesting one is the ticker: the loop only closes when each half is wider than
+the window, and measuring it at 390/768/1440/1920/2560/3840 is what caught a
+1489px half leaving a gap on a 2560 monitor. The rest: the headline still fits the
+fold in two lines, the h1, badge, facts and stat cards carry the confirmed facts,
+both dictionaries hold the same 237 keys, all 133 `data-i18n` keys resolve, no
+element shows a raw key, contrast is unchanged in both themes, and the Chinese
+pass keeps the game name in Latin while translating everything around it.
+
 ## Routing and restore
 
 Why a refresh on `#panel-password` used to land on the landing page, and what the
@@ -408,6 +419,9 @@ arcade" pass, so a lime in a screenshot means an old build.
   `--text-on-accent` is dark in both themes because the button is gold in both.
 - **The ticker** between the hero and About is decorative markup
   (`aria-hidden`): two identical copies so `translateX(-50%)` loops seamlessly.
+  Each copy must be at least one viewport wide or a gap travels across the strip.
+  48 ENTITY / XCOPE tokens is about 4.5k pixels, which covers a 4K display; the
+  80s duration keeps the band at the pace the shorter copy had at 30s.
 - **Section indexes** (`01 // ABOUT`) come from a CSS counter over `.about`,
   `.contact` and `.features`, so they follow document order automatically.
 - **The hero fold** is `min-height: calc(100svh - 100px)` so the ticker is fully
@@ -489,10 +503,12 @@ to weaken the scrim alone.
 
 ## Known gaps
 
-- **There is no link to the Roblox experience anywhere on the site**, because no
-  URL was ever supplied and inventing one would be worse than not having it. The
-  hero therefore leads with the Discord invite and a jump to About. Adding a
-  Play button is one anchor in the hero plus two dictionary keys.
+- **There is no link to Entity: No More Mercy anywhere on the site**, because no
+  experience URL or group URL was ever supplied, and inventing one would be worse
+  than not having it. The hero therefore leads with the Discord invite and a jump
+  to About. Adding a Play button is one anchor in the hero plus two dictionary
+  keys, but it needs the real URL first; that URL is also what the in-game link
+  work would eventually read.
 - Roblox link and background choice live in one browser, not synced. Moving them
   to Firestore is the obvious next step and needs the security rules written.
 - **Official OAuth is now proven end to end.** A real visitor signed in on
