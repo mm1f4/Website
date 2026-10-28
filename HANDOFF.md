@@ -264,6 +264,12 @@ which requires a one minute demo video.
   explains the group, and the stat cards name the genre and the makers. Nothing
   invents player counts, modes, dates or a play link - see "Known gaps". The page
   title comes from `meta.title`, not from the hero headline.
+- **Visitor-facing copy is about the game, not about this repository.** The second
+  About paragraph used to explain that the page is hand-written HTML with no build
+  step; the owner marked it as off-topic, and rightly - a visitor came for the
+  game. Implementation notes belong in this file. The same pass moved the fourth
+  stat from "Accounts: Free" to "Community: Discord", so all four cards describe
+  the group.
 - **Commits** are written as a short imperative subject plus a body explaining
   the reasoning and exactly what was verified. Match that style.
 
