@@ -512,6 +512,14 @@ to weaken the scrim alone.
   real About me and seen the link succeed.
 - Ongoing cost of the Worker CORS list: adding a new test origin means editing
   `ALLOWED_ORIGINS` and redeploying, or every request from that origin fails.
+- **The Worker's refusal advertises `Access-Control-Allow-Origin: null`.** An
+  unlisted origin gets a 403 before any handler runs, so no data is reachable and
+  a normal page cannot read the refusal, because `null` is not its origin - it
+  only looks alarming in a header dump. The imprecision is that a sandboxed frame
+  whose own origin serialises to `null` can read the 403 body, which carries only
+  the error string. `corsHeaders` in `link-service/src/index.mjs` returns that
+  literal; omitting the header is the tidier fix, and it needs a
+  `npx wrangler deploy` to take effect.
 - Nothing loads Roblox data in-game yet. When the link is synced, the Roblox
   experience would read the stored id to recognise the player.
 - The contact section is the Discord invite only
