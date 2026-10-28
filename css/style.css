@@ -2292,7 +2292,7 @@ input[readonly] {
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--bg-scrim, rgba(243, 239, 227, 0.84));
+  background: var(--bg-scrim, rgba(246, 240, 225, 0.84));
 }
 
 :root[data-has-custom-bg="true"] {
@@ -2301,14 +2301,17 @@ input[readonly] {
 
 /* Light mode needs the heavier scrim: dark section headings sit directly on the
    backdrop, so a bright picture has to be washed back a long way. */
-:root[data-has-custom-bg="true"][data-theme="light"] { --bg-scrim: rgba(243, 239, 227, 0.9); }
-:root[data-has-custom-bg="true"][data-theme="dark"] { --bg-scrim: rgba(5, 6, 9, 0.64); }
+:root[data-has-custom-bg="true"][data-theme="light"] { --bg-scrim: rgba(246, 240, 225, 0.9); }
+:root[data-has-custom-bg="true"][data-theme="dark"] { --bg-scrim: rgba(10, 9, 8, 0.64); }
 
 /* With a picture behind it, the frosted surfaces need to be more solid than they
-   are over the wash, because a photograph has far more contrast than a gradient. */
+   are over the wash, because a photograph has far more contrast than a gradient.
+   These are the same colours as the main tokens, only more opaque: when the
+   palette changes, these four values have to move with it, or a visitor who
+   uploads a picture gets the old theme over the new one. */
 :root[data-has-custom-bg="true"] {
-  --card-translucent: rgba(251, 248, 238, 0.94);
-  --surface-translucent: rgba(234, 229, 213, 0.9);
+  --card-translucent: rgba(255, 252, 243, 0.94);
+  --surface-translucent: rgba(239, 231, 212, 0.9);
 }
 
 :root[data-has-custom-bg="true"] .panel-card {
@@ -2318,8 +2321,8 @@ input[readonly] {
 }
 
 :root[data-has-custom-bg="true"][data-theme="dark"] {
-  --card-translucent: rgba(11, 13, 17, 0.9);
-  --surface-translucent: rgba(9, 11, 14, 0.86);
+  --card-translucent: rgba(14, 12, 10, 0.9);
+  --surface-translucent: rgba(16, 14, 12, 0.86);
 }
 
 :root[data-has-custom-bg="true"] header {

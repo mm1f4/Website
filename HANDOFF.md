@@ -408,6 +408,14 @@ arcade" pass, so a lime in a screenshot means an old build.
   dark is a warm near-black (`#0a0908`) under off-white (`#ece6dc`). The
   `theme-color` meta in all three HTML files mirrors those two values, and the
   legal pages repeat them in their own inline script.
+- **Frosted surfaces repeat the palette as literals.** `--surface-translucent`
+  (used only by `.contact` and `footer`, always with `backdrop-filter: blur(12px)`)
+  and `--card-translucent` are the surface and card colours with alpha. The
+  `[data-has-custom-bg="true"]` block sets the same colours again at a higher
+  alpha, plus `--bg-scrim` twice, because a photograph behind text needs a more
+  solid surface than a gradient does. Those are colour literals, not references,
+  so any palette change has to move them too: the first retheme forgot, and the
+  old bone and blue-black only came back for a visitor who uploaded a picture.
 - **Contrast is measured, not eyeballed.** Both themes are read back from the
   browser: body text >= 15:1, muted text >= 6:1 light and >= 7:1 dark, accent
   text >= 6.5:1, dark button label on gold 12.5:1. Changing a surface token means
