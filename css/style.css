@@ -1,9 +1,10 @@
 /* ==========================================================================
    XCOPE - stylesheet
 
-   The visual language is "neon arcade": near-black surfaces, an electric lime
-   accent, condensed display type, square corners and hard offset shadows. The
-   light theme is the same identity printed on bone paper, not a different site.
+   The visual language is "marquee arcade": near-black surfaces, a brass gold
+   accent with an ember cast, condensed display type, square corners and hard
+   offset shadows. The light theme is the same identity printed on warm paper,
+   not a different site.
 
    Structure
      1. Design tokens (shared)
@@ -33,17 +34,19 @@
    1. Design tokens (theme-independent)
 
    --neon is the brand colour and does not change between themes: it is always
-   the lime used for fills, rules and focus. --accent is the *readable* version
-   of that colour, which has to be a deep olive in light mode for body-size
-   links to stay legible on bone. Keeping the two apart is what lets the same
+   the gold used for fills, rules and focus. --accent is the *readable* version
+   of that colour, which has to be a deep bronze in light mode for body-size
+   links to stay legible on paper. Keeping the two apart is what lets the same
    accent work as a button fill and as text.
    -------------------------------------------------------------------------- */
 :root {
-  /* Brand */
-  --neon: #c9ff3d;
-  --neon-ink: #080a0c;
-  --neon-2: #7b5cff;
-  --neon-3: #2ee6c8;
+  /* Brand. --neon is the marquee gold used for fills, rules, focus and the
+     ticker; --neon-2 is the ember it throws and fades into; --neon-3 is the one
+     cool colour in the palette, and appears only in the animated background. */
+  --neon: #ffc53d;
+  --neon-ink: #0a0a0b;
+  --neon-2: #ff6a3d;
+  --neon-3: #22c7b8;
 
   /* Radii - the design is square; these exist for the few circles left. */
   --radius-sm: 2px;
@@ -98,34 +101,34 @@
 :root[data-theme="light"] {
   color-scheme: light;
 
-  /* Surfaces - bone paper rather than white */
-  --bg: #f3efe3;
-  --surface: #eae5d5;
-  --surface-2: #e0dac8;
-  --card: #fbf8ee;
+  /* Surfaces - warm paper rather than white */
+  --bg: #f6f0e1;
+  --surface: #efe7d4;
+  --surface-2: #e6dcc4;
+  --card: #fffcf3;
 
   /* Text */
-  --text: #191b1f;
-  --text-strong: #0a0b0c;
-  --text-on-accent: #0a0b0c;
-  --muted: #5a626c;
-  --placeholder: #8a8473;
+  --text: #1b1917;
+  --text-strong: #0b0a09;
+  --text-on-accent: #0a0a0b;
+  --muted: #5f5a50;
+  --placeholder: #8d8576;
 
   /* Lines */
-  --border: #d5cdb9;
-  --border-strong: #b6ac94;
-  --border-hover: #857c64;
+  --border: #d8cdb4;
+  --border-strong: #b9ad92;
+  --border-hover: #8b7f66;
 
-  /* Accent: readable olive for text, real lime for fills (--neon) */
-  --accent: #3f5d00;
-  --accent-hover: #293d00;
-  --accent-soft: rgba(120, 160, 0, 0.14);
-  --accent-ring: rgba(63, 93, 0, 0.22);
+  /* Accent: readable bronze for text, real gold for fills (--neon) */
+  --accent: #7c4a06;
+  --accent-hover: #5c3400;
+  --accent-soft: rgba(255, 197, 61, 0.18);
+  --accent-ring: rgba(124, 74, 6, 0.22);
   --accent-gradient: linear-gradient(135deg, var(--neon), var(--neon-2));
-  --button-gradient: linear-gradient(180deg, #d9ff55, #c1ef14);
+  --button-gradient: linear-gradient(180deg, #ffd968, #f5b021);
   --logo-bar: linear-gradient(90deg, var(--accent), var(--neon-2));
   --danger-hover: #9c1428;
-  --focus: #4b21c9;
+  --focus: #14110c;
 
   /* Feedback */
   --error: #b3122c;
@@ -137,19 +140,19 @@
   --success-border: rgba(31, 107, 50, 0.3);
 
   /* Structure */
-  --header-bg: rgba(243, 239, 227, 0.86);
-  --overlay-bg: rgba(18, 16, 12, 0.58);
+  --header-bg: rgba(246, 240, 225, 0.86);
+  --overlay-bg: rgba(18, 15, 10, 0.58);
   --body-veil: radial-gradient(
     1100px 520px at 50% -240px,
-    rgba(201, 255, 61, 0.22),
+    rgba(255, 197, 61, 0.2),
     transparent 72%
   );
-  --card-translucent: rgba(251, 248, 238, 0.9);
-  --surface-translucent: rgba(234, 229, 213, 0.82);
-  --header-translucent: rgba(243, 239, 227, 0.96);
-  --border-soft: rgba(213, 205, 185, 0.65);
-  --grid-line: rgba(10, 11, 12, 0.09);
-  --scanline: rgba(10, 11, 12, 0.032);
+  --card-translucent: rgba(255, 252, 243, 0.9);
+  --surface-translucent: rgba(239, 231, 212, 0.82);
+  --header-translucent: rgba(246, 240, 225, 0.96);
+  --border-soft: rgba(216, 205, 180, 0.65);
+  --grid-line: rgba(10, 9, 8, 0.09);
+  --scanline: rgba(10, 9, 8, 0.032);
 
   /* Background presets, light variant: pale washes that keep dark text
      comfortable. The dark variants are in the dark theme below. */
@@ -173,30 +176,30 @@
   color-scheme: dark;
 
   /* Surfaces - raised surfaces are lighter than the page, not darker */
-  --bg: #07080a;
-  --surface: #0c0e12;
-  --surface-2: #14171d;
-  --card: #0b0d11;
+  --bg: #0a0908;
+  --surface: #100e0c;
+  --surface-2: #191614;
+  --card: #0e0c0a;
 
   /* Text */
-  --text: #e6ebef;
-  --text-strong: #ffffff;
-  --text-on-accent: #0a0b0c;
-  --muted: #9aa4ae;
-  --placeholder: #6b7480;
+  --text: #ece6dc;
+  --text-strong: #fffaf0;
+  --text-on-accent: #0a0a0b;
+  --muted: #a49c90;
+  --placeholder: #776f64;
 
   /* Lines */
-  --border: #23272f;
-  --border-strong: #343a44;
-  --border-hover: #4c5460;
+  --border: #292521;
+  --border-strong: #3a3530;
+  --border-hover: #544d45;
 
-  /* Accent - the lime itself is legible on near-black */
-  --accent: #c9ff3d;
-  --accent-hover: #e0ff86;
-  --accent-soft: rgba(201, 255, 61, 0.1);
-  --accent-ring: rgba(201, 255, 61, 0.3);
+  /* Accent - the gold itself is legible on near-black */
+  --accent: #ffc53d;
+  --accent-hover: #ffd977;
+  --accent-soft: rgba(255, 197, 61, 0.1);
+  --accent-ring: rgba(255, 197, 61, 0.3);
   --accent-gradient: linear-gradient(135deg, var(--neon), var(--neon-2));
-  --button-gradient: linear-gradient(180deg, #d7ff66, #b9f01c);
+  --button-gradient: linear-gradient(180deg, #ffd268, #f7b21e);
   --logo-bar: linear-gradient(90deg, var(--neon), var(--neon-2));
   --danger-hover: #ff8098;
   --focus: var(--neon);
@@ -211,19 +214,19 @@
   --success-border: rgba(125, 255, 155, 0.28);
 
   /* Structure */
-  --header-bg: rgba(7, 8, 10, 0.82);
-  --overlay-bg: rgba(3, 4, 6, 0.78);
+  --header-bg: rgba(10, 9, 8, 0.82);
+  --overlay-bg: rgba(3, 3, 2, 0.78);
   --body-veil: radial-gradient(
     1100px 520px at 50% -240px,
-    rgba(201, 255, 61, 0.07),
+    rgba(255, 197, 61, 0.08),
     transparent 72%
   );
-  --card-translucent: rgba(11, 13, 17, 0.86);
-  --surface-translucent: rgba(9, 11, 14, 0.78);
-  --header-translucent: rgba(7, 8, 10, 0.94);
-  --border-soft: rgba(35, 39, 47, 0.65);
-  --grid-line: rgba(255, 255, 255, 0.055);
-  --scanline: rgba(255, 255, 255, 0.028);
+  --card-translucent: rgba(14, 12, 10, 0.86);
+  --surface-translucent: rgba(16, 14, 12, 0.78);
+  --header-translucent: rgba(10, 9, 8, 0.94);
+  --border-soft: rgba(41, 37, 33, 0.65);
+  --grid-line: rgba(255, 250, 240, 0.05);
+  --scanline: rgba(255, 250, 240, 0.026);
 
   /* Background presets, dark variant. */
   --bg-aurora: linear-gradient(140deg, #050a08 0%, #0a2f27 30%, #1c6b3a 58%, #4b2fd6 100%);
@@ -231,16 +234,16 @@
   --bg-ocean: linear-gradient(150deg, #030d18 0%, #063a5a 38%, #0a6f8f 66%, #17b6a8 100%);
   --bg-ember: linear-gradient(150deg, #120604 0%, #3d0c05 38%, #8f210d 66%, #ff7a2f 100%);
 
-  /* Elevation - a violet cast under the lime, so buttons look lit rather than
+  /* Elevation - an ember cast under the gold, so buttons look lit rather than
      merely raised, and near-black shadows for everything else. */
   --shadow-xs: 0 1px 0 rgba(0, 0, 0, 0.4);
   --shadow-sm: 2px 2px 0 rgba(0, 0, 0, 0.45);
   --shadow-md: 4px 4px 0 rgba(0, 0, 0, 0.45);
   --shadow-lg: 8px 8px 0 rgba(0, 0, 0, 0.5);
   --shadow-xl: 0 30px 80px rgba(0, 0, 0, 0.75);
-  --shadow-button: 4px 4px 0 rgba(123, 92, 255, 0.55);
-  --shadow-button-hover: 6px 6px 0 rgba(123, 92, 255, 0.55);
-  --shadow-hard: rgba(123, 92, 255, 0.42);
+  --shadow-button: 4px 4px 0 rgba(255, 106, 61, 0.45);
+  --shadow-button-hover: 6px 6px 0 rgba(255, 106, 61, 0.45);
+  --shadow-hard: rgba(255, 106, 61, 0.38);
 }
 
 /* --------------------------------------------------------------------------
@@ -423,7 +426,7 @@ nav {
   color: var(--text-strong);
 }
 
-/* A lime block ahead of the wordmark, with a violet ghost behind it: the
+/* A gold block ahead of the wordmark, with an ember ghost behind it: the
    smallest possible statement of the two-colour palette. */
 .logo::before {
   content: "";
@@ -614,7 +617,7 @@ nav {
   padding: var(--space-8) 0 var(--space-7);
 }
 
-/* Two washes behind the headline: lime above, violet below-right. They live in
+/* Two washes behind the headline: gold above, ember below-right. They live in
    the hero's stacking context and never intercept a pointer. */
 .hero::before {
   content: "";
@@ -627,7 +630,7 @@ nav {
   transform: translateX(-50%);
   background:
     radial-gradient(closest-side at 50% 50%, var(--accent-soft), transparent 74%),
-    radial-gradient(closest-side at 62% 62%, rgba(123, 92, 255, 0.12), transparent 76%);
+    radial-gradient(closest-side at 62% 62%, rgba(255, 106, 61, 0.12), transparent 76%);
   pointer-events: none;
 }
 
@@ -698,7 +701,7 @@ nav {
   text-shadow: 0 0 60px var(--accent-soft);
 }
 
-/* A short lime rule under the wordmark, centred with the headline. */
+/* A short gold rule under the wordmark, centred with the headline. */
 .hero h1::after {
   content: "";
   display: block;
@@ -770,7 +773,7 @@ html.intro-done .hero > *:nth-child(4) { transition-delay: 400ms; }
 html.intro-done .hero > *:nth-child(5) { transition-delay: 500ms; }
 
 /* ---------- Brand ticker ----------
-   A solid lime band of the wordmark, repeated twice so the loop is seamless at
+   A solid gold band of the wordmark, repeated twice so the loop is seamless at
    -50%. Purely decorative: the markup is aria-hidden. */
 .ticker {
   overflow: hidden;
@@ -855,7 +858,7 @@ html.intro-done .hero > *:nth-child(5) { transition-delay: 500ms; }
     border-color var(--dur) var(--ease-out);
 }
 
-/* A lime rule that draws itself across the top edge on hover. */
+/* A gold rule that draws itself across the top edge on hover. */
 .card::before {
   content: "";
   position: absolute;
@@ -1059,7 +1062,7 @@ main[data-page="home"] { counter-reset: section; }
   box-shadow: var(--shadow-xs);
 }
 
-/* A lime tab on the top-left corner of each stat, echoing the card counters. */
+/* A gold tab on the top-left corner of each stat, echoing the card counters. */
 .stat::before {
   content: "";
   position: absolute;
@@ -2520,7 +2523,7 @@ input[readonly] {
    out of the document once the page is uncovered, so it can never hold a click.
 
    The curtain is ink in both themes on purpose: it is the game's title card,
-   not a page surface, and a lime wordmark on near-black is the strongest form
+   not a page surface, and a gold wordmark on near-black is the strongest form
    of the identity. The page underneath is painted before it lifts.
    -------------------------------------------------------------------------- */
 .intro {
@@ -2531,7 +2534,7 @@ input[readonly] {
   place-items: center;
   padding: var(--space-6);
   visibility: hidden;
-  background: #06070a;
+  background: #080706;
   color: #ffffff;
   transition: opacity 760ms var(--ease-out), transform 820ms var(--ease-out);
 }
@@ -2546,7 +2549,7 @@ html.is-intro .intro { visibility: visible; }
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(closest-side, rgba(201, 255, 61, 0.16), transparent 72%) center / 80% 60% no-repeat,
+    radial-gradient(closest-side, rgba(255, 197, 61, 0.18), transparent 72%) center / 80% 60% no-repeat,
     repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 4px);
   opacity: 1;
   pointer-events: none;

@@ -203,18 +203,27 @@ which requires a one minute demo video.
   hand**, which is how the Worker's three Roblox endpoints were confirmed
   against the live service. It does not make the page work without the Worker;
   see the CORS note under "Roblox" for why.
-- **git is installed machine-wide at `C:\Program Files\Git\cmd\git.exe`**
-  (2.56.0, installed with `winget install --id Git.Git -e --scope user`). The
-  older note about `%LOCALAPPDATA%\Programs\Git` was wrong for this machine; the
-  per-user location does not exist. It is not on the PATH a fresh shell starts
-  with, so put `C:\Program Files\Git\cmd` on `PATH` for the session or call
-  `git.exe` by full path. The identity is set **per repository** to
+- **git is a per-user portable install at `%LOCALAPPDATA%\Programs\Git`**
+  (2.56.0.windows.4, MinGit), with `...\Git\cmd` appended to the user PATH. The
+  machine-wide `C:\Program Files\Git` that an earlier session recorded was gone:
+  no `git` on PATH, no App Paths entry, no uninstall record. `winget` is not
+  usable in this profile either (`winget --info` exits -1978335231), so the
+  MinGit archive was downloaded with Node and expanded into the user profile. A
+  shell that was already running keeps its old PATH, so call `git.exe` by full
+  path or open a new terminal. The identity is set **per repository** to
   `mm1f4 <6fcymcapsbcc@gmail.com>`; there is no global identity.
+- **PowerShell cannot make TLS connections here; Node can.** Every
+  `Invoke-WebRequest` and `curl.exe` attempt dies in schannel with
+  `SEC_E_NO_CREDENTIALS`, while DNS and plain TCP answer normally. Downloads
+  therefore go through a throwaway `.cjs` using `fetch`; that is also why the git
+  install above could not use winget.
 - **This folder is a git checkout**, `main` tracking `origin/main` of
   `github.com/mm1f4/Website`. It was adopted rather than cloned: `git init`,
   `git remote add`, `git fetch`, then `git reset --soft FETCH_HEAD` so the index
   matched the remote without touching a single working file. That is the way to
-  bring an unversioned copy of a live site under git without a merge.
+  bring an unversioned copy of a live site under git without a merge. The
+  checkout was shallow for a while - the reset left one grafted base commit - and
+  `git fetch --unshallow` restored the full history.
 - **The shell is Windows PowerShell 5.1**, not 7: a `pwsh` call that looked like
   it should be 7 reported 5.1.26100. The quoting advice still holds and is worth
   keeping: inline `node -e` through PowerShell breaks often, so prefer writing a
@@ -328,6 +337,15 @@ The one real bug it caught was invisible in screenshots: `html[lang="zh"]` never
 matched `zh-Hant`, so Chinese headlines were falling back to a 400-weight face
 next to 400-weight Anton.
 
+The marquee retheme touched no markup: design tokens, the ember and gold frames,
+and the theme-color value in three files. It was verified with 46 checks, all
+passing - per-theme contrast read back from the browser rather than computed on
+paper, light/dark variants for all four background presets, i18n parity in both
+languages, no horizontal overflow at 1440/768/390, the mobile menu, both legal
+pages, the reduced-motion intro skip, and the Worker's `/health`. One check
+compared the deployed Pages build against the working tree, which is how the
+push was confirmed to have landed.
+
 ## Routing and restore
 
 Why a refresh on `#panel-password` used to land on the landing page, and what the
@@ -358,14 +376,25 @@ not by reading the code:
 
 ## Visual identity
 
-The site was restyled in a "neon arcade" pass. The rules that matter:
+The site was restyled as a "marquee arcade": an arcade cabinet's title screen,
+printed rather than glassy. This replaced the earlier lime-and-violet "neon
+arcade" pass, so a lime in a screenshot means an old build.
 
-- **Two colours, three tokens.** `--neon` is the brand lime (`#c9ff3d`) and never
-  changes; `--neon-2` is the violet used for shadow casts and gradient ends.
+- **Two colours, three tokens.** `--neon` is the marquee gold (`#ffc53d`) and
+  never changes; `--neon-2` is the ember (`#ff6a3d`) it casts and fades into;
+  `--neon-3` is a single cool teal that only the animated background uses.
   `--accent` is the *readable* version of the brand colour and does change: a
-  deep olive in light (`#3f5d00`), the lime itself in dark. Use `--accent` for
-  body-size text and `--neon` for fills and decoration. Lime text on bone fails
+  deep bronze in light (`#7c4a06`), the gold itself in dark. Use `--accent` for
+  body-size text and `--neon` for fills and decoration. Gold text on paper fails
   contrast, which is why the two are split.
+- **Paper and ink.** Light is warm paper (`#f6f0e1`) under warm ink (`#1b1917`);
+  dark is a warm near-black (`#0a0908`) under off-white (`#ece6dc`). The
+  `theme-color` meta in all three HTML files mirrors those two values, and the
+  legal pages repeat them in their own inline script.
+- **Contrast is measured, not eyeballed.** Both themes are read back from the
+  browser: body text >= 15:1, muted text >= 6:1 light and >= 7:1 dark, accent
+  text >= 6.5:1, dark button label on gold 12.5:1. Changing a surface token means
+  re-running that pass.
 - **Fonts**: Anton for h1/h2/h3 and the wordmark, Space Grotesk for text, and
   the system monospace stack for labels and eyebrows. Noto Sans TC carries CJK
   at 400/500/700/900. Anton has no CJK and only a 400 face, so
@@ -375,8 +404,8 @@ The site was restyled in a "neon arcade" pass. The rules that matter:
   page sets `zh-Hant`.
 - **Shape**: 2px radii, 1px borders and hard offset shadows. Elevation is meant
   to look printed, not glassy; the auth modal is the one soft shadow left.
-- **Both themes are the same design**, printed on bone paper or near-black.
-  `--text-on-accent` is dark in both themes because the button is lime in both.
+- **Both themes are the same design**, printed on warm paper or a warm near-black.
+  `--text-on-accent` is dark in both themes because the button is gold in both.
 - **The ticker** between the hero and About is decorative markup
   (`aria-hidden`): two identical copies so `translateX(-50%)` loops seamlessly.
 - **Section indexes** (`01 // ABOUT`) come from a CSS counter over `.about`,
