@@ -95,6 +95,7 @@
       <a class="logo" href="#" data-route data-go-home data-i18n-aria-label="nav.home" aria-label="Back to home">XCOPE</a>
 
       <ul class="nav-links" id="navLinks" data-i18n-aria-label="nav.menu">
+          <li><a href="#market" data-section-link="market" data-i18n="nav.market">Market</a></li>
           <li><a href="#features" data-section-link="features" data-i18n="nav.features">Features</a></li>
           <li><a href="#about" data-section-link="about" data-i18n="nav.about">About</a></li>
           <li><a href="#contact" data-section-link="contact" data-i18n="nav.contact">Contact</a></li>
@@ -146,7 +147,7 @@
       <p class="hero-lead" data-i18n="hero.subtitle">A survival game on Roblox, made by X Cope. Follow the updates, link your Roblox account, and make this page feel like yours.</p>
       <div class="hero-actions">
         <a class="btn btn-lg" href="https://discord.gg/dFQqAMZkb4" target="_blank" rel="noopener noreferrer" data-i18n="hero.cta">Join the Discord</a>
-        <a class="btn btn-ghost btn-lg" href="#about" data-i18n="hero.ctaSecondary">What is here</a>
+        <a class="btn btn-ghost btn-lg" href="#market" data-i18n="hero.ctaSecondary">Visit the market</a>
       </div>
       <ul class="hero-facts">
         <li><span class="hero-fact-dot" aria-hidden="true"></span><span data-i18n="hero.fact1">Survival on Roblox</span></li>
@@ -193,6 +194,152 @@
             <dd data-i18n="about.stat4.value">Discord</dd>
           </div>
         </dl>
+      </div>
+    </section>
+
+    <!-- ---------- Market ----------
+
+         The storefront. Everything is sold for Robux inside the Roblox
+         experience, so the page itself never takes a payment: the cart gathers
+         an order, and the order is handed over in Discord where staff grant the
+         items. Prices, names and categories live in the markup so the section
+         reads and prints with the script switched off; the cart only adds the
+         behaviour on top. -->
+    <section class="market" id="market">
+      <div class="container">
+        <div class="section-head is-reveal">
+          <p class="eyebrow" data-i18n="nav.market">Market</p>
+          <h2 data-i18n="market.title">The X Cope market</h2>
+          <p data-i18n="market.lead">Passes, ranks, bundles and items for Entity: No More Mercy. Everything is paid for in Robux inside Roblox, so no card is ever entered on this page.</p>
+        </div>
+
+        <div class="market-toolbar is-reveal">
+          <div class="market-filters" id="marketFilters" role="group" data-i18n-aria-label="market.filterLabel" aria-label="Filter the market">
+            <button type="button" class="chip is-active" data-filter="all" aria-pressed="true" data-i18n="market.filterAll">All</button>
+            <button type="button" class="chip" data-filter="passes" aria-pressed="false" data-i18n="market.filterPasses">Passes</button>
+            <button type="button" class="chip" data-filter="bundles" aria-pressed="false" data-i18n="market.filterBundles">Bundles</button>
+            <button type="button" class="chip" data-filter="ranks" aria-pressed="false" data-i18n="market.filterRanks">Ranks</button>
+            <button type="button" class="chip" data-filter="items" aria-pressed="false" data-i18n="market.filterItems">Items</button>
+          </div>
+          <p class="market-note">
+            <span class="market-note-dot" aria-hidden="true"></span>
+            <span data-i18n="market.robuxNote">Prices are in Robux. Items arrive in game once Roblox confirms the purchase.</span>
+          </p>
+        </div>
+
+        <!-- Add-to-cart feedback for screen readers as well as for the eye. -->
+        <p class="market-flash" id="marketFlash" role="status" aria-live="polite"></p>
+
+        <div class="market-grid" id="marketGrid" data-reveal-group>
+          <article class="product" data-product="exile-pass" data-category="passes" data-price="399">
+            <div class="product-art" aria-hidden="true"><span class="product-mark"></span></div>
+            <div class="product-body">
+              <p class="product-cat" data-i18n="market.cat.passes">Pass</p>
+              <h3 data-i18n="market.exilePass.name">Exile Pass</h3>
+              <p class="product-desc" data-i18n="market.exilePass.desc">The season reward track: skins, titles and tokens that unlock as you survive.</p>
+              <div class="product-foot">
+                <span class="product-price"><span class="product-price-unit">R$</span>399</span>
+                <button type="button" class="btn btn-sm product-add" data-add="exile-pass" data-i18n="market.add">Add to cart</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product" data-product="night-watch-pass" data-category="passes" data-price="349">
+            <div class="product-art" aria-hidden="true"><span class="product-mark"></span></div>
+            <div class="product-body">
+              <p class="product-cat" data-i18n="market.cat.passes">Pass</p>
+              <h3 data-i18n="market.nightWatchPass.name">Night Watch Pass</h3>
+              <p class="product-desc" data-i18n="market.nightWatchPass.desc">A second track for late joiners. The same rewards, without the catch-up grind.</p>
+              <div class="product-foot">
+                <span class="product-price"><span class="product-price-unit">R$</span>349</span>
+                <button type="button" class="btn btn-sm product-add" data-add="night-watch-pass" data-i18n="market.add">Add to cart</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product" data-product="nightfall-bundle" data-category="bundles" data-price="899">
+            <span class="product-badge" data-i18n="market.badge.best">Best value</span>
+            <div class="product-art" aria-hidden="true"><span class="product-mark"></span></div>
+            <div class="product-body">
+              <p class="product-cat" data-i18n="market.cat.bundles">Bundle</p>
+              <h3 data-i18n="market.nightfallBundle.name">Nightfall Bundle</h3>
+              <p class="product-desc" data-i18n="market.nightfallBundle.desc">Both passes, two outfits and 500 tokens. Cheaper than buying them apart.</p>
+              <div class="product-foot">
+                <span class="product-price"><span class="product-price-unit">R$</span>899</span>
+                <button type="button" class="btn btn-sm product-add" data-add="nightfall-bundle" data-i18n="market.add">Add to cart</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product" data-product="vanguard-rank" data-category="ranks" data-price="249">
+            <span class="product-badge product-badge--alt" data-i18n="market.badge.popular">Popular</span>
+            <div class="product-art" aria-hidden="true"><span class="product-mark"></span></div>
+            <div class="product-body">
+              <p class="product-cat" data-i18n="market.cat.ranks">Rank</p>
+              <h3 data-i18n="market.vanguardRank.name">Vanguard Rank</h3>
+              <p class="product-desc" data-i18n="market.vanguardRank.desc">A permanent rank, a name colour in game and the matching Discord role.</p>
+              <div class="product-foot">
+                <span class="product-price"><span class="product-price-unit">R$</span>249</span>
+                <button type="button" class="btn btn-sm product-add" data-add="vanguard-rank" data-i18n="market.add">Add to cart</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product" data-product="entity-key" data-category="items" data-price="149">
+            <div class="product-art" aria-hidden="true"><span class="product-mark"></span></div>
+            <div class="product-body">
+              <p class="product-cat" data-i18n="market.cat.items">Item</p>
+              <h3 data-i18n="market.entityKey.name">Entity Keys</h3>
+              <p class="product-desc" data-i18n="market.entityKey.desc">Three rolls on the Entity crate. Cosmetic only, never a stat advantage.</p>
+              <div class="product-foot">
+                <span class="product-price"><span class="product-price-unit">R$</span>149</span>
+                <button type="button" class="btn btn-sm product-add" data-add="entity-key" data-i18n="market.add">Add to cart</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product" data-product="revive-pack" data-category="items" data-price="79">
+            <div class="product-art" aria-hidden="true"><span class="product-mark"></span></div>
+            <div class="product-body">
+              <p class="product-cat" data-i18n="market.cat.items">Item</p>
+              <h3 data-i18n="market.revivePack.name">Revive Pack</h3>
+              <p class="product-desc" data-i18n="market.revivePack.desc">Ten revives, kept for the nights that go wrong.</p>
+              <div class="product-foot">
+                <span class="product-price"><span class="product-price-unit">R$</span>79</span>
+                <button type="button" class="btn btn-sm product-add" data-add="revive-pack" data-i18n="market.add">Add to cart</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product" data-product="founders-aura" data-category="items" data-price="1299">
+            <span class="product-badge product-badge--alt" data-i18n="market.badge.limited">Limited</span>
+            <div class="product-art" aria-hidden="true"><span class="product-mark"></span></div>
+            <div class="product-body">
+              <p class="product-cat" data-i18n="market.cat.items">Item</p>
+              <h3 data-i18n="market.foundersAura.name">Founder's Aura</h3>
+              <p class="product-desc" data-i18n="market.foundersAura.desc">A permanent glow, retired once this run sells out. It is never reissued.</p>
+              <div class="product-foot">
+                <span class="product-price"><span class="product-price-unit">R$</span>1,299</span>
+                <button type="button" class="btn btn-sm product-add" data-add="founders-aura" data-i18n="market.add">Add to cart</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product" data-product="private-server" data-category="items" data-price="199">
+            <div class="product-art" aria-hidden="true"><span class="product-mark"></span></div>
+            <div class="product-body">
+              <p class="product-cat" data-i18n="market.cat.items">Item</p>
+              <h3 data-i18n="market.privateServer.name">Private Server &middot; 30 days</h3>
+              <p class="product-desc" data-i18n="market.privateServer.desc">A lobby of your own for a month, invite only.</p>
+              <div class="product-foot">
+                <span class="product-price"><span class="product-price-unit">R$</span>199</span>
+                <button type="button" class="btn btn-sm product-add" data-add="private-server" data-i18n="market.add">Add to cart</button>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <p class="market-empty is-hidden" id="marketEmpty" data-i18n="market.empty">Nothing in this category yet.</p>
       </div>
     </section>
 
@@ -537,6 +684,45 @@
     </div>
   </footer>
 
+  <!-- ---------- Cart ----------
+
+       A drawer rather than a page: the market is where things are chosen, and a
+       navigation away from it to look at three prices would lose the visitor's
+       place. The dock stays put on every screen so the cart is reachable from
+       anywhere without a second menu item. -->
+  <div class="cart-dock">
+    <button type="button" class="cart-toggle" id="cartToggle" aria-expanded="false" aria-controls="cartPanel" aria-label="Cart">
+      <span class="cart-toggle-icon" aria-hidden="true"></span>
+      <span data-i18n="cart.button">Cart</span>
+      <span class="cart-count" id="cartCount" aria-hidden="true">0</span>
+    </button>
+  </div>
+
+  <div class="cart-scrim" id="cartScrim" hidden></div>
+
+  <aside class="cart-panel" id="cartPanel" role="dialog" aria-modal="true" aria-labelledby="cartHeading" aria-hidden="true">
+    <header class="cart-head">
+      <h2 id="cartHeading" data-i18n="cart.title">Your cart</h2>
+      <button type="button" class="cart-close" id="cartClose" data-i18n-aria-label="cart.close" aria-label="Close the cart">&times;</button>
+    </header>
+
+    <ul class="cart-list" id="cartList"></ul>
+    <p class="cart-empty" id="cartEmpty" data-i18n="cart.empty">Your cart is empty. Add something from the market.</p>
+
+    <footer class="cart-foot">
+      <div class="cart-total">
+        <span data-i18n="cart.total">Total</span>
+        <strong id="cartTotal">R$ 0</strong>
+      </div>
+      <p class="field-hint" data-i18n="cart.robuxHint">Robux are charged by Roblox when you buy in game, not by this page.</p>
+      <button type="button" class="btn cart-checkout" id="cartCheckout" data-i18n="cart.checkout">Copy the order for Discord</button>
+      <a class="cart-store" id="cartStore" href="https://www.roblox.com/games/GAME_ID/Entity-No-More-Mercy" target="_blank" rel="noopener noreferrer" data-i18n="cart.storeLink">Open the game page on Roblox</a>
+      <button type="button" class="btn btn-ghost btn-sm cart-clear" id="cartClear" data-i18n="cart.clear">Empty the cart</button>
+      <p class="cart-status" id="cartStatus" role="status" aria-live="polite"></p>
+      <p class="cart-code" id="cartCode" hidden></p>
+    </footer>
+  </aside>
+
   <!-- Only appears once the visitor is far enough down that walking back is
        work. Kept out of the tab order while hidden, so it cannot be focused
        from a page that is still at the top. -->
@@ -746,6 +932,7 @@
 
     const I18N = {
       en: {
+        "nav.market": "Market",
         "nav.features": "Features",
         "nav.about": "About",
         "nav.contact": "Contact",
@@ -761,7 +948,7 @@
         "hero.title": "Entity: No More Mercy",
         "hero.subtitle": "A survival game on Roblox, made by X Cope. Follow the updates, link your Roblox account, and make this page feel like yours.",
         "hero.cta": "Join the Discord",
-        "hero.ctaSecondary": "What is here",
+        "hero.ctaSecondary": "Visit the market",
         "hero.fact1": "Survival on Roblox",
         "hero.fact2": "Made by z9de and onlyone",
         "hero.fact3": "English and Chinese",
@@ -773,6 +960,57 @@
         "features.profile.body": "Sign in to set a display name and photo, and to keep your Roblox account linked.",
         "features.make.title": "Make it yours",
         "features.make.body": "Light or dark, plus a background you choose. The settings stay in this browser.",
+        "market.title": "The X Cope market",
+        "market.lead": "Passes, ranks, bundles and items for Entity: No More Mercy. Everything is paid for in Robux inside Roblox, so no card is ever entered on this page.",
+        "market.filterLabel": "Filter the market",
+        "market.filterAll": "All",
+        "market.filterPasses": "Passes",
+        "market.filterBundles": "Bundles",
+        "market.filterRanks": "Ranks",
+        "market.filterItems": "Items",
+        "market.robuxNote": "Prices are in Robux. Items arrive in game once Roblox confirms the purchase.",
+        "market.add": "Add to cart",
+        "market.added": "{name} added to your cart.",
+        "market.empty": "Nothing in this category yet.",
+        "market.cat.passes": "Pass",
+        "market.cat.bundles": "Bundle",
+        "market.cat.ranks": "Rank",
+        "market.cat.items": "Item",
+        "market.badge.best": "Best value",
+        "market.badge.popular": "Popular",
+        "market.badge.limited": "Limited",
+        "market.exilePass.name": "Exile Pass",
+        "market.exilePass.desc": "The season reward track: skins, titles and tokens that unlock as you survive.",
+        "market.nightWatchPass.name": "Night Watch Pass",
+        "market.nightWatchPass.desc": "A second track for late joiners. The same rewards, without the catch-up grind.",
+        "market.nightfallBundle.name": "Nightfall Bundle",
+        "market.nightfallBundle.desc": "Both passes, two outfits and 500 tokens. Cheaper than buying them apart.",
+        "market.vanguardRank.name": "Vanguard Rank",
+        "market.vanguardRank.desc": "A permanent rank, a name colour in game and the matching Discord role.",
+        "market.entityKey.name": "Entity Keys",
+        "market.entityKey.desc": "Three rolls on the Entity crate. Cosmetic only, never a stat advantage.",
+        "market.revivePack.name": "Revive Pack",
+        "market.revivePack.desc": "Ten revives, kept for the nights that go wrong.",
+        "market.foundersAura.name": "Founder's Aura",
+        "market.foundersAura.desc": "A permanent glow, retired once this run sells out. It is never reissued.",
+        "market.privateServer.name": "Private Server · 30 days",
+        "market.privateServer.desc": "A lobby of your own for a month, invite only.",
+        "cart.button": "Cart",
+        "cart.dockLabel": "Cart, {count} items",
+        "cart.title": "Your cart",
+        "cart.close": "Close the cart",
+        "cart.empty": "Your cart is empty. Add something from the market.",
+        "cart.remove": "Remove {name}",
+        "cart.decrease": "One fewer {name}",
+        "cart.increase": "One more {name}",
+        "cart.total": "Total",
+        "cart.checkout": "Copy the order for Discord",
+        "cart.storeLink": "Open the game page on Roblox",
+        "cart.clear": "Empty the cart",
+        "cart.robuxHint": "Robux are charged by Roblox when you buy in game, not by this page.",
+        "cart.copied": "Order {code} copied. Paste it into a Discord ticket and staff will hand the items over in game.",
+        "cart.copyManual": "Order {code} is ready. Select the code under this line and copy it.",
+        "cart.cleared": "Cart emptied.",
         "footer.rights": "X COPE. All rights reserved.",
         "auth.dialogLabel": "Account",
         "auth.signIn": "Sign in",
@@ -985,6 +1223,7 @@
         "profile.avatarFailed": "The photo could not be saved. Please try again.",
       },
       zh: {
+        "nav.market": "商店",
         "nav.features": "功能",
         "nav.about": "關於",
         "nav.contact": "聯絡我們",
@@ -1000,7 +1239,7 @@
         "hero.title": "Entity: No More Mercy",
         "hero.subtitle": "一款 Roblox 生存遊戲，由 X Cope 製作。追蹤更新、連結你的 Roblox 帳戶，並把這個頁面變成你自己的樣子。",
         "hero.cta": "加入 Discord",
-        "hero.ctaSecondary": "這裡有什麼",
+        "hero.ctaSecondary": "逛逛商店",
         "hero.fact1": "Roblox 生存遊戲",
         "hero.fact2": "由 z9de 與 onlyone 製作",
         "hero.fact3": "英文與中文",
@@ -1012,6 +1251,57 @@
         "features.profile.body": "登入後即可設定顯示名稱與照片，並保持 Roblox 帳戶連結。",
         "features.make.title": "打造自己的風格",
         "features.make.body": "淺色或深色，再加上你自己挑的背景。設定只保存在這個瀏覽器。",
+        "market.title": "X Cope 商店",
+        "market.lead": "《Entity: No More Mercy》的通行證、階級、組合包與道具。全部以 Robux 在 Roblox 內付款，這個頁面不會要你輸入任何卡片資料。",
+        "market.filterLabel": "篩選商品",
+        "market.filterAll": "全部",
+        "market.filterPasses": "通行證",
+        "market.filterBundles": "組合包",
+        "market.filterRanks": "階級",
+        "market.filterItems": "道具",
+        "market.robuxNote": "價格以 Robux 計。Roblox 確認付款後，道具會在遊戲內發放。",
+        "market.add": "加入購物車",
+        "market.added": "已將「{name}」加入購物車。",
+        "market.empty": "這個分類目前沒有商品。",
+        "market.cat.passes": "通行證",
+        "market.cat.bundles": "組合包",
+        "market.cat.ranks": "階級",
+        "market.cat.items": "道具",
+        "market.badge.best": "最划算",
+        "market.badge.popular": "人氣",
+        "market.badge.limited": "限量",
+        "market.exilePass.name": "流亡通行證",
+        "market.exilePass.desc": "賽季獎勵軌道：隨著你生存下去，解鎖造型、稱號與代幣。",
+        "market.nightWatchPass.name": "守夜通行證",
+        "market.nightWatchPass.desc": "給後來加入者的第二條軌道。同樣的獎勵，不必補進度。",
+        "market.nightfallBundle.name": "夜幕組合包",
+        "market.nightfallBundle.desc": "兩張通行證、兩套服裝與 500 代幣。比分開買便宜。",
+        "market.vanguardRank.name": "先鋒階級",
+        "market.vanguardRank.desc": "永久階級、遊戲中的名稱顏色，以及對應的 Discord 身分組。",
+        "market.entityKey.name": "實體鑰匙",
+        "market.entityKey.desc": "三次實體箱抽取。只有外觀，不會帶來數值優勢。",
+        "market.revivePack.name": "復活包",
+        "market.revivePack.desc": "十次復活，留給那些走錯的夜晚。",
+        "market.foundersAura.name": "創始者光環",
+        "market.foundersAura.desc": "永久光效，售完這一輪後就不再上架，也不會再版。",
+        "market.privateServer.name": "私人伺服器 · 30 天",
+        "market.privateServer.desc": "屬於你的房間，為期一個月，只能邀請進入。",
+        "cart.button": "購物車",
+        "cart.dockLabel": "購物車，{count} 件商品",
+        "cart.title": "你的購物車",
+        "cart.close": "關閉購物車",
+        "cart.empty": "購物車是空的，去商店挑點東西吧。",
+        "cart.remove": "移除「{name}」",
+        "cart.decrease": "減少一個「{name}」",
+        "cart.increase": "增加一個「{name}」",
+        "cart.total": "合計",
+        "cart.checkout": "複製訂單到 Discord",
+        "cart.storeLink": "在 Roblox 開啟遊戲頁面",
+        "cart.clear": "清空購物車",
+        "cart.robuxHint": "Robux 由 Roblox 在遊戲內收取，不是這個頁面。",
+        "cart.copied": "訂單 {code} 已複製。貼到 Discord 客服頻道，工作人員會在遊戲內交付道具。",
+        "cart.copyManual": "訂單 {code} 已產生。請選取下面那行代碼並複製。",
+        "cart.cleared": "購物車已清空。",
         "footer.rights": "X COPE。保留所有權利。",
         "auth.dialogLabel": "帳戶",
         "auth.signIn": "登入",
@@ -1318,6 +1608,9 @@
       document.querySelectorAll("[data-profile-name]").forEach((node) => {
         if (lastAuthUser) node.textContent = getName(lastAuthUser);
       });
+      // Cart lines are built from translated card text, so they are redrawn
+      // whenever the language changes.
+      renderCart();
     }
 
     function getName(user) {
@@ -3102,11 +3395,398 @@
       }
     }
 
+    /* ==========================================================
+       MARKET & CART
+       ==========================================================
+       The market is markup first: each product is a card in the document with
+       its own name, copy, category and price, so the section still reads (and
+       prints) with this module never running. The cart is the only part that
+       needs scripting, and it keeps three facts per line - which card, how many,
+       at what price - in localStorage, so a refresh does not empty it.
+
+       Nothing here charges anyone. A Robux purchase has to happen inside the
+       experience, so checkout assembles an order the visitor can paste into a
+       Discord ticket, which is how the group already hands items over. */
+    const CART_KEY = "xcope-cart";
+    const CART_LIMIT = 99;
+
+    let cartRows = readCart();
+    let cartStatusKey = null;
+    let cartStatusVars = null;
+    let lastOrder = null;
+
+    function readCart() {
+      try {
+        const rows = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+        if (!Array.isArray(rows)) return [];
+        return rows
+          .filter((row) => row && typeof row.id === "string" && Number(row.qty) > 0)
+          .map((row) => ({
+            id: row.id,
+            qty: Math.min(CART_LIMIT, Math.max(1, Math.round(Number(row.qty)))),
+          }));
+      } catch (e) {
+        // Blocked storage or a value from an older shape: start empty rather
+        // than fail, because the market itself does not depend on the cart.
+        return [];
+      }
+    }
+
+    function writeCart() {
+      try {
+        localStorage.setItem(CART_KEY, JSON.stringify(cartRows));
+      } catch (e) { /* full or blocked: the cart still works for this visit */ }
+    }
+
+    function productCard(id) {
+      return document.querySelector('[data-product="' + id + '"]');
+    }
+
+    // Names and prices are read back out of the card rather than duplicated in
+    // a JavaScript catalogue: one source of truth, already translated by the
+    // time a cart line is drawn.
+    function productName(id) {
+      const card = productCard(id);
+      const heading = card ? card.querySelector("h3") : null;
+      return heading ? heading.textContent.trim() : id;
+    }
+
+    function productPrice(id) {
+      const card = productCard(id);
+      const price = card ? Number(card.dataset.price) : 0;
+      return isFinite(price) && price > 0 ? price : 0;
+    }
+
+    function money(value) {
+      return "R$ " + value.toLocaleString("en-US");
+    }
+
+    function cartCount() {
+      return cartRows.reduce((sum, row) => sum + row.qty, 0);
+    }
+
+    function cartTotal() {
+      return cartRows.reduce((sum, row) => sum + productPrice(row.id) * row.qty, 0);
+    }
+
+    function emitCartStatus(key, vars) {
+      const el = document.getElementById("cartStatus");
+      if (!el) return;
+      cartStatusKey = key;
+      cartStatusVars = vars || null;
+      el.textContent = t(key, vars);
+      el.classList.add("is-shown");
+    }
+
+    function clearCartStatus() {
+      const el = document.getElementById("cartStatus");
+      cartStatusKey = null;
+      cartStatusVars = null;
+      if (el) {
+        el.textContent = "";
+        el.classList.remove("is-shown");
+      }
+    }
+
+    // Rebuilt rather than patched: there are at most ten lines, every line
+    // depends on which language the page is in right now, and a rebuild is the
+    // only version that cannot leave a stale price behind.
+    function renderCart() {
+      const list = document.getElementById("cartList");
+      const countEl = document.getElementById("cartCount");
+      if (!list || !countEl) return;
+
+      const totalEl = document.getElementById("cartTotal");
+      const emptyEl = document.getElementById("cartEmpty");
+      const clearBtn = document.getElementById("cartClear");
+      const checkoutBtn = document.getElementById("cartCheckout");
+      const toggle = document.getElementById("cartToggle");
+      const hasRows = cartRows.length > 0;
+
+      countEl.textContent = String(cartCount());
+      countEl.classList.toggle("is-empty", !hasRows);
+      if (totalEl) totalEl.textContent = money(cartTotal());
+      if (emptyEl) emptyEl.classList.toggle("is-hidden", hasRows);
+      list.classList.toggle("is-hidden", !hasRows);
+      if (clearBtn) clearBtn.classList.toggle("is-hidden", !hasRows);
+      if (checkoutBtn) checkoutBtn.disabled = !hasRows;
+      if (toggle) toggle.setAttribute("aria-label", t("cart.dockLabel", { count: cartCount() }));
+
+      list.textContent = "";
+      cartRows.forEach((row) => {
+        const name = productName(row.id);
+        const item = document.createElement("li");
+        item.className = "cart-row";
+        item.dataset.id = row.id;
+
+        const title = document.createElement("p");
+        title.className = "cart-row-name";
+        title.textContent = name;
+
+        const price = document.createElement("p");
+        price.className = "cart-row-price";
+        price.textContent = money(productPrice(row.id) * row.qty);
+
+        const qty = document.createElement("div");
+        qty.className = "cart-qty";
+
+        const fewer = document.createElement("button");
+        fewer.type = "button";
+        fewer.dataset.cartStep = "-1";
+        fewer.textContent = "\u2212";
+        fewer.setAttribute("aria-label", t("cart.decrease", { name: name }));
+
+        const value = document.createElement("span");
+        value.textContent = String(row.qty);
+
+        const more = document.createElement("button");
+        more.type = "button";
+        more.dataset.cartStep = "1";
+        more.textContent = "+";
+        more.setAttribute("aria-label", t("cart.increase", { name: name }));
+
+        const drop = document.createElement("button");
+        drop.type = "button";
+        drop.className = "cart-row-remove";
+        drop.dataset.cartRemove = row.id;
+        drop.textContent = "\u00d7";
+        drop.setAttribute("aria-label", t("cart.remove", { name: name }));
+
+        qty.append(fewer, value, more);
+        item.append(title, price, qty, drop);
+        list.appendChild(item);
+      });
+
+      // A generated order outlives a language switch: the code is the one thing
+      // the visitor may already have pasted somewhere. It does not outlive the
+      // cart it was made from, though, so an emptied cart drops the code.
+      if (!hasRows) lastOrder = null;
+      const codeEl = document.getElementById("cartCode");
+      if (codeEl) {
+        codeEl.hidden = !lastOrder;
+        if (lastOrder) codeEl.textContent = lastOrder.code;
+      }
+      if (cartStatusKey) emitCartStatus(cartStatusKey, cartStatusVars);
+    }
+
+    let flashTimer = 0;
+
+    function flashMarket(text) {
+      const el = document.getElementById("marketFlash");
+      if (!el) return;
+      el.textContent = text;
+      el.classList.add("is-shown");
+      window.clearTimeout(flashTimer);
+      flashTimer = window.setTimeout(() => el.classList.remove("is-shown"), 2800);
+    }
+
+    function addToCart(id) {
+      if (!productCard(id)) return;
+      const row = cartRows.find((entry) => entry.id === id);
+      if (row) row.qty = Math.min(CART_LIMIT, row.qty + 1);
+      else cartRows.push({ id: id, qty: 1 });
+      writeCart();
+      clearCartStatus();
+      renderCart();
+      flashMarket(t("market.added", { name: productName(id) }));
+    }
+
+    function stepCart(id, delta) {
+      const index = cartRows.findIndex((entry) => entry.id === id);
+      if (index === -1) return;
+      const next = Math.min(CART_LIMIT, cartRows[index].qty + delta);
+      if (next < 1) cartRows.splice(index, 1);
+      else cartRows[index].qty = next;
+      writeCart();
+      clearCartStatus();
+      renderCart();
+    }
+
+    function filterMarket(filter) {
+      document.querySelectorAll("#marketFilters [data-filter]").forEach((btn) => {
+        const active = btn.dataset.filter === filter;
+        btn.classList.toggle("is-active", active);
+        btn.setAttribute("aria-pressed", String(active));
+      });
+
+      let shown = 0;
+      document.querySelectorAll("#marketGrid .product").forEach((card) => {
+        const match = filter === "all" || card.dataset.category === filter;
+        card.classList.toggle("is-hidden", !match);
+        if (match) shown += 1;
+      });
+
+      const emptyEl = document.getElementById("marketEmpty");
+      if (emptyEl) emptyEl.classList.toggle("is-hidden", shown > 0);
+    }
+
+    function setCartOpen(open) {
+      const panel = document.getElementById("cartPanel");
+      const toggle = document.getElementById("cartToggle");
+      const scrim = document.getElementById("cartScrim");
+      if (!panel || !toggle) return;
+
+      panel.classList.toggle("is-open", open);
+      panel.setAttribute("aria-hidden", String(!open));
+      toggle.setAttribute("aria-expanded", String(open));
+      if (scrim) scrim.hidden = !open;
+      document.documentElement.classList.toggle("cart-open", open);
+
+      // Everything behind the drawer is taken out of the tab order while it is
+      // open, the skip link included: otherwise a keyboard visitor tabs into the
+      // page they cannot see. The dock itself is left alone, because focus has
+      // to be able to return to the control that opens the drawer.
+      ["#main", "#profilePage", "header", "footer", ".skip-link", "#toTop"].forEach((selector) => {
+        const el = document.querySelector(selector);
+        if (el) el.inert = open;
+      });
+
+      if (open) {
+        // The panel's visibility flips instantly on open (see the stylesheet),
+        // so the close button can take focus in this same task. Focusing an
+        // element that is still computed as hidden is silently dropped, which
+        // is what parked focus on the page behind the drawer.
+        const close = document.getElementById("cartClose");
+        if (close) close.focus();
+      } else if (toggle.focus) {
+        // Focus goes back to the one control that opens the drawer. Restoring
+        // whatever held it before would be wrong half the time: the drawer is
+        // also closed by the scrim and by Escape, from anywhere on the page.
+        toggle.focus();
+      }
+    }
+
+    // No ambiguous characters: a code read down a phone or pasted into Discord
+    // should never be an O that might be a zero.
+    function orderCode() {
+      const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      const bytes = new Uint8Array(5);
+      if (window.crypto && window.crypto.getRandomValues) window.crypto.getRandomValues(bytes);
+      else for (let i = 0; i < bytes.length; i += 1) bytes[i] = Math.floor(Math.random() * 256);
+      let code = "";
+      for (let i = 0; i < bytes.length; i += 1) code += alphabet[bytes[i] % alphabet.length];
+      return "XC-" + code;
+    }
+
+    function orderText(code) {
+      const lines = cartRows.map(
+        (row) => row.qty + " x " + productName(row.id) + " - " + money(productPrice(row.id) * row.qty)
+      );
+      return [
+        "X Cope market order " + code,
+        ...lines,
+        "Total: " + money(cartTotal()),
+        "Roblox username: ",
+      ].join("\n");
+    }
+
+    function copyText(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text).then(
+          () => true,
+          () => copyViaSelection(text)
+        );
+      }
+      return Promise.resolve(copyViaSelection(text));
+    }
+
+    // A real selection still copies where the async clipboard is refused, which
+    // is what a plain http:// origin (a Live Server port, say) does.
+    function copyViaSelection(text) {
+      try {
+        const area = document.createElement("textarea");
+        area.value = text;
+        area.setAttribute("readonly", "");
+        area.style.position = "fixed";
+        area.style.top = "-1000px";
+        document.body.appendChild(area);
+        area.select();
+        const ok = document.execCommand("copy");
+        document.body.removeChild(area);
+        return ok;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function checkoutCart() {
+      if (!cartRows.length) return;
+      const code = orderCode();
+      const text = orderText(code);
+      lastOrder = { code: code };
+      copyText(text).then((ok) => {
+        renderCart();
+        emitCartStatus(ok ? "cart.copied" : "cart.copyManual", { code: code });
+      });
+    }
+
+    function initMarket() {
+      const grid = document.getElementById("marketGrid");
+      if (!grid) return;
+
+      document.querySelectorAll("#marketFilters [data-filter]").forEach((btn) => {
+        btn.addEventListener("click", () => filterMarket(btn.dataset.filter));
+      });
+
+      grid.addEventListener("click", (event) => {
+        const add = event.target.closest("[data-add]");
+        if (add) addToCart(add.dataset.add);
+      });
+
+      const list = document.getElementById("cartList");
+      if (list) {
+        list.addEventListener("click", (event) => {
+          const item = event.target.closest(".cart-row");
+          if (!item) return;
+          if (event.target.closest("[data-cart-remove]")) {
+            cartRows = cartRows.filter((row) => row.id !== item.dataset.id);
+            writeCart();
+            clearCartStatus();
+            renderCart();
+            return;
+          }
+          const step = event.target.closest("[data-cart-step]");
+          if (step) stepCart(item.dataset.id, Number(step.dataset.cartStep));
+        });
+      }
+
+      const toggle = document.getElementById("cartToggle");
+      const close = document.getElementById("cartClose");
+      const scrim = document.getElementById("cartScrim");
+      const clearBtn = document.getElementById("cartClear");
+      const checkoutBtn = document.getElementById("cartCheckout");
+
+      if (toggle) toggle.addEventListener("click", () => setCartOpen(!document.getElementById("cartPanel").classList.contains("is-open")));
+      if (close) close.addEventListener("click", () => setCartOpen(false));
+      if (scrim) scrim.addEventListener("click", () => setCartOpen(false));
+
+      if (clearBtn) {
+        clearBtn.addEventListener("click", () => {
+          cartRows = [];
+          writeCart();
+          lastOrder = null;
+          renderCart();
+          emitCartStatus("cart.cleared");
+        });
+      }
+
+      if (checkoutBtn) checkoutBtn.addEventListener("click", checkoutCart);
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape") return;
+        const panel = document.getElementById("cartPanel");
+        if (panel && panel.classList.contains("is-open")) setCartOpen(false);
+      });
+
+      renderCart();
+    }
+
     /* ---------- Start ---------- */
     currentLang = detectInitialLang();
     applyTranslations();
     initScrollReveal();
     initScrollFurniture();
+    initMarket();
     // Last, so everything the curtain is hiding is already wired up behind it.
     initIntro();
 

@@ -28,6 +28,7 @@
     19. Intro animation
     20. Reading aids
     21. Motion preferences
+    22. Market & cart
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -976,6 +977,7 @@ html.intro-done .hero > *:nth-child(5) { transition-delay: 500ms; }
    follow document order without a second source of truth. */
 main[data-page="home"] { counter-reset: section; }
 .about,
+.market,
 .contact,
 .features { counter-increment: section; }
 
@@ -2811,4 +2813,639 @@ html.is-intro { overflow: hidden; }
 
   /* The ticker would otherwise jump to its end frame; a still band is calmer. */
   .ticker-track { animation: none; transform: none; }
+}
+
+/* --------------------------------------------------------------------------
+   22. Market & cart
+
+   The market is a grid of printed cards; the cart is a fixed drawer, because
+   looking at three prices should not cost the visitor their place on the page.
+   No new colour is introduced: the card art is the existing --neon over
+   --accent-soft, so a light visitor gets bronze on paper and a dark visitor gets
+   gold on near-black from the same rules.
+
+   The dock sits bottom-left and the back-to-top button bottom-right, so the two
+   fixed controls never collide at any width.
+   -------------------------------------------------------------------------- */
+.market {
+  padding: clamp(4.5rem, 9vw, 7.5rem) 0;
+}
+
+.market-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.market-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  padding: 0.5rem 0.95rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--dur-fast) ease, color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out);
+}
+
+.chip:hover {
+  border-color: var(--border-hover);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.chip.is-active {
+  background: var(--neon);
+  border-color: var(--neon);
+  color: var(--neon-ink);
+  box-shadow: var(--shadow-sm);
+}
+
+.chip:focus-visible { outline-offset: 3px; }
+
+.market-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  max-width: 46ch;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  line-height: 1.6;
+  letter-spacing: 0.04em;
+}
+
+.market-note-dot {
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-top: 0.28rem;
+  background: var(--neon);
+}
+
+/* Add-to-cart feedback. It takes no vertical space until it has something to
+   say, so the grid never shifts under the pointer mid-click. */
+.market-flash {
+  margin: 0;
+  overflow: hidden;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity var(--dur) var(--ease-out), transform var(--dur) var(--ease-out);
+}
+
+.market-flash.is-shown {
+  opacity: 1;
+  transform: none;
+  margin-bottom: var(--space-3);
+}
+
+.market-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-4);
+}
+
+.product {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--dur) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out), border-color var(--dur) var(--ease-out);
+}
+
+.product:hover {
+  transform: translate(-2px, -2px);
+  border-color: var(--border-strong);
+  box-shadow: 6px 6px 0 var(--shadow-hard);
+}
+
+/* Drawn art rather than a photograph per product: a hatch, a gold bloom and one
+   glyph per category keep the grid light and keep every card the same weight. */
+.product-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 7rem;
+  border-bottom: 1px solid var(--border);
+  background:
+    radial-gradient(120% 90% at 50% 135%, var(--accent-soft), transparent 68%),
+    repeating-linear-gradient(135deg, rgba(255, 197, 61, 0.16) 0 1px, transparent 1px 9px),
+    var(--surface);
+  overflow: hidden;
+}
+
+.product-mark {
+  position: relative;
+  display: block;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--border-strong);
+  color: var(--neon);
+  transition: border-color var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-spring);
+}
+
+.product:hover .product-mark {
+  border-color: var(--neon);
+  transform: translateY(-2px);
+}
+
+.product-mark::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+
+/* Passes - a chevron */
+.product[data-category="passes"] .product-mark::after {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-left: 2.5px solid currentColor;
+  border-bottom: 2.5px solid currentColor;
+  transform: translate(-50%, -60%) rotate(-45deg);
+}
+
+/* Bundles - three stacked bars */
+.product[data-category="bundles"] .product-mark::after {
+  width: 1.05rem;
+  height: 2.5px;
+  background: currentColor;
+  box-shadow: 0 -0.35rem 0 currentColor, 0 0.35rem 0 currentColor;
+  transform: translate(-50%, -50%);
+}
+
+/* Ranks - a diamond */
+.product[data-category="ranks"] .product-mark::after {
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 2.5px solid currentColor;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+/* Items - a ring with a core */
+.product[data-category="items"] .product-mark::after {
+  width: 1rem;
+  height: 1rem;
+  border: 2.5px solid currentColor;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.product[data-category="items"] .product-mark::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.3rem;
+  height: 0.3rem;
+  border-radius: 50%;
+  background: currentColor;
+  transform: translate(-50%, -50%);
+}
+
+.product-badge {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: 2;
+  padding: 0.25rem 0.5rem;
+  background: var(--neon);
+  color: var(--neon-ink);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.product-badge--alt { background: var(--neon-2); }
+
+.product-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+  padding: var(--space-5);
+}
+
+.product-cat {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.product-body h3 {
+  font-size: 1.3rem;
+  line-height: 1.15;
+}
+
+.product-desc {
+  flex: 1;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.product-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px dashed var(--border);
+}
+
+.product-price {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-strong);
+}
+
+.product-price-unit {
+  margin-right: 0.18rem;
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.product-add { flex: none; }
+
+.market-empty {
+  margin-top: var(--space-5);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+}
+
+/* ---------- Cart dock ---------- */
+.cart-dock {
+  position: fixed;
+  left: var(--space-5);
+  bottom: var(--space-5);
+  z-index: 60;
+}
+
+.cart-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.7rem 0.95rem;
+  background: var(--card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-strong);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out), background var(--dur-fast) ease,
+    border-color var(--dur-fast) ease, color var(--dur-fast) ease;
+}
+
+.cart-toggle:hover {
+  background: var(--neon);
+  border-color: var(--neon);
+  color: var(--neon-ink);
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 var(--shadow-hard);
+}
+
+/* A bag drawn from borders, for the same reason the card icons are: no icon
+   font, and no emoji that renders differently on every platform. */
+.cart-toggle-icon {
+  position: relative;
+  flex: none;
+  width: 0.95rem;
+  height: 0.72rem;
+  border: 2px solid currentColor;
+  border-top: none;
+}
+
+.cart-toggle-icon::before {
+  content: "";
+  position: absolute;
+  top: -0.4rem;
+  left: 50%;
+  width: 0.48rem;
+  height: 0.5rem;
+  border: 2px solid currentColor;
+  border-bottom: none;
+  border-radius: 50% 50% 0 0;
+  transform: translateX(-50%);
+}
+
+.cart-count {
+  display: grid;
+  place-items: center;
+  min-width: 1.45rem;
+  height: 1.45rem;
+  padding: 0 0.3rem;
+  background: var(--neon);
+  color: var(--neon-ink);
+  font-size: 0.68rem;
+  line-height: 1;
+}
+
+.cart-count.is-empty {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.cart-toggle:hover .cart-count {
+  background: var(--neon-ink);
+  border-color: transparent;
+  color: var(--card);
+}
+
+/* ---------- Cart drawer ---------- */
+/* Above the skip link (300), which is otherwise the one thing that could paint
+   over a full-screen scrim. */
+.cart-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 320;
+  background: var(--overlay-bg);
+  animation: cartFade var(--dur) var(--ease-out);
+}
+
+@keyframes cartFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.cart-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 330;
+  display: flex;
+  flex-direction: column;
+  width: min(390px, 100vw);
+  height: 100%;
+  background: var(--card);
+  border-left: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-xl);
+  /* Hidden really means gone: no tab stop and no click until it is open.
+
+     visibility is switched instantly on open and delayed by the slide duration
+     on close. Transitioning it in both directions left the panel computed as
+     hidden for one frame after it opened, and focus() on a hidden element is
+     silently dropped, which parked focus behind the drawer instead of in it. */
+  visibility: hidden;
+  transform: translateX(101%);
+  transition: transform var(--dur) var(--ease-out), visibility 0s linear var(--dur);
+}
+
+.cart-panel.is-open {
+  visibility: visible;
+  transform: none;
+  transition: transform var(--dur) var(--ease-out), visibility 0s;
+}
+
+.cart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-bottom: 1px solid var(--border);
+}
+
+.cart-head h2 { font-size: var(--text-xl); }
+
+.cart-close {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-strong);
+  font-family: inherit;
+  font-size: var(--text-lg);
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--dur-fast) ease, color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease;
+}
+
+.cart-close:hover {
+  background: var(--neon);
+  border-color: var(--neon);
+  color: var(--neon-ink);
+}
+
+.cart-list {
+  flex: 1;
+  margin: 0;
+  padding: 0 var(--space-5);
+  overflow-y: auto;
+  list-style: none;
+}
+
+.cart-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-1) var(--space-4);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.cart-row-name {
+  grid-column: 1;
+  grid-row: 1;
+  color: var(--text-strong);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.cart-row-price {
+  grid-column: 1;
+  grid-row: 2;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.cart-qty {
+  display: inline-flex;
+  align-items: center;
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: end;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+
+.cart-qty button {
+  width: 1.7rem;
+  height: 1.7rem;
+  border: 0;
+  background: transparent;
+  color: var(--text-strong);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--dur-fast) ease, color var(--dur-fast) ease;
+}
+
+.cart-qty button:hover {
+  background: var(--neon);
+  color: var(--neon-ink);
+}
+
+.cart-qty span {
+  min-width: 1.7rem;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.cart-row-remove {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: var(--text-base);
+  line-height: 1;
+  cursor: pointer;
+  transition: color var(--dur-fast) ease;
+}
+
+.cart-row-remove:hover { color: var(--error); }
+
+.cart-empty {
+  flex: 1;
+  padding: var(--space-6) var(--space-5);
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.cart-foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-top: 1px solid var(--border-strong);
+  background: var(--surface);
+}
+
+.cart-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cart-total strong {
+  color: var(--text-strong);
+  font-size: var(--text-lg);
+  letter-spacing: 0.02em;
+}
+
+.cart-foot .field-hint { margin: 0; }
+
+.cart-checkout { width: 100%; }
+
+.cart-checkout:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.cart-store {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-align: center;
+}
+
+.cart-clear { align-self: center; }
+
+.cart-status {
+  margin: 0;
+  color: var(--success);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+}
+
+.cart-status:empty { display: none; }
+
+/* The generated order code, selectable in one gesture for the case where the
+   clipboard was refused. */
+.cart-code {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px dashed var(--border-strong);
+  background: var(--card);
+  color: var(--text-strong);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  user-select: all;
+}
+
+/* The page behind a drawer must not scroll under it, which on a phone is how a
+   drag meant for the cart ends up moving the market. */
+html.cart-open,
+html.cart-open body { overflow: hidden; }
+
+@media (max-width: 720px) {
+  .market-toolbar { align-items: flex-start; }
+  .market-note { max-width: none; }
+  .market-grid { grid-template-columns: 1fr; }
+  .product-art { height: 6rem; }
+  .cart-dock { left: var(--space-4); bottom: var(--space-4); }
+  .cart-panel { width: 100vw; border-left: 0; }
 }

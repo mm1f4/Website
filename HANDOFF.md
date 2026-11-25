@@ -91,6 +91,66 @@ that consume them are English.
   small data URL, so it syncs across devices without Cloud Storage.
 - **Roblox linking** by username plus an About me verification code. Stored in
   `localStorage` for now.
+- **Market** (`#market`) with eight products, category filters and a cart drawer.
+  The page never takes a payment: the cart assembles an order code, and the order
+  is handed over in Discord. See "Market and cart" below for the rules that keep
+  it from lying to a buyer.
+
+## Market and cart
+
+The storefront was added after the rebrand, so the copy it sells to is "Entity:
+No More Mercy". What matters before touching it:
+
+- **The markup is the catalogue.** Each product is an `<article class="product">`
+  with `data-product`, `data-category` and `data-price` on it, a
+  `market.<id>.name` / `market.<id>.desc` pair in both dictionaries, a
+  `.product-price` span and an `[data-add]` button. There is no JavaScript
+  catalogue to fall out of step with it, and the section still reads with the
+  module never running. `productName()` and `productPrice()` read the values back
+  out of the card, which is also why a cart line is already translated.
+- **The cart stores ids and counts only**, in `localStorage["xcope-cart"]`, as
+  `[{"id":"exile-pass","qty":2}]`. Prices stay in the markup, so changing a price
+  changes every cart that is already open on the next load.
+- **Nothing is charged here.** Checkout builds an order code (`XC-` plus five
+  characters from an alphabet with no `O`/`0`/`I`/`1`), copies a plain-text order
+  to the clipboard, and shows the code in a selectable box for the case where the
+  clipboard is refused - which is what a plain `http://` Live Server origin does.
+  The visitor pastes it into a Discord ticket. The store link under the button is
+  the only route to Roblox, and its `GAME_ID` is still a placeholder: a guessed
+  place id would send buyers to another game, so it was left obvious instead.
+- **Categories** are `passes`, `bundles`, `ranks`, `items`, with a chip each in
+  `#marketFilters`. The filter only toggles `.is-hidden` on the cards; a category
+  with no products shows `#marketEmpty` rather than an empty grid.
+- **The drawer is a dialog.** `#cartPanel` carries `role="dialog"`,
+  `aria-modal="true"` and `aria-hidden` while closed; opening it marks
+  `#main`, `#profilePage`, `header`, `footer`, `.skip-link` and `#toTop` as
+  `inert`, so a keyboard visitor cannot tab into the page behind it. Focus goes
+  in on the close button and back out to the dock on close. The scrim sits at
+  `z-index: 320` and the panel at `330`, above the skip link's `300`, which would
+  otherwise paint over a full-screen scrim.
+- **`transition: visibility` is a trap here.** The panel transitions `visibility`
+  with `0s linear var(--dur)` closed and `0s` open. Transitioning it in both
+  directions leaves the panel computed as `hidden` for a frame after it opens,
+  and `focus()` on a hidden element is silently dropped - the drawer opened with
+  focus still behind it. That is why the property flips instantly on open and
+  only waits on close.
+- **Section index and nav.** `.market` was added to the `counter-increment:
+  section` rule so the eyebrow reads `02 // MARKET` from document order, and the
+  nav link carries `data-section-link="market"` so the reading hairline
+  highlights it. The hero's ghost button now points at `#market` instead of
+  `#about`.
+- **Styles are section 22** at the end of `css/style.css`, with its own
+  `@media (max-width: 720px)` block. Nothing in it introduces a new colour: card
+  art is `--neon` on `--accent-soft`, so both themes come out of the same rules.
+  Product glyphs are drawn from borders per `data-category`, for the same reason
+  the feature-card icons are.
+
+Verified by driving headless Chrome over CDP (47 checks): card count and prices,
+each filter, add/step/remove, the totals, the localStorage record, checkout and
+its code, language switching mid-cart, persistence across a reload, focus in and
+out of the drawer, `inert` on both sides of the open, the z-order against the
+skip link, no horizontal overflow at 390px, and the section's copy and prices
+being present in the markup with scripting off.
 
 ## Places only the owner can act
 
@@ -516,6 +576,16 @@ fix is to reduce the scrim and give the hero its own frosted panel, rather than
 to weaken the scrim alone.
 
 ## Known gaps
+
+- **The market's store link still points at `GAME_ID`.** The cart link
+  (`#cartStore`) is `https://www.roblox.com/games/GAME_ID/Entity-No-More-Mercy`
+  until the real place id is dropped in, which is the same missing URL the
+  Play-button gap above is waiting on. Switching the eight products to real game
+  passes means one href each; the cards deliberately do not link to a Roblox
+  purchase page yet, because none exists.
+- There is no stock, ownership or duplicate check anywhere in the cart: an order
+  is a note the buyer pastes into Discord, and staff still confirm the purchase
+  in game. Do not add a "paid" state that nothing can verify.
 
 - **There is no link to Entity: No More Mercy anywhere on the site**, because no
   experience URL or group URL was ever supplied, and inventing one would be worse
